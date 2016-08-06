@@ -1,0 +1,4 @@
+Ilib::IImage		T_PTROBJ
+Ilib::IFont		T_PTROBJ
+Ilib::IGC		T_PTROBJ
+Ilib::IColor		T_PTROBJ

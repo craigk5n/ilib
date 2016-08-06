@@ -1,0 +1,13 @@
+Ilib Perl module!
+
+This is alpha-level code, and not all Ilib functions are supported (due to
+my incomplete understanding of how to create perl modules).  For instance,
+IReadImage() is not yet supported (just ICreateImage()).
+
+To install:
+
+perl Makefile.PL
+make
+make install
+
+Send bug reports, patches, etc. to me at cknudsen@radix.net.

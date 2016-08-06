@@ -1,0 +1,120 @@
+<html>
+<head>
+<title>Ilib FAQ</title>
+</head>
+<body style="background-color: #FFFFFF;">
+
+<a href="http://ilib.sourceforge.net/"><img src="images/ilib-logo-small.png" width=117 height=66 alt="Ilib Logo" align="right" border="0" /></a>
+
+<h2>Ilib FAQ</h2>
+<p>
+
+Last updated: 20 August 1999
+</p>
+
+<ul>
+<li><a href="#libpng">Where can I get libpng?</a>
+<li><a href="#giflib">Where can I get giflib/libungif?</a>
+<li><a href="#msdev">Can I build Ilib with MS Visual Developer Studio?</a>
+<li><a href="#cygnus">Can I build Ilib with Cygnus' Win32 GCC?</a>
+<li><a href="#x11err">I get a bunch of X11-related link errors.  What's that all about?</a>
+<li><a href="#ifont2h">What's the purpose of the <tt>ifont2h</tt> utility?</a>
+<li><a href="#patches">Do you accept patches/modifications?</a>
+<li><a href="#todo">What are some of the features that can be added?</a>
+</ul>
+
+<hr />
+
+
+<h3><a name="libpng">Where can I get libpng?</a></h3>
+<p>
+
+Libpng is available at:<blockquote><a href="http://www.cdrom.com/pub/png/pngcode.html">http://www.cdrom.com/pub/png/pngcode.html</a></blockquote>
+</p>
+
+<h3><a name="giflib">Where can I get giflib/libungif?</a></h3>
+<p>
+Libungif is identical to Giflib except that it does not include
+the questionable LZW compression that Unisys owns the rights to.
+Images generated with Libungif will be uncompressed (larger).
+Libungif 4.X is available at:
+</p>
+
+<blockquote><a href="http://prtr-13.ucsc.edu/~badger/software/libungif.shtml">http://prtr-13.ucsc.edu/~badger/software/libungif.shtml</a></blockquote>
+
+<p>
+Giflib 4.X is available at:
+</p>
+<blockquote><a href="http://prtr-13.ucsc.edu/~badger/software/giflib.shtml">http://prtr-13.ucsc.edu/~badger/software/giflib.shtml</a></blockquote>
+
+<h3><a name="msdev">Can I build Ilib with MS Visual Developer Studio?</a></h3>
+<p>
+Yes, it has been successfully built using MS Developer Studio on Windows
+NT.  You must setup your own project for this.
+</p>
+
+<h3><a name="cygnus">Can I build Ilib with Cygnus' Win32 GCC?</a></h3>
+<p>
+Yes, you can.  However, you will also have to use GCC to build
+your application and you will need to distribute the required
+Cygnus runtime DLLs with it.
+</p>
+
+<h3><a name="x11err">I get a bunch of X11-related link errors.  What's that all about?</a></h3>
+
+<p>
+Version 4.X of Giflib/Libungif requires you to add -lX11 to LIBS and all
+the makefiles.  (Version 3.X did not require this.)
+You can get around this by building Giflib/Libungif without support
+for X11.  (Try <tt>configure --help</tt> when building
+Giflib/Libungif for information on how to do this.)
+</p>
+
+<h3><a name="ifont2h">What's the purpose of the <tt>ifont2h</tt> utility?</a></h3>
+<p>
+The <tt>ifont2h</tt> utility allow you to embed a font within the
+application's executable so that you do not need to distribute the
+BDF font file with the executable.
+</p>
+
+<h3><a name="patches">Do you accept patches/modifications?</a></h3>
+<p>
+You bet...  Just email any patches to <a href="mailto:cknudsen@cknudsen.com">cknudsen@cknudsen.com</a>.
+</p>
+
+<h3><a name="todo">What are some of the features that can be added?</a></h3>
+
+<ul>
+<li>Add new drawing functions:
+   <ul>
+   <li><tt>IFillArc()</tt></li>
+   </ul>
+<li>Better routines for converting 24-bit images to 8-bit images.</li>
+<li>Add support for True Type (scalable) fonts -- this will allow
+    text to be drawn at angles</li>
+<li>Add support for more file types:
+  <ul>
+  <li>Update PNG to use 8-bit (colormapped) for writing when possible </li>
+  <li>Read XPM </li>
+  <li>Read/Write XBM </li>
+  <li>Read/Write PAM </li>
+  <li>Write BMP </li>
+  <li>Write PostScript </li>
+  </ul></li>
+<li>Any other useful clients that could be packaged with Ilib
+    (squid traffic reporter generator, etc.)</li>
+<li>Provide makefiles for Win32</li>
+<li>Autoconf for makefiles
+<li>A perl module for Ilib</li>
+<li>A PHP module for Ilib</li>
+</ul>
+
+<hr />
+
+<p>
+Ilib home page: <a href="http://ilib.sourceforge.net/">http://ilib.sourceforge.net</a>
+
+</p>
+
+</body>
+</html>

@@ -1,0 +1,83 @@
+Ilib-1.1.9
+Copyright (C) 2001-2004 Craig Knudsen, cknudsen@cknudsen.com
+http://ilib.sourceforge.net
+
+Ilib is a library (and some tools and examples) written in C
+that can read, create, manipulate and save images.  It is capable
+of using X11 BDF fonts for drawing text.  That means you get
+lots (208, to be exact) of fonts to use.  You can even create your
+own if you know how to create an X11 BDF font.  It can read and
+write PPM, XPM, GIF, PNG and JPG image format.  It can read (but not
+yet write) BMP.
+
+PERL MODULE!
+The Ilib perl module is now included with the distribution.  It is not
+compiled or installed by default.  This perl module builds like all other
+perl modules.  AFTER installing the rest of Ilib (see instructions below),
+do the following:
+  cd perl
+  perl Makefile.PL
+  make
+  make install
+(Normally, you will need to be root to install.)
+
+
+EXTRAS:
+--------------------------------------------------------------------------
+Download and install EITHER Giflib or Libungif if you want to read or
+write GIFs.  Giflib is available at:
+	http://prtr-13.ucsc.edu/~badger/software/giflib.shtml
+Libungif is available at:
+	http://prtr-13.ucsc.edu/~badger/software/libungif.shtml
+
+Download and install libpng if you want to read or write PNGs:
+	http://www.cdrom.com/pub/png/pngcode.html
+
+Download and install libjpeg to read and write JPEGs:
+	ftp://ftp.uu.net/graphics/jpeg/
+
+Download additional X11 BDF fonts:
+	ftp://ftp.xfree.org/pub/XFree86/current/untarred/xc/fonts/bdf/75dpi/
+	  or try
+	ftp://ftp.xfree.org/pub/XFree86/3.3.3.1/untarred/xc/fonts/bdf/75dpi/
+
+Edit/Import/Create BDF fonts with xmbdfed (requires Motif/Lesstif):
+	(not sure where the primary location for this... use
+	AltaVista to find it.)
+
+
+COMPILING (UNIX):
+--------------------------------------------------------------------------
+In order to make use of GIF, PNG or JPEG, you need to obtain the
+add-on libraries mentioned above.  (First, check your system.  If
+you have a Linux distribution, it's likely to have some of these
+installed.)
+
+Edit the definitions of LIBS, DEFINES, INCLUDES to indicate which
+libraries are installed.  Change PREFIX if you don't want to install
+in /usr/local.
+
+Also, edit the values of CC and RANLIB if needed.
+
+Then, just type "make makefiles; make all" to build everthing.
+Both a shared and static library will be buily in the "lib" directory.
+Type "make install" to install everything (defaults to /usr/local).
+
+Look at the programs in "examples" and "clients" as examples how to use
+Ilib.  The example program "iconvert" shows a handy tool for converting
+images between different formats and "isample" shows how to draw text,
+lines, etc.
+
+COMPILING (Win32):
+--------------------------------------------------------------------------
+You should be able to use the Cygnus Win32 package to build Ilib using the
+provided makefiles.  I have not tested this since Ilib v1.0.
+
+Ilib-1.1.0 has also been built on Win95 with MS Visual Developer (Visual
+C++).  GIFLIB was also built with MS Visual Developer.  Sorry, I'm not
+going to try and provide makefiles or project files for this.
+
+
+HISTORY:
+--------------------------------------------------------------------------
+See ChangeLog.

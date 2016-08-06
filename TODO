@@ -1,0 +1,21 @@
+Ilib TODO List
+Last Updated: 15 Aug 2001
+-----------------------------------------------------------------------
+
+- Complete the Perl module (it does not yet implement the full API)
+- PHP3/4 Module
+- Add a font path and search the font path for any requested font file
+- Add support for True Type fonts (scalable w/ anti-aliasing)
+- Add support for PostScript output -- would allow printing of images
+- Add man pages for client apps (iconvert, ifont2h, etc.) as well
+  as man pages for the Ilib functions.
+- New Functions:
+  + ICalculateTextCoordinates
+    pass in text, font, desired text alignment (below point, to left of
+    pointer, etc.) and get back a coordinate to draw text
+  + IReduceColors
+    reduce colors to 256 (8-bit) or less for writing GIFs and other 8-bit
+    image formats
+    would also be nice to add support for converting to a specified
+    colormap
+

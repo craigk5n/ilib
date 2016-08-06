@@ -1,0 +1,745 @@
+<html>
+<head>
+<title>ILib API Documentation</title>
+</head>
+<body style="background-color: #FFFFFF;">
+<h2>Ilib Image Library</h2>
+<blockquote>
+The Ilib library is a portable set of routines for manipulating images.  It has been successfully compiled and run on various UNIX platforms as well as Windows 95/98/NT (gcc, lcc-win32 and MS Visual C++). The source is 32-bit, so this will never be a 16-bit Windows application.  It is intended to be independent of any windowing system or graphics file format.
+</blockquote>
+<table border="0">
+<tr><td>Home Page:</td>
+  <td><a href="http://ilib.sourceforge.net">http://ilib.sourceforge.net</a></td></tr>
+<tr><td>Author:</td>
+  <td><a href="http://www.5kn.us/">Craig Knudsen</a>,
+    <a href="mailto:craig@k5n.us">craig@k5n.us</a></td></tr>
+<tr><td>Last updated:</td><td>17-Jul-2016</td></tr>
+</table>
+<h2>API Documentation</h2>
+<ul>
+<li><a href="#IAllocColor">IAllocColor</a></li>
+<li><a href="#IAllocNamedColor">IAllocNamedColor</a></li>
+<li><a href="#IArcProperties">IArcProperties</a></li>
+<li><a href="#ICopyImage">ICopyImage</a></li>
+<li><a href="#ICopyImageScaled">ICopyImageScaled</a></li>
+<li><a href="#ICreateGC">ICreateGC</a></li>
+<li><a href="#ICreateImage">ICreateImage</a></li>
+<li><a href="#IDrawArc">IDrawArc</a></li>
+<li><a href="#IDrawCircle">IDrawCircle</a></li>
+<li><a href="#IDrawEllipse">IDrawEllipse</a></li>
+<li><a href="#IDrawEnclosedArc">IDrawEnclosedArc</a></li>
+<li><a href="#IDrawLine">IDrawLine</a></li>
+<li><a href="#IDrawPoint">IDrawPoint</a></li>
+<li><a href="#IDrawPolygon">IDrawPolygon</a></li>
+<li><a href="#IDrawRectangle">IDrawRectangle</a></li>
+<li><a href="#IDrawString">IDrawString</a></li>
+<li><a href="#IDrawStringRotated">IDrawStringRotated</a></li>
+<li><a href="#IDrawStringRotatedAngle">IDrawStringRotatedAngle</a></li>
+<li><a href="#IDuplicateImage">IDuplicateImage</a></li>
+<li><a href="#IErrorString">IErrorString</a></li>
+<li><a href="#IFileType">IFileType</a></li>
+<li><a href="#IFillArc">IFillArc</a></li>
+<li><a href="#IFillCircle">IFillCircle</a></li>
+<li><a href="#IFillEllipse">IFillEllipse</a></li>
+<li><a href="#IFillPolygon">IFillPolygon</a></li>
+<li><a href="#IFillRectangle">IFillRectangle</a></li>
+<li><a href="#IFloodFill">IFloodFill</a></li>
+<li><a href="#IFontSize">IFontSize</a></li>
+<li><a href="#IFreeColor">IFreeColor</a></li>
+<li><a href="#IFreeFont">IFreeFont</a></li>
+<li><a href="#IFreeGC">IFreeGC</a></li>
+<li><a href="#IFreeImage">IFreeImage</a></li>
+<li><a href="#IGetComment">IGetComment</a></li>
+<li><a href="#IGetTransparent">IGetTransparent</a></li>
+<li><a href="#ILoadFontFromData">ILoadFontFromData</a></li>
+<li><a href="#ILoadFontFromFile">ILoadFontFromFile</a></li>
+<li><a href="#IReadImageFile">IReadImageFile</a></li>
+<li><a href="#ISetBackground">ISetBackground</a></li>
+<li><a href="#ISetComment">ISetComment</a></li>
+<li><a href="#ISetFont">ISetFont</a></li>
+<li><a href="#ISetForeground">ISetForeground</a></li>
+<li><a href="#ISetLineStyle">ISetLineStyle</a></li>
+<li><a href="#ISetLineWidth">ISetLineWidth</a></li>
+<li><a href="#ISetTextStyle">ISetTextStyle</a></li>
+<li><a href="#ISetTransparent">ISetTransparent</a></li>
+<li><a href="#ITextDimensions">ITextDimensions</a></li>
+<li><a href="#ITextHeight">ITextHeight</a></li>
+<li><a href="#ITextWidth">ITextWidth</a></li>
+<li><a href="#IWriteImageFile">IWriteImageFile</a></li>
+</ul>
+<hr />
+<P>
+<h3><a name="IAllocColor">IAllocColor</a></h3>
+<p><tt>IColor IAllocColor ( unsigned int red, unsigned int green, unsigned int blue )</tt></p><p>
+Allocates a color to be used for drawing. (See <A HREF="#ISetForeground">ISetForeground</A>).</p><p>
+Returns: <tt>IColor</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>unsigned int red</tt> - red value (0-255)  </li>
+<li><tt>unsigned int green</tt> - green value (0-255)  </li>
+<li><tt>unsigned int blue</tt> - blue value (0-255)  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IAllocNamedColor">IAllocNamedColor</a></h3>
+<p><tt>IError IAllocNamedColor ( char *colorname, IColor *color_ret )</tt></p><p>
+Allocates a color by name (i.e. "blue") to be used for drawing. (See <A HREF="#ISetForeground">ISetForeground</A>).</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>char *colorname</tt> - color name ("red, "orange", etc.)  </li>
+<li><tt>IColor *color_ret</tt> - resulting color  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IArcProperties">IArcProperties</a></h3>
+<p><tt>IError IArcProperties ( IGC gc, int x, int y, int r1, int r2, double a1, double a2, int *a1_x, int *a1_y, int *a2_x, int *a2_y, int *middle_x, int *middle_y )</tt></p><p>
+Determines the x-y coordinates of the starting, stopping and middle point of an arc.  Any of the pointers may be NULL if you're not interested in obtaining the value.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int x</tt> - arc center x coordinate  </li>
+<li><tt>int y</tt> - arc center y coordinate  </li>
+<li><tt>int r1</tt> - angle 1 radius  </li>
+<li><tt>int r2</tt> - angle 2 radius  </li>
+<li><tt>double a1</tt> - first angle (in degrees)  </li>
+<li><tt>double a2</tt> - second angle (in degrees)  </li>
+</ul>
+<p>
+Output Parameters:</p>
+<ul>
+<li><tt>int *a1_x</tt> - x coordinate of edge of angle 1 </li>
+<li><tt>int *a1_y</tt> - y coordinate of edge of angle 1 </li>
+<li><tt>int *a2_x</tt> - x coordinate of edge of angle 2 </li>
+<li><tt>int *a2_y</tt> - y coordinate of edge of angle 2 </li>
+<li><tt>int *middle_x</tt> - x coordinate of edge center </li>
+<li><tt>int *middle_y</tt> - y coordinate of edge center </li>
+</ul>
+<P>
+<h3><a name="ICopyImage">ICopyImage</a></h3>
+<p><tt>IError ICopyImage ( IImage source, IImage dest, IGC gc, int src_x, int src_y, unsigned int width, unsigned int height, int dest_x, int dest_y )</tt></p><p>
+Copies all or part of one image onto another image at a specified coordinate.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage source</tt> - source image  </li>
+<li><tt>IImage dest</tt> - destination image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int src_x</tt> - x from source image  </li>
+<li><tt>int src_y</tt> - y from source image  </li>
+<li><tt>unsigned int width</tt> - width to copy  </li>
+<li><tt>unsigned int height</tt> - height to copy  </li>
+<li><tt>int dest_x</tt> - x coordinate on the destination image  </li>
+<li><tt>int dest_y</tt> - y coordinate on the destination image  </li>
+</ul>
+<p>
+<P>
+<h3><a name="ICopyImageScaled">ICopyImageScaled</a></h3>
+<p><tt>IError ICopyImageScaled ( IImage source, IImage dest, IGC gc, int src_x, int src_y, unsigned int src_width, unsigned int src_height, int dest_x, int dest_y, unsigned int dest_width, unsigned int dest_height )</tt></p><p>
+Copies all of an image to another image by scaling it to fit.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage source</tt> - source image  </li>
+<li><tt>IImage dest</tt> - destination image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int src_x</tt> - x from source image  </li>
+<li><tt>int src_y</tt> - y from source image  </li>
+<li><tt>unsigned int src_width</tt> - width of source image to copy  </li>
+<li><tt>unsigned int src_height</tt> - height of source image to copy  </li>
+<li><tt>int dest_x</tt> - x coordinate on the destination image  </li>
+<li><tt>int dest_y</tt> - y coordinate on the destination image  </li>
+<li><tt>unsigned int dest_width</tt> - width to copy to  </li>
+<li><tt>unsigned int dest_height</tt> - height to copy to  </li>
+</ul>
+<p>
+<P>
+<h3><a name="ICreateGC">ICreateGC</a></h3>
+<p><tt>IGC ICreateGC (  )</tt></p><p>
+Creates a graphic context for drawing on an image.</p><p>
+Returns: <tt>IGC</tt></p><p>
+Input Parameters:</p>
+<ul>
+</ul>
+<p>
+<P>
+<h3><a name="ICreateImage">ICreateImage</a></h3>
+<p><tt>IImage ICreateImage ( unsigned int width, unsigned int height, unsigned int options )</tt></p><p>
+Create a blank (white) image of a specified width and height.</p><p>
+Returns: <tt>IImage</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>unsigned int width</tt> - image width  </li>
+<li><tt>unsigned int height</tt> - image height  </li>
+<li><tt>unsigned int options</tt> - options flags (IOPTION_GREYSCALE, etc.)  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IDrawArc">IDrawArc</a></h3>
+<p><tt>IError IDrawArc ( IImage image, IGC gc, int x, int y, int r1, int r2, double a1, double a2 )</tt></p><p>
+Draws an arc onto the image using the graphic context's current line style ( see <A HREF="#ISetLineStyle">ISetLineStyle</A>). In order to draw an arc that passes over 0 degrees, the first angle (a1) should be negative and the second angle (a2) should be positive.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int x</tt> - arc center x coordinate  </li>
+<li><tt>int y</tt> - arc center y coordinate  </li>
+<li><tt>int r1</tt> - angle 1 radius  </li>
+<li><tt>int r2</tt> - angle 2 radius  </li>
+<li><tt>double a1</tt> - first angle (in degrees)  </li>
+<li><tt>double a2</tt> - second angle (in degrees)  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IDrawCircle">IDrawCircle</a></h3>
+<p><tt>IError IDrawCircle ( IImage image, IGC gc, int x, int y, int r )</tt></p><p>
+Draws a circle onto the image using the graphic context's current line style ( see <A HREF="#ISetLineStyle">ISetLineStyle</A>).</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int x</tt> - circle center x coordinate  </li>
+<li><tt>int y</tt> - circle center y coordinate  </li>
+<li><tt>int r</tt> - circle radius  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IDrawEllipse">IDrawEllipse</a></h3>
+<p><tt>IError IDrawEllipse ( IImage image, IGC gc, int x, int y, int r1, int r2 )</tt></p><p>
+Draws an ellipse onto the image using the graphic context's current line style ( see <A HREF="#ISetLineStyle">ISetLineStyle</A>).</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int x</tt> - ellipse center x coordinate  </li>
+<li><tt>int y</tt> - ellipse center y coordinate  </li>
+<li><tt>int r1</tt> - x radius  </li>
+<li><tt>int r2</tt> - y radius  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IDrawEnclosedArc">IDrawEnclosedArc</a></h3>
+<p><tt>IError IDrawEnclosedArc ( IImage image, IGC gc, int x, int y, int r1, int r2, double a1, double a2 )</tt></p><p>
+Draws an arc and connects the arc to the center point  using the graphic context's current line style ( see <A HREF="#ISetLineStyle">ISetLineStyle</A>). This function is intended to be used drawing pie charts. In order to draw an arc that passes over 0 degrees, the first angle (a1) should be negative and the second angle (a2) should be positive.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int x</tt> - arc center x coordinate  </li>
+<li><tt>int y</tt> - arc center y coordinate  </li>
+<li><tt>int r1</tt> - angle 1 radius  </li>
+<li><tt>int r2</tt> - angle 2 radius  </li>
+<li><tt>double a1</tt> - first angle (in degrees)  </li>
+<li><tt>double a2</tt> - second angle (in degrees)  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IDrawLine">IDrawLine</a></h3>
+<p><tt>IError IDrawLine ( IImage image, IGC gc, int x1, int y1, int x2, int y2 )</tt></p><p>
+Draws a line onto the image using the graphics context's current line style ( see <A HREF="#ISetLineStyle">ISetLineStyle</A>).</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int x1</tt> - 1st coordinate  </li>
+<li><tt>int y1</tt> - 1st coordinate  </li>
+<li><tt>int x2</tt> - 2nd coordinate  </li>
+<li><tt>int y2</tt> - 2nd coordinate  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IDrawPoint">IDrawPoint</a></h3>
+<p><tt>IError IDrawPoint ( IImage image, IGC gc, int x, int y )</tt></p><p>
+Draws a single point on the image.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int x</tt> - x coordinate  </li>
+<li><tt>int y</tt> - y coordinate  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IDrawPolygon">IDrawPolygon</a></h3>
+<p><tt>IError IDrawPolygon ( IImage image, IGC gc, IPoint *points, int npoints )</tt></p><p>
+Draws a polygon onto the image using the graphics context's current line style ( see <A HREF="#ISetLineStyle">ISetLineStyle</A>).</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>IPoint *points</tt> - array of points  </li>
+<li><tt>int npoints</tt> - size of above array  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IDrawRectangle">IDrawRectangle</a></h3>
+<p><tt>IError IDrawRectangle ( IImage image, IGC gc, int x, int y, unsigned int width, unsigned int height )</tt></p><p>
+Draws a rectangle onto the image of the specified width and height using the graphic context's current line stlye ( see <A HREF="#ISetLineStyle">ISetLineStyle</A>).</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int x</tt> - x coordinate  </li>
+<li><tt>int y</tt> - y coordinate  </li>
+<li><tt>unsigned int width</tt> - width  </li>
+<li><tt>unsigned int height</tt> - height  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IDrawString">IDrawString</a></h3>
+<p><tt>IError IDrawString ( IImage image, IGC gc, int x, int y, char *text, unsigned int len )</tt></p><p>
+Draws text onto the image at the specified coordinate. See the font definition file to determine which characters are supported. <BR>Note: the font is set with <A HREF="#ISetFont">ISetFont</A>.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int x</tt> - x coordinate (lower left of text)  </li>
+<li><tt>int y</tt> - y coordinate (lower left of text)  </li>
+<li><tt>char *text</tt> - pointer to text  </li>
+<li><tt>unsigned int len</tt> - length of text  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IDrawStringRotated">IDrawStringRotated</a></h3>
+<p><tt>IError IDrawStringRotated ( IImage image, IGC gc, int x, int y, char *text, unsigned int len, ITextDirection direction )</tt></p><p>
+Draws text onto the image at the specified coordinate using one of the angles: ITEXT_LEFT_TO_RIGHT, ITEXT_TOP_TO_BOTTOM, or ITEXT_BOTTOM_TO_TOP. See the font definition file to determine which characters are supported. <BR>Note: the font is set with <A HREF="#ISetFont">ISetFont</A>. The x-y coordinates always specify the starting point to draw from (the lower left spot of the first character). For example, for ITEXT_TOP_TO_BOTTOM the x-y would represent the upper left area of the box where text will be drawn.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int x</tt> - x coordinate  </li>
+<li><tt>int y</tt> - y coordinate  </li>
+<li><tt>char *text</tt> - pointer to text  </li>
+<li><tt>unsigned int len</tt> - length of text  </li>
+<li><tt>ITextDirection direction</tt> - direction to draw text  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IDrawStringRotatedAngle">IDrawStringRotatedAngle</a></h3>
+<p><tt>IError IDrawStringRotatedAngle ( IImage image, IGC gc, int x, int y, char *text, unsigned int len, double angle )</tt></p><p>
+Draws text onto the image at the specified coordinate using one the specified angle.  This is slightly slower than <A HREF="#IDrawStringRotated">IDrawStringRotated</A>, so only use this function if you're drawing something other than 90, 180, or 270 degrees. See the font definition file to determine which characters are supported. <BR>Note: the font is set with <A HREF="#ISetFont">ISetFont</A>. The x-y coordinates always specify the starting point to draw from (the lower left spot of the first character).</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int x</tt> - x coordinate  </li>
+<li><tt>int y</tt> - y coordinate  </li>
+<li><tt>char *text</tt> - pointer to text  </li>
+<li><tt>unsigned int len</tt> - length of text  </li>
+<li><tt>double angle</tt> - angle to rotate text  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IDuplicateImage">IDuplicateImage</a></h3>
+<p><tt>IError IDuplicateImage ( IImage image, IImage *image_return )</tt></p><p>
+Creates a duplicate of the original image.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image to duplicate  </li>
+</ul>
+<p>
+Output Parameters:</p>
+<ul>
+<li><tt>IImage *image_return</tt> - pointer to new image </li>
+</ul>
+<P>
+<h3><a name="IErrorString">IErrorString</a></h3>
+<p><tt>char * IErrorString ( IError err )</tt></p><p>
+Convert an IError value into text suitable for printing in an error message.</p><p>
+Returns: <tt>char *</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IError err</tt> - error value  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IFileType">IFileType</a></h3>
+<p><tt>IError IFileType ( char *file, IFileFormat *format_return )</tt></p><p>
+Determine the type of image by the file extension.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>char *file</tt> - filename  </li>
+</ul>
+<p>
+Output Parameters:</p>
+<ul>
+<li><tt>IFileFormat *format_return</tt> - format of file </li>
+</ul>
+<P>
+<h3><a name="IFillArc">IFillArc</a></h3>
+<p><tt>IError IFillArc ( IImage image, IGC gc, int x, int y, int r1, int r2, double a1, double a2 )</tt></p><p>
+Fill an arc. In order to draw an arc that passes over 0 degrees, the first angle (a1) should be negative and the second angle (a2) should be positive.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int x</tt> - arc center x coordinate  </li>
+<li><tt>int y</tt> - arc center y coordinate  </li>
+<li><tt>int r1</tt> - angle 1 radius  </li>
+<li><tt>int r2</tt> - angle 2 radius  </li>
+<li><tt>double a1</tt> - first angle (in degrees)  </li>
+<li><tt>double a2</tt> - second angle (in degrees)  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IFillCircle">IFillCircle</a></h3>
+<p><tt>IError IFillCircle ( IImage image, IGC gc, int x, int y, int r )</tt></p><p>
+Fill a circle.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int x</tt> - arc center x coordinate  </li>
+<li><tt>int y</tt> - arc center y coordinate  </li>
+<li><tt>int r</tt> - radius  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IFillEllipse">IFillEllipse</a></h3>
+<p><tt>IError IFillEllipse ( IImage image, IGC gc, int x, int y, int r1, int r2 )</tt></p><p>
+Fill an ellipse.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int x</tt> - arc center x coordinate  </li>
+<li><tt>int y</tt> - arc center y coordinate  </li>
+<li><tt>int r1</tt> - angle 1 radius  </li>
+<li><tt>int r2</tt> - angle 2 radius  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IFillPolygon">IFillPolygon</a></h3>
+<p><tt>IError IFillPolygon ( IImage image, IGC gc, IPoint *points, int npoints )</tt></p><p>
+Fill a polygon.  Only convex, non-intersecting polygons are supported. Invalid polygons will return an error.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>IPoint *points</tt> - array of points  </li>
+<li><tt>int npoints</tt> - size of above array  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IFillRectangle">IFillRectangle</a></h3>
+<p><tt>IError IFillRectangle ( IImage image, IGC gc, int x, int y, unsigned int width, unsigned int height )</tt></p><p>
+Fills a rectangle on the image using the graphics context's foreground color (see <A HREF="#ISetForeground">ISetForeground</A>).</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int x</tt> - x coordinate  </li>
+<li><tt>int y</tt> - y coordinate  </li>
+<li><tt>unsigned int width</tt> - width  </li>
+<li><tt>unsigned int height</tt> - height  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IFloodFill">IFloodFill</a></h3>
+<p><tt>IError IFloodFill ( IImage image, IGC gc, int x, int y )</tt></p><p>
+Flood fill an area.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>int x</tt> - x coordinate starting point  </li>
+<li><tt>int y</tt> - y coordinate starting point  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IFontSize">IFontSize</a></h3>
+<p><tt>IError IFontSize ( IFont font, unsigned int *height_return )</tt></p><p>
+Gets the pixel height of the font. (See <A HREF="#ITextHeight">ITextHeight</A> for calculating the height of a multiline text.)</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IFont font</tt> - font  </li>
+</ul>
+<p>
+Output Parameters:</p>
+<ul>
+<li><tt>unsigned int *height_return</tt> - height in pixels of font </li>
+</ul>
+<P>
+<h3><a name="IFreeColor">IFreeColor</a></h3>
+<p><tt>IError IFreeColor ( IColor color )</tt></p><p>
+Frees a color no longer in use.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IColor color</tt> - color  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IFreeFont">IFreeFont</a></h3>
+<p><tt>IError IFreeFont ( IFont font )</tt></p><p>
+Frees a font no longer in use.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IFont font</tt> - font to free  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IFreeGC">IFreeGC</a></h3>
+<p><tt>IError IFreeGC ( IGC gc )</tt></p><p>
+Frees a graphic context no longer in use.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IGC gc</tt> - graphics context  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IFreeImage">IFreeImage</a></h3>
+<p><tt>IError IFreeImage ( IImage image )</tt></p><p>
+Frees the memory associated with an image that will not be used again.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - pointer to image  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IGetComment">IGetComment</a></h3>
+<p><tt>IError IGetComment ( IImage image, char **comment )</tt></p><p>
+Get the comment (if there is one).</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - pointer to image  </li>
+<li><tt>char **comment</tt> - address to comment  </li>
+</ul>
+<p>
+<P>
+<h3><a name="IGetTransparent">IGetTransparent</a></h3>
+<p><tt>IError IGetTransparent ( IImage image, IColor *color )</tt></p><p>
+Get the transparent color of the image. If there is no transparent image set, then INoTransparentColor is returned.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IColor *color</tt> - returned color  </li>
+</ul>
+<p>
+<P>
+<h3><a name="ILoadFontFromData">ILoadFontFromData</a></h3>
+<p><tt>IError ILoadFontFromData ( char *name, char **lines, IFont *font_return )</tt></p><p>
+Loads a font from data passed in.  This is identical to <A HREF="#ILoadFontFromFile">ILoadFontFromFile</A> except the font data is passed in as an argument rather than a file. This allows the font to be embedded in the application rather than distributed as a separate file.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>char *name</tt> - name to use for reference (filename)  </li>
+<li><tt>char **lines</tt> - font data (identical to file contents)  as an array of character strings  (one text line per array element  terminated with a NULL element  </li>
+</ul>
+<p>
+Output Parameters:</p>
+<ul>
+<li><tt>IFont *font_return</tt> - pointer to returned font </li>
+</ul>
+<P>
+<h3><a name="ILoadFontFromFile">ILoadFontFromFile</a></h3>
+<p><tt>IError ILoadFontFromFile ( char *name, char *path, IFont *font_return )</tt></p><p>
+Load a font from file.  Currently, only BDF font files can be used.  BDF font files can be found at: <A HREF="ftp://ftp.x.org/pub/R6.1/xc/fonts/bdf/75dpi/"> ftp://ftp.x.org/pub/R6.1/xc/fonts/bdf/75dpi/</A>. (BDF fonts are part of the X11 Window System developed at MIT and used on almost all UNIX workstations.)</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>char *name</tt> - name to use for reference (filename)  </li>
+<li><tt>char *path</tt> - path to font file  </li>
+</ul>
+<p>
+Output Parameters:</p>
+<ul>
+<li><tt>IFont *font_return</tt> - returned font </li>
+</ul>
+<P>
+<h3><a name="IReadImageFile">IReadImageFile</a></h3>
+<p><tt>IError IReadImageFile ( FILE *fp, IFileFormat format, IOptions options, IImage *image_return )</tt></p><p>
+Creates an image from an image file. Currently can read raw PPM (IFORMAT_PPM), XPM (IFORMAT_XPM), GIF (IFORMAT_GIF), PNG (IFORMAT_PNG), and JPEG (IFORMAT_JPEG) files. The file is left open for the caller to close. (Note: you should set the file to binary mode on Win32 platforms by using something like: <BR> <TT>&nbsp;&nbsp; file = fopen ( filename, "rb" ); </TT></p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>FILE *fp</tt> - file pointer  </li>
+<li><tt>IFileFormat format</tt> - output format (e.g. IFORMAT_GIF)  </li>
+<li><tt>IOptions options</tt> - options  </li>
+</ul>
+<p>
+Output Parameters:</p>
+<ul>
+<li><tt>IImage *image_return</tt> - returned image on success </li>
+</ul>
+<P>
+<h3><a name="ISetBackground">ISetBackground</a></h3>
+<p><tt>IError ISetBackground ( IGC gc, IColor color )</tt></p><p>
+Set the background color of a graphics context. This will affect colors when using text styles.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>IColor color</tt> - color  </li>
+</ul>
+<p>
+<P>
+<h3><a name="ISetComment">ISetComment</a></h3>
+<p><tt>IError ISetComment ( IImage image, char *comment )</tt></p><p>
+Set the comment.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - pointer to image  </li>
+<li><tt>char *comment</tt> - new comment  </li>
+</ul>
+<p>
+<P>
+<h3><a name="ISetFont">ISetFont</a></h3>
+<p><tt>IError ISetFont ( IGC gc, IFont font )</tt></p><p>
+Sets the current drawing font for a graphics context. Subsequent calls to <A HREF="#IDrawString">IDrawString</A> will use the specified font.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>IFont font</tt> - font  </li>
+</ul>
+<p>
+<P>
+<h3><a name="ISetForeground">ISetForeground</a></h3>
+<p><tt>IError ISetForeground ( IGC gc, IColor color )</tt></p><p>
+Set the foreground color of a graphics context. This will set the drawing color for drawing functions (<A HREF="#IDrawLine">IDrawLine</A>, <A HREF="#IFillRectangle">IFillRectangle</A>, etc.)</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>IColor color</tt> - color  </li>
+</ul>
+<p>
+<P>
+<h3><a name="ISetLineStyle">ISetLineStyle</a></h3>
+<p><tt>IError ISetLineStyle ( IGC gc, ILineStyle line_style )</tt></p><p>
+Sets the current line drawing style for a graphics context. Currently support ILINE_SOLID (default) and ILINE_ON_OFF_DASH.  (This applies to <A HREF="#IDrawLine">IDrawLine</A> and <A HREF="#IDrawRectangle">IDrawRectangle</A>.)</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>ILineStyle line_style</tt> - line style  </li>
+</ul>
+<p>
+<P>
+<h3><a name="ISetLineWidth">ISetLineWidth</a></h3>
+<p><tt>IError ISetLineWidth ( IGC gc, unsigned int line_width )</tt></p><p>
+Sets the line drawing with for a graphics context. (This applies to <A HREF="#IDrawLine">IDrawLine</A> and <A HREF="#IDrawRectangle">IDrawRectangle</A>.)</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>unsigned int line_width</tt> - line width  </li>
+</ul>
+<p>
+<P>
+<h3><a name="ISetTextStyle">ISetTextStyle</a></h3>
+<p><tt>IError ISetTextStyle ( IGC gc, ITextStyle text_style )</tt></p><p>
+Sets the curret text drawing style for a graphics context. Supported styles are:<UL> <LI> ITEXT_NORMAL - default (no effects) <LI> ITEXT_ETCHED_IN - draw text etched into background (does not use foreground color, just background) <LI> ITEXT_ETCHED_OUT - draw text etched out of background (does not use foreground color, just background) <LI> ITEXT_SHADOWED - draw text with a dark shadow to the lower left of the text. </UL> (This applies to <A HREF="#IDrawString">IDrawString</A> and <A HREF="#IDrawStringRotated">IDrawStringRotated</A>.)</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>ITextStyle text_style</tt> - text style  </li>
+</ul>
+<p>
+<P>
+<h3><a name="ISetTransparent">ISetTransparent</a></h3>
+<p><tt>IError ISetTransparent ( IImage image, IColor color )</tt></p><p>
+Set the transparent color of the image. This is only relevant to images that are written to either GIF or XPM formats.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IColor color</tt> - color  </li>
+</ul>
+<p>
+<P>
+<h3><a name="ITextDimensions">ITextDimensions</a></h3>
+<p><tt>IError ITextDimensions ( IGC gc, IFont font, char *text, unsigned int len, unsigned int *width_return, unsigned int *height_return )</tt></p><p>
+Determines the width & height (in pixels) of the given text for the specified font. (useful for multiline text)</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>IFont font</tt> - font  </li>
+<li><tt>char *text</tt> - text  </li>
+<li><tt>unsigned int len</tt> - length of text  </li>
+</ul>
+<p>
+Output Parameters:</p>
+<ul>
+<li><tt>unsigned int *width_return</tt> - width in pixels of text </li>
+<li><tt>unsigned int *height_return</tt> - height in pixels of text </li>
+</ul>
+<P>
+<h3><a name="ITextHeight">ITextHeight</a></h3>
+<p><tt>IError ITextHeight ( IGC gc, IFont font, char *text, unsigned int len, unsigned int *height_return )</tt></p><p>
+Determines the height (in pixels) of the given text for the specified font. This is useful for multiline text.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>IFont font</tt> - font  </li>
+<li><tt>char *text</tt> - text  </li>
+<li><tt>unsigned int len</tt> - length of text  </li>
+</ul>
+<p>
+Output Parameters:</p>
+<ul>
+<li><tt>unsigned int *height_return</tt> - height in pixels of text </li>
+</ul>
+<P>
+<h3><a name="ITextWidth">ITextWidth</a></h3>
+<p><tt>IError ITextWidth ( IGC gc, IFont font, char *text, unsigned int len, unsigned int *width_return )</tt></p><p>
+Determines the length (in pixels) of the given text for the specified font.</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>IGC gc</tt> - graphics context  </li>
+<li><tt>IFont font</tt> - font  </li>
+<li><tt>char *text</tt> - text  </li>
+<li><tt>unsigned int len</tt> - length of text  </li>
+</ul>
+<p>
+Output Parameters:</p>
+<ul>
+<li><tt>unsigned int *width_return</tt> - width in pixels of text </li>
+</ul>
+<P>
+<h3><a name="IWriteImageFile">IWriteImageFile</a></h3>
+<p><tt>IError IWriteImageFile ( FILE *fp, IImage image, IFileFormat format, IOptions options )</tt></p><p>
+Writes an image to a file. Currently supports writing PPM (IFORMAT_PPM), XPM (IFORMAT_XPM), GIF (IFORMAT_GIF), PNG (IFORMAT_PNG) and JPEG (IFORMAT_JPEG) formats. The file is left open for the caller to close. (Note: you should set the file to binary mode on Win32 platforms.)</p><p>
+Returns: <tt>IError</tt></p><p>
+Input Parameters:</p>
+<ul>
+<li><tt>FILE *fp</tt> - file pointer  </li>
+<li><tt>IImage image</tt> - image  </li>
+<li><tt>IFileFormat format</tt> - output format (e.g. IFORMAT_XPM)  </li>
+<li><tt>IOptions options</tt> - options (e.g. IOPTION_INTERLACED)  </li>
+</ul>
+<p>
+</body>
+</html>
