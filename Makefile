@@ -24,7 +24,7 @@ STATIC = yes
 
 
 #   Build .so shared library if yes
-DYNAMIC = yes
+DYNAMIC = no
 
 
 #   Lib path may need correction depending upon platform

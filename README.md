@@ -57,6 +57,15 @@ brew install giflib
 brew install libjpeg
 brew install libpng
 ```
+Edit Makefile and change DYNAMIC to NO. Then...
+```
+make makefiles
+make -i all
+```
+You'll get errors on not being able to find the shared libraries since
+the makefiles are still somewhat broken for Mac.  But this will build
+the static libIlib.a file.  You can compile some of the sample client
+code using ```make static``` in each example client's directory.
 
 ## Compiling (Linux, Unix):
 
