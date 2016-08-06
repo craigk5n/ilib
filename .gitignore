@@ -1,3 +1,5 @@
 *.o
 *.a
 *~
+helv*.h
+cour*.h
