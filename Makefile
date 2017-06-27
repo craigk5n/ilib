@@ -75,7 +75,7 @@ POST_INSTALL = echo
 
 # Definitions for your compiler and make (do you have system defined CFLAGS?)
 CC = cc
-CFLAGS = -g -Wall $(DEFINES) $(INCLUDES)
+CFLAGS = -g -Wall $(DEFINES) $(INCLUDES) -fPIC
 RANLIB = ranlib
 
 ######################################################################

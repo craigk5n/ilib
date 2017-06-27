@@ -74,6 +74,10 @@ add-on libraries mentioned above.  (First, check your system.  If
 you have a Linux distribution, it's likely to have some of these
 installed.)
 
+To do so on ubuntu:
+
+    yum libjpeg-devel libpng-devel libgif-devel giflib-devel
+
 Edit the definitions of LIBS, DEFINES, INCLUDES to indicate which
 libraries are installed.  Change PREFIX if you don't want to install
 in /usr/local.

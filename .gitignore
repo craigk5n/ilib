@@ -1,5 +1,7 @@
+*.O
 *.o
 *.a
 *~
 helv*.h
 cour*.h
+libIlib.so.*
