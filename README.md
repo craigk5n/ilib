@@ -76,7 +76,7 @@ installed.)
 
 To do so on ubuntu:
 
-    yum libjpeg-devel libpng-devel libgif-devel giflib-devel
+    yum install libjpeg-devel libpng-devel libgif-devel giflib-devel
 
 Edit the definitions of LIBS, DEFINES, INCLUDES to indicate which
 libraries are installed.  Change PREFIX if you don't want to install
