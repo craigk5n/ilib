@@ -374,6 +374,10 @@ IError _IReadGIF ( FILE *fp, IOptions options, IImageP **image_return )
         }
         DGifGetExtensionNext ( gft, &extension );
       }
+    } else {
+      /* TERMINATE_RECORD_TYPE (end of GIF, no image) or an undefined record:
+         no image will ever appear, so stop instead of looping forever. */
+      goto fail;
     }
   }
 
@@ -414,7 +418,7 @@ fail:
 #else
     DGifCloseFile ( gft );
 #endif
-  goto fail;
+  return ( IGIFError );
 }
 
 
