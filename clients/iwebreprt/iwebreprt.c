@@ -99,10 +99,10 @@ static int calc_max (
 ** Define start and stop times.  Use YYMMDDHHMMSS so that we can just
 ** use strcmp() to compare times.
 */
-static char start_time[20];	/* in YYMMDDHHMMSS format */
-static char stop_time[20];	/* in YYMMDDHHMMSS format */
-static char pretty_start[30];	/* in human readable format */
-static char pretty_stop[30];	/* in human readable format */
+static char start_time[64];	/* in YYMMDDHHMMSS format */
+static char stop_time[64];	/* in YYMMDDHHMMSS format */
+static char pretty_start[64];	/* in human readable format */
+static char pretty_stop[64];	/* in human readable format */
 static char *months[] = {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
@@ -516,7 +516,7 @@ static void add_time ( char *text )
 {
   char *ptr;
   char temp[10];
-  int int1, loop, month, year, day, hour, weekday, y, m, d;
+  int int1, loop, month, year, day, hour = 0, weekday, y, m, d;
   static int dlook[] = { 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4 };
 
   temp[2] = '\0';
@@ -611,14 +611,14 @@ static void generate_gif ( void )
 {
   int loop;
   char temp[200];
-  int maxval;
-  int lastday;
+  int maxval = 0;
+  int lastday = 0;
   int x, y, lastx, lasty;
   IImage im_out;	/* output image */
   IFont helvB18, courR10;
   IColor red, blue, black, grey;
   IGC gc;
-  int height, width;
+  int height, width = 0;
 
   /*
   ** Display day of month data

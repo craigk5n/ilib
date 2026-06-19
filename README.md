@@ -10,9 +10,9 @@ own if you know how to create an X11 BDF font.  It can read and
 write PPM, XPM, GIF, PNG and JPG image format.  It can read (but not
 yet write) BMP.
 
-Note: This code was originally developed in the late 1990s so some the C source
-code was written for "classic" C before ANSI C was standard everywhere.
-So functions are defined differently (not ANSI-style).
+Note: This code was originally developed in the late 1990s in "classic"
+(K&R) C. It has since been modernized to ISO C (ANSI-style prototypes) and
+builds warning-clean under `-Wall -Wextra`.
 
 ## API Documentation
 The API documentation is generated from the source code and can be

@@ -2,6 +2,7 @@
 
 # ifont2h converts an X11 BDF font into a C header (no libilib dependency).
 add_executable(ifont2h ifont2h/ifont2h.c)
+ilib_set_warnings(ifont2h)
 install(TARGETS ifont2h RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
 # The remaining clients use the Ilib API. ifraggraph and iwebreprt also call
@@ -13,6 +14,7 @@ foreach(_client idisplayfont ifraggraph iindex iwebreprt)
   if(ILIB_CLIENT_MATH_LIBRARY)
     target_link_libraries(${_client} PRIVATE "${ILIB_CLIENT_MATH_LIBRARY}")
   endif()
+  ilib_set_warnings(${_client})
   install(TARGETS ${_client} RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 endforeach()
 
