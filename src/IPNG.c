@@ -86,7 +86,7 @@ IError _IWritePNG ( FILE *fp, IImageP *image, IOptions options )
   }
   png_write_end ( png_ptr, info_ptr );
   fflush ( fp );
-  png_destroy_write_struct ( &png_ptr, (png_infopp)NULL );
+  png_destroy_write_struct ( &png_ptr, &info_ptr );
 
   return ( INoError );
 }
@@ -145,9 +145,6 @@ IError _IReadPNG ( FILE *fp, IOptions options, IImageP **image_return )
   /* Read the image one line at a time.  That way we don't have to
   ** malloc two images.
   */
-  row_pointer = (png_bytep) png_malloc ( png_ptr,
-      png_get_rowbytes ( png_ptr, info_ptr ) );
-
   row_pointer = (png_bytep) malloc ( image->width * 3 );
   for ( row = 0; (png_uint_32) row < height; row++ ) {
     png_read_rows ( png_ptr, &row_pointer, NULL, 1 );

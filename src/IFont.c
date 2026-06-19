@@ -71,6 +71,7 @@ IError _IFreeFont ( IFont font )
     if ( fontp->magic != IMAGIC_FONT )
       return ( IInvalidFont );
     IFontBDFFree ( fontp->name );
+    free ( fontp->name );
     free ( fontp );
   }
 
