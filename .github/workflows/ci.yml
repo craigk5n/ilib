@@ -93,10 +93,6 @@ jobs:
   fuzz:
     name: fuzz (libFuzzer smoke)
     runs-on: ubuntu-latest
-    # Advisory for now: the harness runs on every PR and surfaces decoder
-    # crashes in the logs, but does not block merges while the decade-old
-    # format readers are hardened against malformed input incrementally.
-    continue-on-error: true
     env:
       CC: clang
     steps:
@@ -110,8 +106,10 @@ jobs:
       - name: Build
         run: cmake --build build --parallel
       - name: Fuzz smoke run
-        # Decoders leak on malformed input (known, separate issue); this run
-        # targets crashes / overflows / UB, so leak detection is disabled.
+        # Blocking regression gate. A fixed seed keeps the 60s run
+        # deterministic so it does not flake on unrelated PRs. Decoders still
+        # leak on malformed input (known, separate issue), so leak detection
+        # is disabled; this run gates on crashes / overflows / UB.
         run: |
           ASAN_OPTIONS=detect_leaks=0 ./build/tests/fuzz_decode \
-            -max_total_time=60 -timeout=10 -rss_limit_mb=4096
+            -max_total_time=60 -timeout=10 -rss_limit_mb=4096 -seed=1
