@@ -27,11 +27,17 @@ IGC ICreateGC ( void )
   IGCP *gc;
 
   gc = (IGCP *) malloc ( sizeof ( IGCP ) );
+  if ( ! gc )
+    return ( (IGC) NULL );
   memset ( gc, '\0', sizeof ( IGCP ) );
 
   gc->magic = IMAGIC_GC;
   gc->foreground = _IGetColor ( IBLACK_PIXEL );
   gc->background = _IGetColor ( IWHITE_PIXEL );
+  if ( ! gc->foreground || ! gc->background ) {
+    free ( gc );
+    return ( (IGC) NULL );
+  }
   gc->line_width = 1;
   gc->line_style = ILINE_SOLID;
   gc->text_style = ITEXT_NORMAL;
@@ -166,6 +172,8 @@ IError ISetLineWidth ( IGC gc, unsigned int line_width )
     if ( gcp->magic != IMAGIC_GC )
       return ( IInvalidGC );
   }
+  else
+    return ( IInvalidGC );
 
   gcp->line_width = line_width;
 
@@ -182,6 +190,8 @@ IError ISetLineStyle ( IGC gc, ILineStyle line_style )
     if ( gcp->magic != IMAGIC_GC )
       return ( IInvalidGC );
   }
+  else
+    return ( IInvalidGC );
 
   gcp->line_style = line_style;
 
@@ -199,6 +209,8 @@ IError ISetTextStyle ( IGC gc, ITextStyle text_style )
     if ( gcp->magic != IMAGIC_GC )
       return ( IInvalidGC );
   }
+  else
+    return ( IInvalidGC );
 
   gcp->text_style = text_style;
 
