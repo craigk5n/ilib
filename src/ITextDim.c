@@ -67,7 +67,7 @@ unsigned int *height_return;
   IFontP *fontp = (IFontP *)font;
   unsigned int *bitdata;
   unsigned int height, width, actual_width, size, font_height;
-  int xoffset, yoffset, charx, chary;
+  int xoffset, yoffset, charx;
   char ch[256], *ptr;
   int loop, loop2;
   IError ret;
@@ -86,7 +86,6 @@ unsigned int *height_return;
     return ( IInvalidGC );
 
   charx = 0;
-  chary = 0;
 
   IFontSize ( font, &font_height );
 
@@ -95,7 +94,6 @@ unsigned int *height_return;
   for ( ptr = text, loop = 0; (unsigned int) loop < len; loop++, ptr++ ) {
     if ( *ptr == '\012' ) {
       charx = 0;
-      chary += font_height;
       ret_height += font_height;
       char_num = 0;
       continue;
