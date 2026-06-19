@@ -43,6 +43,43 @@ jobs:
       - name: Test
         run: ctest --test-dir build --output-on-failure
 
+  no-codecs:
+    name: build without optional codecs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake
+      - name: Configure (no png/jpeg/gif)
+        run: |
+          cmake -B build -DILIB_BUILD_TESTS=ON -DILIB_WERROR=ON \
+            -DILIB_WITH_PNG=OFF -DILIB_WITH_JPEG=OFF -DILIB_WITH_GIF=OFF
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  clang-tidy:
+    name: clang-tidy (static analysis)
+    runs-on: ubuntu-latest
+    # Informational: surfaces bugprone / static-analyzer findings on the
+    # decoder-heavy sources without gating merges yet. Tighten to blocking
+    # once the legacy baseline is clean.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake clang clang-tidy libpng-dev libjpeg-dev libgif-dev
+      - name: Configure (export compile_commands.json)
+        run: cmake -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - name: Run clang-tidy on library sources
+        run: |
+          clang-tidy -p build $(git ls-files 'src/*.c')
+
   sanitizers:
     name: sanitizers (asan+ubsan)
     runs-on: ubuntu-latest
@@ -107,9 +144,9 @@ jobs:
         run: cmake --build build --parallel
       - name: Fuzz smoke run
         # Blocking regression gate. A fixed seed keeps the 60s run
-        # deterministic so it does not flake on unrelated PRs. Decoders still
-        # leak on malformed input (known, separate issue), so leak detection
-        # is disabled; this run gates on crashes / overflows / UB.
+        # deterministic so it does not flake on unrelated PRs. The decoders are
+        # now hardened against leaks on malformed input, so leak detection is
+        # enabled: this run gates on crashes / overflows / UB *and* leaks.
         run: |
-          ASAN_OPTIONS=detect_leaks=0 ./build/tests/fuzz_decode \
+          ASAN_OPTIONS=detect_leaks=1 ./build/tests/fuzz_decode \
             -max_total_time=60 -timeout=10 -rss_limit_mb=4096 -seed=1
