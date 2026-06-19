@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <limits.h>
 
 #include "Ilib.h"
 #include "IlibP.h"
@@ -280,7 +281,13 @@ IError _IReadXPM ( FILE *fp, IOptions options, IImageP **image_return )
       return IInvalidFormat; /* small memory leak */
   }
 
+  /* Validate untrusted dimensions: positive and no w*h*3 overflow. */
+  if ( w <= 0 || h <= 0 || w > INT_MAX / 3 / h )
+    return ( IInvalidFormat );
+
   image = (IImageP *) ICreateImage ( w, h, options );
+  if ( ! image )
+    return ( IInvalidFormat );
 
   /* now read row by row of data */
   ptr = (char *) malloc ( colorw * w + 20 );

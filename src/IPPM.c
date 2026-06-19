@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <limits.h>
 
 #include "Ilib.h"
 #include "IlibP.h"
@@ -124,7 +125,17 @@ IError _IReadPPM ( FILE *fp, IOptions options, IImageP **image_return )
   if ( sscanf ( data, "%d", &maxcolors ) != 1 )
     return ( IFileInvalid );
 
+  /* Validate header values from the (untrusted) file: positive dimensions,
+     a usable maxcolors (it divides below), and no integer overflow in the
+     w*h*3 size math used for allocation and the pixel loops. */
+  if ( w <= 0 || h <= 0 || maxcolors <= 0 )
+    return ( IFileInvalid );
+  if ( w > INT_MAX / 3 / h )
+    return ( IFileInvalid );
+
   image = (IImageP *) ICreateImage ( w, h, options );
+  if ( ! image )
+    return ( IFileInvalid );
   if ( comments )
     image->comments = comments;
   else {
