@@ -28,12 +28,7 @@
 
 #define SPACES_PER_TAB		8
 
-IError ITextWidth ( gc, font, text, len, width_return )
-IGC gc;
-IFont font;
-char *text;
-unsigned int len;
-unsigned int *width_return;
+IError ITextWidth ( IGC gc, IFont font, char *text, unsigned int len, unsigned int *width_return )
 {
   unsigned int height_return;
   return ( ITextDimensions ( gc, font, text, len, width_return,
@@ -41,12 +36,7 @@ unsigned int *width_return;
 }
 
 
-IError ITextHeight ( gc, font, text, len, height_return )
-IGC gc;
-IFont font;
-char *text;
-unsigned int len;
-unsigned int *height_return;
+IError ITextHeight ( IGC gc, IFont font, char *text, unsigned int len, unsigned int *height_return )
 {
   unsigned int width_return;
   return ( ITextDimensions ( gc, font, text, len, &width_return,
@@ -55,13 +45,7 @@ unsigned int *height_return;
 
 
 
-IError ITextDimensions ( gc, font, text, len, width_return, height_return )
-IGC gc;
-IFont font;
-char *text;
-unsigned int len;
-unsigned int *width_return;
-unsigned int *height_return;
+IError ITextDimensions ( IGC gc, IFont font, char *text, unsigned int len, unsigned int *width_return, unsigned int *height_return )
 {
   IGCP *gcp = (IGCP *)gc;
   IFontP *fontp = (IFontP *)font;

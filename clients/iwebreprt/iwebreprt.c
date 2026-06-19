@@ -154,9 +154,7 @@ static char *retrievals = "Retrievals";
 /*
 ** Main
 */
-int main ( argc, argv )
-int argc;
-char *argv[];
+int main ( int argc, char *argv[] )
 {
   int loop;
 
@@ -232,7 +230,7 @@ char *argv[];
 * Set the time range variables so that we look at data from today only.
 *
 ****************************************************************************/
-static void set_times_today ()
+static void set_times_today ( void )
 {
   time_t now;
   struct tm *tm;
@@ -261,7 +259,7 @@ static void set_times_today ()
 * Set the time range variables so that we look at data from yesterday only.
 *
 ****************************************************************************/
-static void set_times_yesterday ()
+static void set_times_yesterday ( void )
 {
   time_t now, yest;
   struct tm *tm;
@@ -291,7 +289,7 @@ static void set_times_yesterday ()
 * where the week starts on Monday and finishes on Sunday.
 *
 ****************************************************************************/
-static void set_times_last_week ()
+static void set_times_last_week ( void )
 {
   time_t now, lastweek, lastweekstop;
   struct tm *tm;
@@ -340,7 +338,7 @@ static void set_times_last_week ()
 * where the week starts on Monday and finishes on Sunday.
 *
 ****************************************************************************/
-static void set_times_this_week ()
+static void set_times_this_week ( void )
 {
   time_t now, thisweek, thisweekstop;
   struct tm *tm;
@@ -389,7 +387,7 @@ static void set_times_this_week ()
 * Set the time range variables so that we look at data from this month only.
 *
 ****************************************************************************/
-static void set_times_this_month ()
+static void set_times_this_month ( void )
 {
   time_t now, first, last;
   struct tm *tm;
@@ -432,7 +430,7 @@ static void set_times_this_month ()
 * prior to the current month.
 *
 ****************************************************************************/
-static void set_times_last_month ()
+static void set_times_last_month ( void )
 {
   time_t now, first, last;
   struct tm *tm;
@@ -489,8 +487,7 @@ static void set_times_last_month ()
 * Read in the data file
 *
 ****************************************************************************/
-static void read_file ( filename )
-char *filename;
+static void read_file ( char *filename )
 {
   FILE *fp;
   char text[10240];
@@ -515,8 +512,7 @@ char *filename;
 /*
 ** Add the time information so we can report time of day, day of month.
 */
-static void add_time ( text )
-char *text;
+static void add_time ( char *text )
 {
   char *ptr;
   char temp[10];
@@ -611,7 +607,7 @@ char *text;
 #define BOTTOM_PAD	55
 #define DATA_WIDTH	15
 #define DATA_HEIGHT	200
-static void generate_gif ()
+static void generate_gif ( void )
 {
   int loop;
   char temp[200];
@@ -1000,8 +996,7 @@ static void generate_gif ()
 * Calculate a nice round number to use as the maximum for the y axis.
 *
 ****************************************************************************/
-static int calc_max ( cur_max )
-int cur_max; 	/* the current max value */
+static int calc_max ( int cur_max )	/* the current max value */
 {
   int ret_val;
   int next_round, tens, div_val;
@@ -1049,8 +1044,7 @@ int cur_max; 	/* the current max value */
 * Check to see if the entry is within our time window
 *
 ****************************************************************************/
-static int is_in_time_range ( entry )
-char *entry;
+static int is_in_time_range ( char *entry )
 {
   char *ptr;
   int is_after_start, is_before_stop;

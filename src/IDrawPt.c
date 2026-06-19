@@ -21,11 +21,7 @@
 #include "IlibP.h"
 
 
-IError IDrawPoint ( image, gc, x, y )
-IImage image;
-IGC gc;
-int x;
-int y;
+IError IDrawPoint ( IImage image, IGC gc, int x, int y )
 {
   IGCP *gcp = (IGCP *)gc;
   IImageP *imagep = (IImageP *)image;

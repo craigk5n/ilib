@@ -36,10 +36,7 @@
 #include "IlibP.h"
 
 
-IError _IWritePNG ( fp, image, options )
-FILE *fp;
-IImageP *image;
-IOptions options;
+IError _IWritePNG ( FILE *fp, IImageP *image, IOptions options )
 {
   png_structp png_ptr;
   png_infop info_ptr;
@@ -98,10 +95,7 @@ IOptions options;
 
 
 
-IError _IReadPNG ( fp, options, image_return )
-FILE *fp;
-IOptions options;
-IImageP **image_return;
+IError _IReadPNG ( FILE *fp, IOptions options, IImageP **image_return )
 {
   IImageP *image = NULL;
   png_structp png_ptr;

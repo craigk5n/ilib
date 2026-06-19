@@ -28,13 +28,8 @@
 #include "IlibP.h"
 
 
-IError ICopyImage ( source, dest, gc, src_x, src_y, width, height,
-  dest_x, dest_y )
-IImage source, dest;
-IGC gc;
-int src_x, src_y;
-unsigned int width, height;
-int dest_x, dest_y;
+IError ICopyImage ( IImage source, IImage dest, IGC gc, int src_x, int src_y, unsigned int width, unsigned int height,
+  int dest_x, int dest_y )
 {
   IImageP *i1 = (IImageP *) source;
   IImageP *i2 = (IImageP *) dest;
@@ -109,15 +104,9 @@ int dest_x, dest_y;
 ** This allows the user to scale up or down the source image onto
 ** the destination image.
 */
-IError ICopyImageScaled ( source, dest, gc,
-  src_x, src_y, src_width, src_height,
-  dest_x, dest_y, dest_width, dest_height )
-IImage source, dest;
-IGC gc;
-int src_x, src_y;
-unsigned int src_width, src_height;
-int dest_x, dest_y;
-unsigned int dest_width, dest_height;
+IError ICopyImageScaled ( IImage source, IImage dest, IGC gc,
+  int src_x, int src_y, unsigned int src_width, unsigned int src_height,
+  int dest_x, int dest_y, unsigned int dest_width, unsigned int dest_height )
 {
   IImageP *i1 = (IImageP *) source;
   IImageP *i2 = (IImageP *) dest;

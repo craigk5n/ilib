@@ -25,21 +25,9 @@
 #define deg2rad(a)	( ( 2.0 * PI / 360.0 ) * ( a ) )
 
 
-IError IArcProperties ( gc, x, y, r1, r2, a1, a2,
-  a1_x, a1_y, a2_x, a2_y, middle_x, middle_y )
-IGC gc;
-int x;
-int y;
-int r1;
-int r2;
-double a1; /* arc 1 (in degrees) */
-double a2; /* arc 2 (in degrees) */
-int *a1_x;
-int *a1_y;
-int *a2_x;
-int *a2_y;
-int *middle_x;
-int *middle_y;
+IError IArcProperties ( IGC gc, int x, int y, int r1, int r2,
+  double a1, double a2,
+  int *a1_x, int *a1_y, int *a2_x, int *a2_y, int *middle_x, int *middle_y )
 {
   IGCP *gcp = (IGCP *)gc;
   double a;

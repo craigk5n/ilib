@@ -35,9 +35,7 @@
 		*(buffer+2) = (colortable[byte&0xff]&(0xff<<0))>>0; \
 	} while (0);
 
-static int ReadShort (fp, ret)
-FILE *fp;
-int *ret;
+static int ReadShort (FILE *fp, int *ret)
 {
   int c = fgetc(fp);
   if (c == EOF) return 0;
@@ -48,9 +46,7 @@ int *ret;
   return 1;
 }
 
-static int ReadLong (fp, ret)
-FILE *fp;
-int *ret;
+static int ReadLong (FILE *fp, int *ret)
 {
   int c = fgetc(fp);
   if (c == EOF) return 0;
@@ -67,10 +63,7 @@ int *ret;
   return 1;
 }
 
-IError _IReadBMP ( fp, options, image_return )
-FILE *fp;
-IOptions options;
-IImageP **image_return;
+IError _IReadBMP ( FILE *fp, IOptions options, IImageP **image_return )
 {
   IImageP *image = NULL;
   int scratch, fileSize, offset, w, h, depth, compression,

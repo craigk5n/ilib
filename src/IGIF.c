@@ -90,9 +90,7 @@ static int InterlacedOffset[] = { 0, 4, 2, 1 };
 static int InterlacedJumps[] = { 8, 8, 4, 2 };
 
 
-static int color_compare ( r, g, b, test1, test2 )
-unsigned int r, g, b;
-IColorP *test1, *test2;
+static int color_compare ( unsigned int r, unsigned int g, unsigned int b, IColorP *test1, IColorP *test2 )
 {
   int diff1, diff2;
 
@@ -105,10 +103,7 @@ IColorP *test1, *test2;
   return ( diff1 > diff2 );
 }
 
-IError _IWriteGIF ( fp, image, options )
-FILE *fp;
-IImageP *image;
-IOptions options;
+IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
 {
   int r, c, offset;
   unsigned char *ptr;
@@ -279,10 +274,7 @@ IOptions options;
 
 
 
-IError _IReadGIF ( fp, options, image_return )
-FILE *fp;
-IOptions options;
-IImageP **image_return;
+IError _IReadGIF ( FILE *fp, IOptions options, IImageP **image_return )
 {
   IImageP *image = NULL;
   GifFileType *gft;

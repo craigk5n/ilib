@@ -23,13 +23,7 @@
 
 
 
-IError IDrawEllipse ( image, gc, x, y, r1, r2 )
-IImage image;
-IGC gc;
-int x;
-int y;
-int r1;
-int r2;
+IError IDrawEllipse ( IImage image, IGC gc, int x, int y, int r1, int r2 )
 {
   IError ret;
 

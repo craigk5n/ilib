@@ -24,13 +24,7 @@
 
 #define ON_OFF_PIXELS	3.0
 
-IError IDrawLine ( image, gc, x1, y1, x2, y2 )
-IImage image;
-IGC gc;
-int x1;
-int y1;
-int x2;
-int y2;
+IError IDrawLine ( IImage image, IGC gc, int x1, int y1, int x2, int y2 )
 {
   IGCP *gcp = (IGCP *)gc;
   IImageP *imagep = (IImageP *)image;

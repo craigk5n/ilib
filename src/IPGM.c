@@ -21,10 +21,7 @@
 #include "IlibP.h"
 
 
-IError _IWritePGM ( fp, image, options )
-FILE *fp;
-IImageP *image;
-IOptions options;
+IError _IWritePGM ( FILE *fp, IImageP *image, IOptions options )
 {
   int r, c;
   unsigned char *ptr;

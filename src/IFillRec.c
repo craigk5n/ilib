@@ -21,13 +21,7 @@
 #include "IlibP.h"
 
 
-IError IFillRectangle ( image, gc, x, y, w, h )
-IImage image;
-IGC gc;
-int x;
-int y;
-unsigned int w;
-unsigned int h;
+IError IFillRectangle ( IImage image, IGC gc, int x, int y, unsigned int w, unsigned int h )
 {
   IGCP *gcp = (IGCP *)gc;
   IImageP *imagep = (IImageP *)image;

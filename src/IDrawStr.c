@@ -55,13 +55,7 @@ static IError draw_string_rotated_90 (
 
 
 
-IError IDrawString ( image, gc, x, y, text, len )
-IImage image;
-IGC gc;
-int x;
-int y;
-char *text;
-unsigned int len;
+IError IDrawString ( IImage image, IGC gc, int x, int y, char *text, unsigned int len )
 {
   return IDrawStringRotated ( image, gc, x, y, text, len, ITEXT_LEFT_TO_RIGHT );
 }
@@ -69,9 +63,7 @@ unsigned int len;
 
 
 /* calculate values for topshadow and bottomshadow */
-static void make_top_and_bottom_shadow ( incolorp, top, bottom )
-IColorP *incolorp;
-IColor *top, *bottom;
+static void make_top_and_bottom_shadow ( IColorP *incolorp, IColor *top, IColor *bottom )
 {
   unsigned int topr, topg, topb, bottomr, bottomg, bottomb;
 
@@ -92,10 +84,7 @@ IColor *top, *bottom;
 
 
 /* calculate values for shadows  */
-static void make_shadows ( incolorp, shadows, nshadows )
-IColorP *incolorp;
-IColor *shadows;
-int nshadows;
+static void make_shadows ( IColorP *incolorp, IColor *shadows, int nshadows )
 {
   unsigned int rinc, ginc, binc, rstart, gstart, bstart;
   int loop;
@@ -115,14 +104,7 @@ int nshadows;
 }
 
 
-IError IDrawStringRotated ( image, gc, x, y, text, len, direction )
-IImage image;
-IGC gc;
-int x;
-int y;
-char *text;
-unsigned int len;
-ITextDirection direction;
+IError IDrawStringRotated ( IImage image, IGC gc, int x, int y, char *text, unsigned int len, ITextDirection direction )
 {
   IGCP *gcp = (IGCP *)gc;
   IError ret = INoError;
@@ -186,14 +168,7 @@ ITextDirection direction;
 }
 
 
-static IError draw_string_rotated_90 ( image, gc, x, y, text, len, direction )
-IImage image;
-IGC gc;
-int x;
-int y;
-char *text;
-unsigned int len;
-ITextDirection direction;
+static IError draw_string_rotated_90 ( IImage image, IGC gc, int x, int y, char *text, unsigned int len, ITextDirection direction )
 {
   IGCP *gcp = (IGCP *)gc;
   IImageP *imagep = (IImageP *)image;
@@ -333,14 +308,7 @@ ITextDirection direction;
 
 
 
-IError IDrawStringRotatedAngle ( image, gc, x, y, text, len, angle )
-IImage image;
-IGC gc;
-int x;
-int y;
-char *text;
-unsigned int len;
-double angle;
+IError IDrawStringRotatedAngle ( IImage image, IGC gc, int x, int y, char *text, unsigned int len, double angle )
 {
   IGCP *gcp = (IGCP *)gc;
   IImageP *imagep = (IImageP *)image;

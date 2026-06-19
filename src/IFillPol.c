@@ -43,8 +43,7 @@ typedef struct {
 ** Calculate slope.  Keep in mind that our y coordinate is reverse
 ** compared to the standard math coordinate system.
 */
-static void set_line_slope ( line )
-linetype *line;
+static void set_line_slope ( linetype *line )
 {
   if ( abs ( line->x2 - line->x1 ) < 0.01 )
     line->slope = 0;
@@ -58,9 +57,7 @@ linetype *line;
 /*
 ** Does a line include the specified y value?
 */
-static int line_includes_y_value ( line, yval )
-linetype line;
-int yval;
+static int line_includes_y_value ( linetype line, int yval )
 {
   if ( line.y1 <= yval && line.y2 >= yval )
     return 1;
@@ -69,9 +66,7 @@ int yval;
   return 0;
 }
 
-static int get_intersection_x_value ( line, yval )
-linetype line;
-int yval;
+static int get_intersection_x_value ( linetype line, int yval )
 {
   double b, ret;
 
@@ -100,11 +95,7 @@ int yval;
 
 
 
-IError IFillPolygon ( image, gc, points, npoints )
-IImage image;
-IGC gc;
-IPoint *points;
-int npoints;
+IError IFillPolygon ( IImage image, IGC gc, IPoint *points, int npoints )
 {
   IGCP *gcp = (IGCP *)gc;
   IImageP *imagep = (IImageP *)image;
