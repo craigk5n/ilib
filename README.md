@@ -36,71 +36,67 @@ do the following:
 (Normally, you will need to be root to install.)
 
 
-## Extras
-- Giflib: [http://giflib.sourceforge.net/]
-- LibPNG: [http://www.libpng.org/pub/png/libpng.html]
-- libjpeg: [http://libjpeg.sourceforge.net/]
-- Fonts:
-  - X11 BDF fonts: You can find these in a number of places:
-    - [Google search](https://www.google.com/search?q=timR24.bdf)
-    - [Apple](https://opensource.apple.com/source/X11fonts/X11fonts-10.2/font-adobe-100dpi/font-adobe-100dpi-X11R7.0-1.0.0/)
-  - Edit/Import/Create BDF fonts with 3rd party tools.  Use (google)[https://www.google.com/search?q=bdf+font+editor] to find them.
+## Building
 
-## Compiling (Mac):
+Ilib uses [CMake](https://cmake.org/) (3.16 or newer). It builds with no
+external dependencies; GIF, PNG and JPEG support is enabled automatically when
+the corresponding development libraries are found.
 
-Install giflib, libjpeg and libpng if you want to be able to
-read or write images in those formats.
-The easiest way to do this is with brew:
+### Optional dependencies
+
+Install whichever of these you want format support for:
+
+- **Debian/Ubuntu:** `sudo apt install cmake libpng-dev libjpeg-dev libgif-dev`
+- **Fedora/RHEL:** `sudo dnf install cmake libpng-devel libjpeg-turbo-devel giflib-devel`
+- **macOS (Homebrew):** `brew install cmake giflib libjpeg libpng`
+
+### Build, test and install
 
 ```
-brew install giflib
-brew install libjpeg
-brew install libpng
+cmake -B build                  # add -DILIB_BUILD_TESTS=ON to build the tests
+cmake --build build
+ctest --test-dir build          # optional; requires -DILIB_BUILD_TESTS=ON
+sudo cmake --install build      # installs to /usr/local by default
 ```
-Edit Makefile and change DYNAMIC to NO. Then...
+
+CMake prints a summary of which image formats were enabled. A missing optional
+library is simply skipped with a notice rather than failing the build.
+
+### Useful options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `CMAKE_INSTALL_PREFIX` | `/usr/local` | Install location |
+| `BUILD_SHARED_LIBS` | `ON` | Build a shared library (`OFF` for static) |
+| `ILIB_WITH_PNG` / `ILIB_WITH_JPEG` / `ILIB_WITH_GIF` | `ON` | Toggle a codec even if its library is present |
+| `ILIB_BUILD_CLIENTS` / `ILIB_BUILD_EXAMPLES` | `ON` | Build the bundled tools / demos |
+| `ILIB_BUILD_TESTS` | `OFF` | Build the CTest test suite |
+
+### Using Ilib from another project
+
+With CMake:
+
+```cmake
+find_package(Ilib REQUIRED)
+target_link_libraries(your_target PRIVATE Ilib::ilib)
 ```
-make makefiles
-make -i all
+
+Or with pkg-config:
+
 ```
-You'll get errors on not being able to find the shared libraries since
-the makefiles are still somewhat broken for Mac.  But this will build
-the static libIlib.a file.  You can compile some of the sample client
-code using ```make static``` in each example client's directory.
+cc example.c $(pkg-config --cflags --libs ilib) -o example
+```
 
-## Compiling (Linux, Unix):
+The `examples/` and `clients/` directories show how to use the API: `iconvert`
+converts images between formats and `isample` demonstrates drawing text, lines,
+and shapes.
 
-In order to make use of GIF, PNG or JPEG, you need to obtain the
-add-on libraries mentioned above.  (First, check your system.  If
-you have a Linux distribution, it's likely to have some of these
-installed.)
+## Fonts
 
-To do so on ubuntu:
+Ilib draws text using X11 BDF fonts. A few sample fonts ship in `fonts/`; you
+can load any BDF font at runtime, or compile one into your program with the
+`ifont2h` tool. More BDF fonts:
 
-    yum install libjpeg-devel libpng-devel libgif-devel giflib-devel
-
-Edit the definitions of LIBS, DEFINES, INCLUDES to indicate which
-libraries are installed.  Change PREFIX if you don't want to install
-in /usr/local.
-
-Also, edit the values of CC and RANLIB if needed.
-
-Then, just type "make makefiles; make all" to build everthing.
-Both a shared and static library will be buily in the "lib" directory.
-Type "make install" to install everything (defaults to /usr/local).
-
-Look at the programs in "examples" and "clients" as examples how to use
-Ilib.  The example program "iconvert" shows a handy tool for converting
-images between different formats and "isample" shows how to draw text,
-lines, etc.
-
-## Compiling (Win32):
-
-You should be able to use the Cygnus Win32 package to build Ilib using the
-provided makefiles.  I have not tested this since Ilib v1.0.
-
-Ilib-1.1.0 was built on Win95 with MS Visual Developer (Visual
-C++).  GIFLIB was also built with MS Visual Developer.  Sorry, I'm not
-going to try and provide makefiles or project files for this.
-
-## TODO
-- Automake support, obviously...
+- [Search the web](https://www.google.com/search?q=timR24.bdf)
+- [Apple X11 fonts](https://opensource.apple.com/source/X11fonts/X11fonts-10.2/font-adobe-100dpi/font-adobe-100dpi-X11R7.0-1.0.0/)
+- Edit or create BDF fonts with any [BDF font editor](https://www.google.com/search?q=bdf+font+editor).
