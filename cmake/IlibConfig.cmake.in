@@ -1,0 +1,19 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Re-discover the optional image-format dependencies that were enabled when
+# Ilib was built (needed for consumers that link the static library).
+if(@ILIB_PNG_ENABLED@)
+  find_dependency(PNG)
+endif()
+if(@ILIB_JPEG_ENABLED@)
+  find_dependency(JPEG)
+endif()
+if(@ILIB_GIF_ENABLED@)
+  find_dependency(GIF)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/IlibTargets.cmake")
+
+check_required_components(Ilib)
