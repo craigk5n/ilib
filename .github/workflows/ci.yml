@@ -89,3 +89,25 @@ jobs:
           name: coverage-html
           path: coverage-html
           if-no-files-found: ignore
+
+  fuzz:
+    name: fuzz (libFuzzer smoke)
+    runs-on: ubuntu-latest
+    env:
+      CC: clang
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake clang libpng-dev libjpeg-dev libgif-dev
+      - name: Configure
+        run: cmake -B build -DILIB_FUZZ=ON
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Fuzz smoke run
+        # Decoders leak on malformed input (known, separate issue); this run
+        # targets crashes / overflows / UB, so leak detection is disabled.
+        run: |
+          ASAN_OPTIONS=detect_leaks=0 ./build/tests/fuzz_decode \
+            -max_total_time=60 -timeout=10 -rss_limit_mb=4096
