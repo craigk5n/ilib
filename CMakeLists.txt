@@ -149,6 +149,26 @@ message(STATUS "  Install prefix : ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "  Font dir       : ${CMAKE_INSTALL_PREFIX}/${ILIB_FONT_INSTALL_DIR}")
 message(STATUS "")
 
+# --- API documentation (Doxygen) --------------------------------------------
+# `cmake --build build --target docs` regenerates the HTML API reference from
+# the annotated public header. Gated on Doxygen being available so a normal
+# build never requires it. The CI docs workflow publishes the output to Pages.
+find_package(Doxygen QUIET)
+if(DOXYGEN_FOUND)
+  set(DOXYGEN_INPUT_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/src/Ilib.h")
+  set(DOXYGEN_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/docs")
+  configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile" @ONLY)
+  add_custom_target(docs
+    COMMAND "${DOXYGEN_EXECUTABLE}" "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMENT "Generating API documentation with Doxygen"
+    VERBATIM)
+else()
+  message(STATUS "Doxygen not found -- 'docs' target unavailable")
+endif()
+
 # --- Packaging (CPack) ------------------------------------------------------
 # `cpack -G TGZ` (binary) and `cpack --config CPackSourceConfig.cmake` (source)
 # produce release tarballs; the release CI workflow wires this to tag pushes.

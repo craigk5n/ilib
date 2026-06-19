@@ -71,6 +71,33 @@
 #ifndef _ilib_h
 #define _ilib_h
 
+/**
+ * @file Ilib.h
+ * @brief Public API for Ilib, a C raster-image library.
+ *
+ * @mainpage Ilib
+ *
+ * Ilib is a C library for reading, creating, manipulating and saving raster
+ * images. It can draw text using X11 BDF fonts and read/write PPM, PGM, XPM,
+ * XBM, GIF, PNG and JPEG (and read BMP). The drawing API is modeled on a
+ * subset of the X11 graphics functions.
+ *
+ * @section handles Opaque handles
+ * The public types ::IImage, ::IFont, ::IGC and ::IColor are opaque. Construct
+ * them with ICreateImage(), ICreateGC(), ILoadFontFromFile() / IAllocColor(),
+ * and release them with the IFreeImage(), IFreeGC(), IFreeFont() and
+ * IFreeColor() macros.
+ *
+ * @section errors Error handling
+ * Most functions return an ::IError code (::INoError is success);
+ * IErrorString() maps a code to a message. Constructor functions return a
+ * handle or NULL/0 on failure.
+ *
+ * @section start Getting started
+ * See the bundled `examples/` (iconvert, isample) and the project README for
+ * build and usage instructions.
+ */
+
 #include <stdio.h>		/* for FILE * in the read/write prototypes */
 
 #define ILIB_MAJOR_VERSION	1
@@ -79,12 +106,12 @@
 
 #define ILIB_VERSION		"1.1.10"
 #define ILIB_VERSION_DATE	"25 Oct 2004"
-#define ILIB_URL		"http://ilib.sourceforge.net"
+#define ILIB_URL		"https://www.k5n.us/Ilib.php"
 
 
-/*
-** Structures
-*/
+/**
+ * Structures
+ */
 typedef void * IImage;		/* image */
 typedef void * IFont;		/* font */
 typedef void * IGC;		/* graphics context */
@@ -104,20 +131,20 @@ typedef enum {
 } IFileFormat;
 #define INUM_FORMATS	9
 
-/*
-** Line drawing styles.
-** Applies to: IDrawLine, IDrawRectangle
-*/
+/**
+ * Line drawing styles.
+ * Applies to: IDrawLine, IDrawRectangle
+ */
 typedef enum {
   ILINE_SOLID,			/* default */
   ILINE_ON_OFF_DASH,		/* dashes (every 3 pixels) */
   ILINE_DOUBLE_DASH		/* not yet implemented */
 } ILineStyle;
 
-/*
-** Fill styles.
-** Applies to: nothing yet (not implemented)
-*/
+/**
+ * Fill styles.
+ * Applies to: nothing yet (not implemented)
+ */
 typedef enum {
   IFILL_SOLID,			/* default */
   IFILL_TILED,			/* not yet implemented */
@@ -125,10 +152,10 @@ typedef enum {
   IFILL_OPAQUE_STIPPLED		/* not yet implemented */
 } IFillStyle;
 
-/*
-** Text drawing styles.
-** Applies to: IDrawString, IDrawStringRotated
-*/
+/**
+ * Text drawing styles.
+ * Applies to: IDrawString, IDrawStringRotated
+ */
 typedef enum {
   ITEXT_NORMAL,			/* default */
   ITEXT_ETCHED_IN,		/* text appears etched into background */
@@ -136,28 +163,28 @@ typedef enum {
   ITEXT_SHADOWED		/* text has shadow that fades into background */
 } ITextStyle;
 
-/*
-** Text drawing directions
-** Applies to: IDrawStringRotated()
-*/
+/**
+ * Text drawing directions
+ * Applies to: IDrawStringRotated()
+ */
 typedef enum {
   ITEXT_LEFT_TO_RIGHT,		/* default */
   ITEXT_BOTTOM_TO_TOP,
   ITEXT_TOP_TO_BOTTOM
 } ITextDirection;
 
-/*
-** Defines a structure for specifying a point.
-*/
+/**
+ * Defines a structure for specifying a point.
+ */
 typedef struct {
   int x;
   int y;
 } IPoint;
 
 
-/*
-** Options
-*/
+/**
+ * Options
+ */
 #define IOPTION_NONE		0x0000
 
 /* use the following with ICreateImage() */
@@ -168,16 +195,16 @@ typedef struct {
 #define IOPTION_ASCII		0x0001	/* ascii output for pbm/pgm/ppm */
 #define IOPTION_INTERLACED	0x0002	/* interlaced output (GIF) */
 
-/*
-** Default color values for black and white
-*/
+/**
+ * Default color values for black and white
+ */
 #define IBLACK_PIXEL		0
 #define IWHITE_PIXEL		1
 
 
-/*
-** Errors
-*/
+/**
+ * Errors
+ */
 typedef enum {
   INoError = 0,
   IInvalidImage,
@@ -204,24 +231,24 @@ typedef enum {
 } IError;
 
 
-/*
-** Functions
-*/
+/**
+ * Functions
+ */
 
 
-/*
-** Convert an IError value into text suitable for printing in an error
-** message.
-*/
+/**
+ * Convert an IError value into text suitable for printing in an error
+ * message.
+ */
 char *IErrorString (
 #ifndef _NO_PROTO
   IError err			/* error value */
 #endif
 );
 
-/*
-** Create a blank (white) image of a specified width and height.
-*/
+/**
+ * Create a blank (white) image of a specified width and height.
+ */
 IImage ICreateImage (
 #ifndef _NO_PROTO
   unsigned int width,		/* image width */
@@ -230,9 +257,9 @@ IImage ICreateImage (
 #endif
 );
 
-/*
-** Creates a duplicate of the original image.
-*/
+/**
+ * Creates a duplicate of the original image.
+ */
 IError IDuplicateImage (
 #ifndef _NO_PROTO
   IImage image,			/* image to duplicate */
@@ -240,10 +267,10 @@ IError IDuplicateImage (
 #endif
 );
 
-/*
-** Copies all or part of one image onto another image at a specified
-** coordinate.
-*/
+/**
+ * Copies all or part of one image onto another image at a specified
+ * coordinate.
+ */
 IError ICopyImage (
 #ifndef _NO_PROTO
   IImage source,		/* source image */
@@ -258,9 +285,9 @@ IError ICopyImage (
 #endif
 );
 
-/*
-** Copies all of an image to another image by scaling it to fit.
-*/
+/**
+ * Copies all of an image to another image by scaling it to fit.
+ */
 IError ICopyImageScaled (
 #ifndef _NO_PROTO
   IImage source,		/* source image */
@@ -281,36 +308,36 @@ IError ICopyImageScaled (
 #define IFreeImage(i) \
 	_IFreeImage(i); (i) = NULL;
 
-/*
-** Frees the memory associated with an image that will not be used again.
-*/
+/**
+ * Frees the memory associated with an image that will not be used again.
+ */
 IError _IFreeImage (
 #ifndef _NO_PROTO
   IImage image			/* pointer to image */
 #endif
 );
 
-/*
-** Returns the height of the image.
-*/
+/**
+ * Returns the height of the image.
+ */
 unsigned int IImageHeight (
 #ifndef _NO_PROTO
   IImage image			/* pointer to image */
 #endif
 );
 
-/*
-** Returns the width of the image.
-*/
+/**
+ * Returns the width of the image.
+ */
 unsigned int IImageWidth (
 #ifndef _NO_PROTO
   IImage image			/* pointer to image */
 #endif
 );
 
-/*
-** Set the comment.
-*/
+/**
+ * Set the comment.
+ */
 IError ISetComment (
 #ifndef _NO_PROTO
   IImage image,			/* pointer to image */
@@ -318,9 +345,9 @@ IError ISetComment (
 #endif
 );
 
-/*
-** Get the comment (if there is one).
-*/
+/**
+ * Get the comment (if there is one).
+ */
 IError IGetComment (
 #ifndef _NO_PROTO
   IImage image,			/* pointer to image */
@@ -328,9 +355,9 @@ IError IGetComment (
 #endif
 );
 
-/*
-** Determine the type of image by the file extension.
-*/
+/**
+ * Determine the type of image by the file extension.
+ */
 IError IFileType (
 #ifndef _NO_PROTO
   char *file,			/* filename */
@@ -338,17 +365,17 @@ IError IFileType (
 #endif
 );
 
-/*
-** Creates an image from an image file.
-** Currently can read raw PPM (IFORMAT_PPM), XPM (IFORMAT_XPM),
-** GIF (IFORMAT_GIF), PNG (IFORMAT_PNG), and JPEG (IFORMAT_JPEG) files.
-** The file is left open for the caller to close.
-** (Note: you should set the file to binary mode on Win32 platforms
-** by using something like: <BR>
-** <TT>&nbsp;&nbsp;
-** file = fopen ( filename, "rb" );
-** </TT>
-*/
+/**
+ * Creates an image from an image file.
+ * Currently can read raw PPM (IFORMAT_PPM), XPM (IFORMAT_XPM),
+ * GIF (IFORMAT_GIF), PNG (IFORMAT_PNG), and JPEG (IFORMAT_JPEG) files.
+ * The file is left open for the caller to close.
+ * (Note: you should set the file to binary mode on Win32 platforms
+ * by using something like: <BR>
+ * <TT>&nbsp;&nbsp;
+ * file = fopen ( filename, "rb" );
+ * </TT>
+ */
 IError IReadImageFile (
 #ifndef _NO_PROTO
   FILE *fp,			/* file pointer */
@@ -358,13 +385,13 @@ IError IReadImageFile (
 #endif
 );
 
-/*
-** Writes an image to a file.
-** Currently supports writing PPM (IFORMAT_PPM), XPM (IFORMAT_XPM),
-** GIF (IFORMAT_GIF), PNG (IFORMAT_PNG) and JPEG (IFORMAT_JPEG) formats.
-** The file is left open for the caller to close.
-** (Note: you should set the file to binary mode on Win32 platforms.)
-*/
+/**
+ * Writes an image to a file.
+ * Currently supports writing PPM (IFORMAT_PPM), XPM (IFORMAT_XPM),
+ * GIF (IFORMAT_GIF), PNG (IFORMAT_PNG) and JPEG (IFORMAT_JPEG) formats.
+ * The file is left open for the caller to close.
+ * (Note: you should set the file to binary mode on Win32 platforms.)
+ */
 IError IWriteImageFile (
 #ifndef _NO_PROTO
   FILE *fp,			/* file pointer */
@@ -374,32 +401,32 @@ IError IWriteImageFile (
 #endif
 );
 
-/*
-** Creates a graphic context for drawing on an image.
-*/
+/**
+ * Creates a graphic context for drawing on an image.
+ */
 IGC ICreateGC (
 );
 
 #define IFreeGC(g) \
 	_IFreeGC(g); (g) = NULL;
 
-/*
-** Frees a graphic context no longer in use.
-*/
+/**
+ * Frees a graphic context no longer in use.
+ */
 IError _IFreeGC (
 #ifndef _NO_PROTO
   IGC gc			/* graphics context */
 #endif
 );
 
-/*
-** Load a font from file.  Currently, only BDF font files can be
-** used.  BDF font files can be found at:
-** <A HREF="ftp://ftp.x.org/pub/R6.1/xc/fonts/bdf/75dpi/">
-** ftp://ftp.x.org/pub/R6.1/xc/fonts/bdf/75dpi/</A>.
-** (BDF fonts are part of the X11 Window System developed at MIT
-** and used on almost all UNIX workstations.)
-*/
+/**
+ * Load a font from file.  Currently, only BDF font files can be
+ * used.  BDF font files can be found at:
+ * <A HREF="ftp://ftp.x.org/pub/R6.1/xc/fonts/bdf/75dpi/">
+ * ftp://ftp.x.org/pub/R6.1/xc/fonts/bdf/75dpi/</A>.
+ * (BDF fonts are part of the X11 Window System developed at MIT
+ * and used on almost all UNIX workstations.)
+ */
 IError ILoadFontFromFile (
 #ifndef _NO_PROTO
   char *name,			/* name to use for reference (filename) */
@@ -408,13 +435,13 @@ IError ILoadFontFromFile (
 #endif
 );
 
-/*
-** Loads a font from data passed in.  This is identical to
-** <A HREF="#ILoadFontFromFile">ILoadFontFromFile</A> except the
-** font data is passed in as an argument rather than a file.
-** This allows the font to be embedded in the application rather
-** than distributed as a separate file.
-*/
+/**
+ * Loads a font from data passed in.  This is identical to
+ * <A HREF="#ILoadFontFromFile">ILoadFontFromFile</A> except the
+ * font data is passed in as an argument rather than a file.
+ * This allows the font to be embedded in the application rather
+ * than distributed as a separate file.
+ */
 IError ILoadFontFromData (
 #ifndef _NO_PROTO
   char *name,			/* name to use for reference (filename) */
@@ -428,20 +455,20 @@ IError ILoadFontFromData (
 
 #define IFreeFont(f)		_IFreeFont(f); (f) = NULL;
 
-/*
-** Frees a font no longer in use.
-*/
+/**
+ * Frees a font no longer in use.
+ */
 IError _IFreeFont (
 #ifndef _NO_PROTO
   IFont font			/* font to free */
 #endif
 );
 
-/*
-** Gets the pixel height of the font.
-** (See <A HREF="#ITextHeight">ITextHeight</A> for calculating the
-** height of a multiline text.)
-*/
+/**
+ * Gets the pixel height of the font.
+ * (See <A HREF="#ITextHeight">ITextHeight</A> for calculating the
+ * height of a multiline text.)
+ */
 IError IFontSize (
 #ifndef _NO_PROTO
   IFont font,			/* font */
@@ -449,10 +476,10 @@ IError IFontSize (
 #endif
 );
 
-/*
-** Determines the length (in pixels) of the given text for
-** the specified font.
-*/
+/**
+ * Determines the length (in pixels) of the given text for
+ * the specified font.
+ */
 IError ITextWidth (
 #ifndef _NO_PROTO
   IGC gc,			/* graphics context */
@@ -464,10 +491,10 @@ IError ITextWidth (
 );
 
 
-/*
-** Determines the height (in pixels) of the given text for
-** the specified font. This is useful for multiline text.
-*/
+/**
+ * Determines the height (in pixels) of the given text for
+ * the specified font. This is useful for multiline text.
+ */
 IError ITextHeight (
 #ifndef _NO_PROTO
   IGC gc,			/* graphics context */
@@ -478,10 +505,10 @@ IError ITextHeight (
 #endif
 );
 
-/*
-** Determines the width & height (in pixels) of the given text for
-** the specified font. (useful for multiline text)
-*/
+/**
+ * Determines the width & height (in pixels) of the given text for
+ * the specified font. (useful for multiline text)
+ */
 IError ITextDimensions (
 #ifndef _NO_PROTO
   IGC gc,			/* graphics context */
@@ -494,11 +521,11 @@ IError ITextDimensions (
 );
 
 
-/*
-** Determines the x-y coordinates of the starting, stopping and middle
-** point of an arc.  Any of the pointers may be NULL if you're
-** not interested in obtaining the value.
-*/
+/**
+ * Determines the x-y coordinates of the starting, stopping and middle
+ * point of an arc.  Any of the pointers may be NULL if you're
+ * not interested in obtaining the value.
+ */
 IError IArcProperties (
 #ifndef _NO_PROTO
   IGC gc,			/* graphics context */
@@ -518,10 +545,10 @@ IError IArcProperties (
 );
 
 
-/*
-** Allocates a color to be used for drawing.
-** (See <A HREF="#ISetForeground">ISetForeground</A>).
-*/
+/**
+ * Allocates a color to be used for drawing.
+ * (See <A HREF="#ISetForeground">ISetForeground</A>).
+ */
 IColor IAllocColor (
 #ifndef _NO_PROTO
   unsigned int red,		/* red value (0-255) */
@@ -530,10 +557,10 @@ IColor IAllocColor (
 #endif
 );
 
-/*
-** Allocates a color by name (i.e. "blue") to be used for drawing.
-** (See <A HREF="#ISetForeground">ISetForeground</A>).
-*/
+/**
+ * Allocates a color by name (i.e. "blue") to be used for drawing.
+ * (See <A HREF="#ISetForeground">ISetForeground</A>).
+ */
 IError IAllocNamedColor (
 #ifndef _NO_PROTO
   char *colorname,		/* color name ("red, "orange", etc.) */
@@ -543,20 +570,20 @@ IError IAllocNamedColor (
 
 #define IFreeColor(c)		_IFreeColor(c); (c) = 0;
 
-/*
-** Frees a color no longer in use.
-*/
+/**
+ * Frees a color no longer in use.
+ */
 IError _IFreeColor (
 #ifndef _NO_PROTO
   IColor color			/* color */
 #endif
 );
 
-/*
-** Set the transparent color of the image.
-** This is only relevant to images that are written to either
-** GIF or XPM formats.
-*/
+/**
+ * Set the transparent color of the image.
+ * This is only relevant to images that are written to either
+ * GIF or XPM formats.
+ */
 IError ISetTransparent (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -564,11 +591,11 @@ IError ISetTransparent (
 #endif
 );
 
-/*
-** Get the transparent color of the image.
-** If there is no transparent image set, then INoTransparentColor
-** is returned.
-*/
+/**
+ * Get the transparent color of the image.
+ * If there is no transparent image set, then INoTransparentColor
+ * is returned.
+ */
 IError IGetTransparent (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -577,12 +604,12 @@ IError IGetTransparent (
 );
 
 
-/*
-** Set the foreground color of a graphics context.
-** This will set the drawing color for drawing functions
-** (<A HREF="#IDrawLine">IDrawLine</A>,
-** <A HREF="#IFillRectangle">IFillRectangle</A>, etc.)
-*/
+/**
+ * Set the foreground color of a graphics context.
+ * This will set the drawing color for drawing functions
+ * (<A HREF="#IDrawLine">IDrawLine</A>,
+ * <A HREF="#IFillRectangle">IFillRectangle</A>, etc.)
+ */
 IError ISetForeground (
 #ifndef _NO_PROTO
   IGC gc,			/* graphics context */
@@ -590,10 +617,10 @@ IError ISetForeground (
 #endif
 );
 
-/*
-** Set the background color of a graphics context.
-** This will affect colors when using text styles.
-*/
+/**
+ * Set the background color of a graphics context.
+ * This will affect colors when using text styles.
+ */
 IError ISetBackground (
 #ifndef _NO_PROTO
   IGC gc,			/* graphics context */
@@ -601,11 +628,11 @@ IError ISetBackground (
 #endif
 );
 
-/*
-** Sets the current drawing font for a graphics context.
-** Subsequent calls to <A HREF="#IDrawString">IDrawString</A>
-** will use the specified font.
-*/
+/**
+ * Sets the current drawing font for a graphics context.
+ * Subsequent calls to <A HREF="#IDrawString">IDrawString</A>
+ * will use the specified font.
+ */
 IError ISetFont (
 #ifndef _NO_PROTO
   IGC gc,			/* graphics context */
@@ -613,11 +640,11 @@ IError ISetFont (
 #endif
 );
 
-/*
-** Sets the line drawing with for a graphics context.
-** (This applies to <A HREF="#IDrawLine">IDrawLine</A> and
-** <A HREF="#IDrawRectangle">IDrawRectangle</A>.)
-*/
+/**
+ * Sets the line drawing with for a graphics context.
+ * (This applies to <A HREF="#IDrawLine">IDrawLine</A> and
+ * <A HREF="#IDrawRectangle">IDrawRectangle</A>.)
+ */
 IError ISetLineWidth (
 #ifndef _NO_PROTO
   IGC gc,			/* graphics context */
@@ -625,13 +652,13 @@ IError ISetLineWidth (
 #endif
 );
 
-/*
-** Sets the current line drawing style for a graphics context.
-** Currently support ILINE_SOLID (default)
-** and ILINE_ON_OFF_DASH.  (This applies to
-** <A HREF="#IDrawLine">IDrawLine</A> and
-** <A HREF="#IDrawRectangle">IDrawRectangle</A>.)
-*/
+/**
+ * Sets the current line drawing style for a graphics context.
+ * Currently support ILINE_SOLID (default)
+ * and ILINE_ON_OFF_DASH.  (This applies to
+ * <A HREF="#IDrawLine">IDrawLine</A> and
+ * <A HREF="#IDrawRectangle">IDrawRectangle</A>.)
+ */
 IError ISetLineStyle (
 #ifndef _NO_PROTO
   IGC gc,			/* graphics context */
@@ -639,21 +666,21 @@ IError ISetLineStyle (
 #endif
 );
 
-/*
-** Sets the curret text drawing style for a graphics context.
-** Supported styles are:<UL>
-** <LI> ITEXT_NORMAL - default (no effects)
-** <LI> ITEXT_ETCHED_IN - draw text etched into background (does not
-**      use foreground color, just background)
-** <LI> ITEXT_ETCHED_OUT - draw text etched out of background (does not
-**      use foreground color, just background)
-** <LI> ITEXT_SHADOWED - draw text with a dark shadow to the lower left
-**      of the text.
-** </UL>
-** (This applies to
-** <A HREF="#IDrawString">IDrawString</A> and
-** <A HREF="#IDrawStringRotated">IDrawStringRotated</A>.)
-*/
+/**
+ * Sets the curret text drawing style for a graphics context.
+ * Supported styles are:<UL>
+ * <LI> ITEXT_NORMAL - default (no effects)
+ * <LI> ITEXT_ETCHED_IN - draw text etched into background (does not
+ *      use foreground color, just background)
+ * <LI> ITEXT_ETCHED_OUT - draw text etched out of background (does not
+ *      use foreground color, just background)
+ * <LI> ITEXT_SHADOWED - draw text with a dark shadow to the lower left
+ *      of the text.
+ * </UL>
+ * (This applies to
+ * <A HREF="#IDrawString">IDrawString</A> and
+ * <A HREF="#IDrawStringRotated">IDrawStringRotated</A>.)
+ */
 IError ISetTextStyle (
 #ifndef _NO_PROTO
   IGC gc,			/* graphics context */
@@ -662,12 +689,12 @@ IError ISetTextStyle (
 );
 
 
-/*
-** Draws text onto the image at the specified coordinate.
-** See the font definition file to determine which characters are supported.
-** <BR>Note: the font is set with
-** <A HREF="#ISetFont">ISetFont</A>.
-*/
+/**
+ * Draws text onto the image at the specified coordinate.
+ * See the font definition file to determine which characters are supported.
+ * <BR>Note: the font is set with
+ * <A HREF="#ISetFont">ISetFont</A>.
+ */
 IError IDrawString (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -679,18 +706,18 @@ IError IDrawString (
 #endif
 );
 
-/*
-** Draws text onto the image at the specified coordinate using one
-** of the angles: ITEXT_LEFT_TO_RIGHT, ITEXT_TOP_TO_BOTTOM, or
-** ITEXT_BOTTOM_TO_TOP.
-** See the font definition file to determine which characters are supported.
-** <BR>Note: the font is set with
-** <A HREF="#ISetFont">ISetFont</A>.
-** The x-y coordinates always specify the starting point to draw from
-** (the lower left spot of the first character).
-** For example, for ITEXT_TOP_TO_BOTTOM the x-y would represent the
-** upper left area of the box where text will be drawn.
-*/
+/**
+ * Draws text onto the image at the specified coordinate using one
+ * of the angles: ITEXT_LEFT_TO_RIGHT, ITEXT_TOP_TO_BOTTOM, or
+ * ITEXT_BOTTOM_TO_TOP.
+ * See the font definition file to determine which characters are supported.
+ * <BR>Note: the font is set with
+ * <A HREF="#ISetFont">ISetFont</A>.
+ * The x-y coordinates always specify the starting point to draw from
+ * (the lower left spot of the first character).
+ * For example, for ITEXT_TOP_TO_BOTTOM the x-y would represent the
+ * upper left area of the box where text will be drawn.
+ */
 IError IDrawStringRotated (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -703,18 +730,18 @@ IError IDrawStringRotated (
 #endif
 );
 
-/*
-** Draws text onto the image at the specified coordinate using one
-** the specified angle.  This is slightly slower than
-** <A HREF="#IDrawStringRotated">IDrawStringRotated</A>, so only
-** use this function if you're drawing something other than
-** 90, 180, or 270 degrees.
-** See the font definition file to determine which characters are supported.
-** <BR>Note: the font is set with
-** <A HREF="#ISetFont">ISetFont</A>.
-** The x-y coordinates always specify the starting point to draw from
-** (the lower left spot of the first character).
-*/
+/**
+ * Draws text onto the image at the specified coordinate using one
+ * the specified angle.  This is slightly slower than
+ * <A HREF="#IDrawStringRotated">IDrawStringRotated</A>, so only
+ * use this function if you're drawing something other than
+ * 90, 180, or 270 degrees.
+ * See the font definition file to determine which characters are supported.
+ * <BR>Note: the font is set with
+ * <A HREF="#ISetFont">ISetFont</A>.
+ * The x-y coordinates always specify the starting point to draw from
+ * (the lower left spot of the first character).
+ */
 IError IDrawStringRotatedAngle (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -728,9 +755,9 @@ IError IDrawStringRotatedAngle (
 );
 
 
-/*
-** Draws a single point on the image.
-*/
+/**
+ * Draws a single point on the image.
+ */
 IError IDrawPoint (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -740,11 +767,11 @@ IError IDrawPoint (
 #endif
 );
 
-/*
-** Draws a line onto the image using the graphics context's
-** current line style (
-** see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
-*/
+/**
+ * Draws a line onto the image using the graphics context's
+ * current line style (
+ * see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
+ */
 IError IDrawLine (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -756,11 +783,11 @@ IError IDrawLine (
 #endif
 );
 
-/*
-** Draws a polygon onto the image using the graphics context's
-** current line style (
-** see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
-*/
+/**
+ * Draws a polygon onto the image using the graphics context's
+ * current line style (
+ * see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
+ */
 IError IDrawPolygon (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -770,11 +797,11 @@ IError IDrawPolygon (
 #endif
 );
 
-/*
-** Draws a rectangle onto the image of the specified width and
-** height using the graphic context's current line stlye (
-** see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
-*/
+/**
+ * Draws a rectangle onto the image of the specified width and
+ * height using the graphic context's current line stlye (
+ * see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
+ */
 IError IDrawRectangle (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -786,11 +813,11 @@ IError IDrawRectangle (
 #endif
 );
 
-/*
-** Draws a circle onto the image using the graphic context's
-** current line style (
-** see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
-*/
+/**
+ * Draws a circle onto the image using the graphic context's
+ * current line style (
+ * see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
+ */
 IError IDrawCircle (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -801,13 +828,13 @@ IError IDrawCircle (
 #endif
 );
 
-/*
-** Draws an arc onto the image using the graphic context's
-** current line style (
-** see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
-** In order to draw an arc that passes over 0 degrees, the first angle (a1)
-** should be negative and the second angle (a2) should be positive.
-*/
+/**
+ * Draws an arc onto the image using the graphic context's
+ * current line style (
+ * see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
+ * In order to draw an arc that passes over 0 degrees, the first angle (a1)
+ * should be negative and the second angle (a2) should be positive.
+ */
 IError IDrawArc (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -821,15 +848,15 @@ IError IDrawArc (
 #endif
 );
 
-/*
-** Draws an arc and connects the arc to the center point 
-** using the graphic context's
-** current line style (
-** see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
-** This function is intended to be used drawing pie charts.
-** In order to draw an arc that passes over 0 degrees, the first angle (a1)
-** should be negative and the second angle (a2) should be positive.
-*/
+/**
+ * Draws an arc and connects the arc to the center point
+ * using the graphic context's
+ * current line style (
+ * see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
+ * This function is intended to be used drawing pie charts.
+ * In order to draw an arc that passes over 0 degrees, the first angle (a1)
+ * should be negative and the second angle (a2) should be positive.
+ */
 IError IDrawEnclosedArc (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -843,11 +870,11 @@ IError IDrawEnclosedArc (
 #endif
 );
 
-/*
-** Draws an ellipse onto the image using the graphic context's
-** current line style (
-** see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
-*/
+/**
+ * Draws an ellipse onto the image using the graphic context's
+ * current line style (
+ * see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
+ */
 IError IDrawEllipse (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -859,11 +886,11 @@ IError IDrawEllipse (
 #endif
 );
 
-/*
-** Draws a circle onto the image using the graphic context's
-** current line style (
-** see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
-*/
+/**
+ * Draws a circle onto the image using the graphic context's
+ * current line style (
+ * see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
+ */
 IError IDrawCircle (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -875,10 +902,10 @@ IError IDrawCircle (
 );
 
 
-/*
-** Fills a rectangle on the image using the graphics context's
-** foreground color (see <A HREF="#ISetForeground">ISetForeground</A>).
-*/
+/**
+ * Fills a rectangle on the image using the graphics context's
+ * foreground color (see <A HREF="#ISetForeground">ISetForeground</A>).
+ */
 IError IFillRectangle (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -890,10 +917,10 @@ IError IFillRectangle (
 #endif
 );
 
-/*
-** Fill a polygon.  Only convex, non-intersecting polygons are supported.
-** Invalid polygons will return an error.
-*/
+/**
+ * Fill a polygon.  Only convex, non-intersecting polygons are supported.
+ * Invalid polygons will return an error.
+ */
 IError IFillPolygon (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -903,11 +930,11 @@ IError IFillPolygon (
 #endif
 );
 
-/*
-** Fill an arc.
-** In order to draw an arc that passes over 0 degrees, the first angle (a1)
-** should be negative and the second angle (a2) should be positive.
-*/
+/**
+ * Fill an arc.
+ * In order to draw an arc that passes over 0 degrees, the first angle (a1)
+ * should be negative and the second angle (a2) should be positive.
+ */
 IError IFillArc (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -921,9 +948,9 @@ IError IFillArc (
 #endif
 );
 
-/*
-** Fill an ellipse.
-*/
+/**
+ * Fill an ellipse.
+ */
 IError IFillEllipse (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -935,9 +962,9 @@ IError IFillEllipse (
 #endif
 );
 
-/*
-** Fill a circle.
-*/
+/**
+ * Fill a circle.
+ */
 IError IFillCircle (
 #ifndef _NO_PROTO
   IImage image,			/* image */
@@ -948,9 +975,9 @@ IError IFillCircle (
 #endif
 );
 
-/*
-** Flood fill an area.
-*/
+/**
+ * Flood fill an area.
+ */
 IError IFloodFill (
 #ifndef _NO_PROTO
   IImage image,			/* image */

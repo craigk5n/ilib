@@ -15,10 +15,19 @@ Note: This code was originally developed in the late 1990s in "classic"
 builds warning-clean under `-Wall -Wextra`.
 
 ## API Documentation
-The API documentation is generated from the source code and can be
-found in Ilib.html.  You can view it online
-[here](http://www.k5n.us/Ilib.php?topic=API).
-Note that the API is modeled after a subset of the
+The API reference is generated from the annotated public header (`src/Ilib.h`)
+with [Doxygen](https://www.doxygen.nl/) and published to GitHub Pages:
+
+- **Online:** https://craigk5n.github.io/ilib/
+
+Build it locally (requires Doxygen) with:
+
+```bash
+cmake -B build
+cmake --build build --target docs    # output in build/docs/html/
+```
+
+Note that the drawing API is modeled after a subset of the
 [X11 API drawing functions](https://www.x.org/releases/X11R7.6/doc/libX11/specs/libX11/libX11.html#graphics_functions).
 
 
