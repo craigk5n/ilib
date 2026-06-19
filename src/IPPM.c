@@ -82,7 +82,7 @@ IError _IWritePPM ( FILE *fp, IImageP *image, IOptions options )
 IError _IReadPPM ( FILE *fp, IOptions options, IImageP **image_return )
 {
   char data[1024];
-  IImageP *image;
+  IImageP *image = NULL;
   int w, h;
   int i;
   unsigned int temp;
@@ -93,15 +93,15 @@ IError _IReadPPM ( FILE *fp, IOptions options, IImageP **image_return )
   int greyscale = 0;
 
   if ( fgets ( data, 1024, fp ) == NULL )
-    return ( IFileInvalid );
+    goto fail;
   if ( strncmp ( data, "P5", 2 ) == 0 ) {
     greyscale = 1;
     options |= IOPTION_GREYSCALE;
   } else if ( strncmp ( data, "P6", 2 ) )
-    return ( IFileInvalid );
+    goto fail;
 
   if ( fgets ( data, 1024, fp ) == NULL )
-    return ( IFileInvalid );
+    goto fail;
   while ( data[0] == '#' ) {
     if ( comments == NULL ) {
       for ( p = data + 1; *p != ' ' && *p != '\0'; p++) ;
@@ -111,33 +111,35 @@ IError _IReadPPM ( FILE *fp, IOptions options, IImageP **image_return )
       }
     }
     if ( fgets ( data, 1024, fp ) == NULL )
-      return ( IFileInvalid );
+      goto fail;
   }
   /* should now contain width and height */
   if ( sscanf ( data, "%d %d", &w, &h ) != 2 )
-    return ( IFileInvalid );
+    goto fail;
   if ( fgets ( data, 1024, fp ) == NULL )
-    return ( IFileInvalid );
+    goto fail;
   while ( data[0] == '#' )
     if ( fgets ( data, 1024, fp ) == NULL )
-      return ( IFileInvalid );
+      goto fail;
   /* should now contain maxcolor value */
   if ( sscanf ( data, "%d", &maxcolors ) != 1 )
-    return ( IFileInvalid );
+    goto fail;
 
   /* Validate header values from the (untrusted) file: positive dimensions,
      a usable maxcolors (it divides below), and no integer overflow in the
      w*h*3 size math used for allocation and the pixel loops. */
   if ( w <= 0 || h <= 0 || maxcolors <= 0 )
-    return ( IFileInvalid );
+    goto fail;
   if ( w > INT_MAX / 3 / h )
-    return ( IFileInvalid );
+    goto fail;
 
   image = (IImageP *) ICreateImage ( w, h, options );
   if ( ! image )
-    return ( IFileInvalid );
-  if ( comments )
+    goto fail;
+  if ( comments ) {
     image->comments = comments;
+    comments = NULL;   /* ownership transferred to image */
+  }
   else {
     image->comments = (char *) malloc ( strlen ( IDEFAULT_COMMENT ) + 1 );
     strcpy ( image->comments, IDEFAULT_COMMENT );
@@ -145,11 +147,11 @@ IError _IReadPPM ( FILE *fp, IOptions options, IImageP **image_return )
 
   if ( greyscale ) {
     if ( fread ( image->data, 1, w * h, fp ) != (size_t) ( w * h ) )
-      return ( IFileInvalid );
+      goto fail;
   }
   else {
     if ( fread ( image->data, 1, w * h * 3, fp ) != (size_t) ( w * h * 3 ) )
-      return ( IFileInvalid );
+      goto fail;
   }
 
   /* Normalize to 255 if not already. The buffer is w*h bytes for greyscale
@@ -168,5 +170,14 @@ IError _IReadPPM ( FILE *fp, IOptions options, IImageP **image_return )
   *image_return = image;
 
   return ( INoError );
+
+fail:
+  /* free anything allocated before the failure (image owns comments once
+     transferred, so comments is NULL by then) */
+  if ( comments )
+    free ( comments );
+  if ( image )
+    _IFreeImage ( image );
+  return ( IFileInvalid );
 }
 
