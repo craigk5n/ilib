@@ -269,15 +269,15 @@ IError _IFontBDFGetSize (
 #define _ISetPoint(i,g,x,y) \
 	{ \
 	  unsigned char *ptrX;\
-	  if ( (x) >= 0 && (x) < i->width && (y) >= 0 && (y) < i->height ) {\
-            if ( i->greyscale ) {\
-	      ptrX = i->data + ( (y) * i->width ) + (x); \
-	      *ptrX = g->foreground->red; \
+	  if ( (x) >= 0 && (x) < (i)->width && (y) >= 0 && (y) < (i)->height ) {\
+            if ( (i)->greyscale ) {\
+	      ptrX = (i)->data + ( (y) * (i)->width ) + (x); \
+	      *ptrX = (g)->foreground->red; \
             } else {\
-	      ptrX = i->data + ( (y) * i->width * 3 ) + ( (x) * 3 ); \
-	      *ptrX = g->foreground->red; \
-	      *(ptrX + 1) = g->foreground->green; \
-	      *(ptrX + 2) = g->foreground->blue; \
+	      ptrX = (i)->data + ( (y) * (i)->width * 3 ) + ( (x) * 3 ); \
+	      *ptrX = (g)->foreground->red; \
+	      *(ptrX + 1) = (g)->foreground->green; \
+	      *(ptrX + 2) = (g)->foreground->blue; \
             }\
 	  }\
 	}
@@ -285,15 +285,15 @@ IError _IFontBDFGetSize (
 #define _ISetPointRGB(i,x,y,r,g,b) \
 	{ \
 	  unsigned char *ptrX;\
-	  if ( (x) >= 0 && (x) < i->width && (y) >= 0 && (y) < i->height ) {\
-            if ( i->greyscale ) {\
-	      ptrX = i->data + ( (y) * i->width ) + (x); \
-	      *ptrX = r; \
+	  if ( (x) >= 0 && (x) < (i)->width && (y) >= 0 && (y) < (i)->height ) {\
+            if ( (i)->greyscale ) {\
+	      ptrX = (i)->data + ( (y) * (i)->width ) + (x); \
+	      *ptrX = (r); \
             } else {\
-	      ptrX = i->data + ( (y) * i->width * 3 ) + ( (x) * 3 ); \
-	      *ptrX = r; \
-	      *(ptrX + 1) = g; \
-	      *(ptrX + 2) = b; \
+	      ptrX = (i)->data + ( (y) * (i)->width * 3 ) + ( (x) * 3 ); \
+	      *ptrX = (r); \
+	      *(ptrX + 1) = (g); \
+	      *(ptrX + 2) = (b); \
             }\
 	  }\
 	}
@@ -301,21 +301,21 @@ IError _IFontBDFGetSize (
 #define _IGetPointColor(i,x,y,c) \
 	{ \
 	  unsigned char *ptrX;\
-	  if ( (x) >= 0 && (x) < i->width && (y) >= 0 && (y) < i->height ) {\
-            if ( i->greyscale ) {\
-	      ptrX = i->data + ( (y) * i->width ) + (x); \
-	      c.red = c.green = c.blue = *ptrX; \
+	  if ( (x) >= 0 && (x) < (i)->width && (y) >= 0 && (y) < (i)->height ) {\
+            if ( (i)->greyscale ) {\
+	      ptrX = (i)->data + ( (y) * (i)->width ) + (x); \
+	      (c).red = (c).green = (c).blue = *ptrX; \
             } else {\
-	      ptrX = i->data + ( (y) * i->width * 3 ) + ( (x) * 3 ); \
-	      c.red = *ptrX; \
-	      c.green = *(ptrX + 1); \
-	      c.blue = *(ptrX + 2); \
+	      ptrX = (i)->data + ( (y) * (i)->width * 3 ) + ( (x) * 3 ); \
+	      (c).red = *ptrX; \
+	      (c).green = *(ptrX + 1); \
+	      (c).blue = *(ptrX + 2); \
             }\
 	  }\
 	}
 
 #define _IColorsMatch(c1,c2) \
-	( c1.red == c2.red && c1.green == c2.green && c1.blue == c2.blue )
+	( (c1).red == (c2).red && (c1).green == (c2).green && (c1).blue == (c2).blue )
 
 #endif /* _ilibp_h */
 

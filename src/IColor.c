@@ -73,14 +73,23 @@ IColor IAllocColor ( unsigned int red, unsigned int green, unsigned int blue )
     return ( 0 ); /* black */
   }
   else {
+    IColorP **new_colors;
     color = (IColorP *) malloc ( sizeof ( IColorP ) );
+    if ( ! color )
+      return ( 0 ); /* black */
     color->magic = IMAGIC_COLOR;
     color->red = red;
     color->green = green;
     color->blue = blue;
     color->value = num_colors++;
-    colors  = (IColorP **) realloc ( (void *)colors,
+    new_colors = (IColorP **) realloc ( (void *)colors,
       ( num_colors * sizeof ( IColorP * ) ) );
+    if ( ! new_colors ) {
+      free ( color );
+      num_colors--;
+      return ( 0 ); /* black */
+    }
+    colors = new_colors;
     colors[color->value] = color;
     return ( color->value );
   }

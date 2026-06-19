@@ -29,8 +29,8 @@ IError IFloodFill ( IImage image, IGC gc, int x, int y )
   IImageP *imagep = (IImageP *)image;
   int fillL, fillR, i;
   int in_line = 1;
-  IColorP color;
-  IColorP origColor; /* color we are replacing with flood fill */
+  IColorP color = { 0 };
+  IColorP origColor = { 0 }; /* color we are replacing with flood fill */
 
   if ( ! gcp )
     return ( IInvalidGC );

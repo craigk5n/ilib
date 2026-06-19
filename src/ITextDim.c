@@ -85,9 +85,11 @@ IError ITextDimensions ( IGC gc, IFont font, char *text, unsigned int len, unsig
     else if ( *ptr == '\t' ) {
       ret = IFontBDFGetChar ( fontp->name, ch, &bitdata, &width, &height,
         &actual_width, &size, &xoffset, &yoffset );
-      charx += ( 8 - ( char_num % 8 ) ) * actual_width;
-      if ( charx > ret_width )
-        ret_width = charx;
+      if ( ! ret ) {
+        charx += ( 8 - ( char_num % 8 ) ) * actual_width;
+        if ( charx > ret_width )
+          ret_width = charx;
+      }
       continue;
     }
     else if ( *ptr != '\033' ) {

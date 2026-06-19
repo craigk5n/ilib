@@ -95,6 +95,11 @@ char_translation translation[] = {
 
 static char *trans_table[256];
 
+/* Upper bound on a single BDF glyph's width/height (pixels). Real glyphs are
+   far smaller; this guards the data-buffer allocation against overflow from
+   bogus BBX values in an untrusted font file. */
+#define IFONT_MAX_GLYPH_DIM 4096
+
 typedef struct {
   char *name;			/* translated name ("A", "B", "\033agrave;") */
   unsigned int *data;		/* character definition */
@@ -130,7 +135,7 @@ IError IFontBDFReadFile ( char *name, char *path )
   FILE *fp;
   char text[256];
   IError ret;
-  char **lines;
+  char **lines, **tmp;
   int num_lines = 0, loop;
 
   if ( stat ( path, &buf ) == 0 ) {
@@ -138,8 +143,20 @@ IError IFontBDFReadFile ( char *name, char *path )
     if ( !fp )
       return ( INoSuchFile );
     lines = malloc ( 1 );
+    if ( ! lines ) {
+      fclose ( fp );
+      return ( IFontError );
+    }
     while ( fgets ( text, 256, fp ) ) {
-      lines = realloc ( lines, ( num_lines + 1 ) * sizeof ( char * ) );
+      tmp = realloc ( lines, ( num_lines + 1 ) * sizeof ( char * ) );
+      if ( ! tmp ) {
+        for ( loop = 0; loop < num_lines; loop++ )
+          free ( lines[loop] );
+        free ( lines );
+        fclose ( fp );
+        return ( IFontError );
+      }
+      lines = tmp;
       if ( text[strlen(text)-1] == '\012' )
         text[strlen(text)-1] = '\0';
       if ( text[strlen(text)-1] == '\015' )
@@ -148,7 +165,14 @@ IError IFontBDFReadFile ( char *name, char *path )
       strcpy ( lines[num_lines++], text );
     }
     fclose ( fp );
-    lines = realloc ( lines, ( num_lines + 1 ) * sizeof ( char * ) );
+    tmp = realloc ( lines, ( num_lines + 1 ) * sizeof ( char * ) );
+    if ( ! tmp ) {
+      for ( loop = 0; loop < num_lines; loop++ )
+        free ( lines[loop] );
+      free ( lines );
+      return ( IFontError );
+    }
+    lines = tmp;
     lines[num_lines++] = NULL;
     ret = IFontBDFReadData ( name, lines );
     for ( loop = 0; lines[loop]; loop++ )
@@ -242,9 +266,17 @@ IError IFontBDFReadData ( char *name, char **lines )
     else if ( strncmp ( text, "BBX", 3 ) == 0 && character != NULL ) {
       sscanf ( text, "BBX %d %d %d %d", &character->width, &character->height,
         &character->xoffset, &character->yoffset );
+      /* Reject absurd glyph dimensions: untrusted BBX values would otherwise
+         overflow the int multiplication below and under-allocate the buffer. */
+      if ( character->width > IFONT_MAX_GLYPH_DIM ||
+           character->height > IFONT_MAX_GLYPH_DIM ) {
+        character->width = 0;
+        character->height = 0;
+      }
       /* use the width and height to allocate space for the data */
-      character->data = (unsigned int *) calloc ( character->height * character->width,
-        sizeof ( int ) );
+      character->data = (unsigned int *) calloc (
+        (size_t) character->height * character->width,
+        sizeof ( unsigned int ) );
     }
     else if ( strncmp ( text, "DWIDTH", 6 ) == 0 && character != NULL ) {
       sscanf ( text, "DWIDTH %d %d", &character->actual_width, &temp );
@@ -257,7 +289,7 @@ IError IFontBDFReadData ( char *name, char **lines )
       }
 */
       in_bitmap = 1;
-      xpos = ypos = 0;
+      ypos = 0;
     } else if ( strcmp ( text, "ENDCHAR" ) == 0 ) {
       if ( in_bitmap ) {
         in_bitmap = 0;
@@ -267,8 +299,15 @@ IError IFontBDFReadData ( char *name, char **lines )
         if ( strlen ( character->name ) == 1 )
           font->chars[(unsigned char)character->name[0]] = character;
         else {
-          font->other_chars = (Char **) realloc ( font->other_chars,
+          Char **ctmp = (Char **) realloc ( font->other_chars,
             ( font->num_other_chars + 1 ) * sizeof ( Char * ) );
+          if ( ! ctmp ) {
+            free ( character->name );
+            free ( character->data );
+            free ( character );
+            return ( IFontError );
+          }
+          font->other_chars = ctmp;
           font->other_chars[font->num_other_chars++] = character;
         }
       }
@@ -308,11 +347,17 @@ IError IFontBDFReadData ( char *name, char **lines )
   }
 
   /* Now add this font to the tree of loaded fonts */
-  if ( ! fonts )
-     fonts = (Font **) malloc ( sizeof ( Font * ) );
-  else
-    fonts = (Font **) realloc ( fonts, 
-    ( num_fonts + 1 ) * sizeof ( Font * ) );
+  {
+    Font **ftmp;
+    if ( ! fonts )
+      ftmp = (Font **) malloc ( sizeof ( Font * ) );
+    else
+      ftmp = (Font **) realloc ( fonts,
+        ( num_fonts + 1 ) * sizeof ( Font * ) );
+    if ( ! ftmp )
+      return ( IFontError );
+    fonts = ftmp;
+  }
   fonts[num_fonts++] = font;
 
   /* return success */
