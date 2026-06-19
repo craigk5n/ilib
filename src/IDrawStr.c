@@ -194,6 +194,9 @@ static IError draw_string_rotated_90 ( IImage image, IGC gc, int x, int y, char 
   if ( ! gcp->font )
     return ( INoFontSet );
 
+  if ( ! gcp->foreground )
+    return ( IInvalidGC );
+
   charx = x;
   chary = y;
 
@@ -336,6 +339,9 @@ IError IDrawStringRotatedAngle ( IImage image, IGC gc, int x, int y, char *text,
 
   if ( ! gcp->font )
     return ( INoFontSet );
+
+  if ( ! gcp->foreground )
+    return ( IInvalidGC );
 
   charx = x;
   chary = y;
