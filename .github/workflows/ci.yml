@@ -64,10 +64,8 @@ jobs:
   clang-tidy:
     name: clang-tidy (static analysis)
     runs-on: ubuntu-latest
-    # Informational: surfaces bugprone / static-analyzer findings on the
-    # decoder-heavy sources without gating merges yet. Tighten to blocking
-    # once the legacy baseline is clean.
-    continue-on-error: true
+    # Blocking gate: the curated bugprone / static-analyzer baseline (.clang-tidy)
+    # is clean, so any new finding fails the build.
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
@@ -78,7 +76,7 @@ jobs:
         run: cmake -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
       - name: Run clang-tidy on library sources
         run: |
-          clang-tidy -p build $(git ls-files 'src/*.c')
+          clang-tidy --warnings-as-errors='*' -p build $(git ls-files 'src/*.c')
 
   sanitizers:
     name: sanitizers (asan+ubsan)

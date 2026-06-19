@@ -279,7 +279,7 @@ IError ICopyImageScaled (
 
 
 #define IFreeImage(i) \
-	_IFreeImage(i); i = NULL;
+	_IFreeImage(i); (i) = NULL;
 
 /*
 ** Frees the memory associated with an image that will not be used again.
@@ -381,7 +381,7 @@ IGC ICreateGC (
 );
 
 #define IFreeGC(g) \
-	_IFreeGC(g); g = NULL;
+	_IFreeGC(g); (g) = NULL;
 
 /*
 ** Frees a graphic context no longer in use.
@@ -426,7 +426,7 @@ IError ILoadFontFromData (
 #endif
 );
 
-#define IFreeFont(f)		_IFreeFont(f); f = NULL;
+#define IFreeFont(f)		_IFreeFont(f); (f) = NULL;
 
 /*
 ** Frees a font no longer in use.
@@ -541,7 +541,7 @@ IError IAllocNamedColor (
 #endif
 );
 
-#define IFreeColor(c)		_IFreeColor(c); c = 0;
+#define IFreeColor(c)		_IFreeColor(c); (c) = 0;
 
 /*
 ** Frees a color no longer in use.

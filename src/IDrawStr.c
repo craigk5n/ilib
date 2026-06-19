@@ -224,16 +224,18 @@ static IError draw_string_rotated_90 ( IImage image, IGC gc, int x, int y, char 
     else if ( *ptr == '\t' ) {
       ret = IFontBDFGetChar ( gcp->font->name, ch, &bitdata, &width, &height,
         &actual_width, &size, &xoffset, &yoffset );
-      switch ( direction ) {
-        case ITEXT_LEFT_TO_RIGHT:
-          charx += ( 8 - ( char_num % 8 ) ) * actual_width;
-          break;
-        case ITEXT_TOP_TO_BOTTOM:
-          chary -= ( 8 - ( char_num % 8 ) ) * actual_width;
-          break;
-        case ITEXT_BOTTOM_TO_TOP:
-          chary += ( 8 - ( char_num % 8 ) ) * actual_width;
-          break;
+      if ( ! ret ) {
+        switch ( direction ) {
+          case ITEXT_LEFT_TO_RIGHT:
+            charx += ( 8 - ( char_num % 8 ) ) * actual_width;
+            break;
+          case ITEXT_TOP_TO_BOTTOM:
+            chary -= ( 8 - ( char_num % 8 ) ) * actual_width;
+            break;
+          case ITEXT_BOTTOM_TO_TOP:
+            chary += ( 8 - ( char_num % 8 ) ) * actual_width;
+            break;
+        }
       }
       continue;
     }
@@ -359,7 +361,8 @@ IError IDrawStringRotatedAngle ( IImage image, IGC gc, int x, int y, char *text,
     else if ( *ptr == '\t' ) {
       ret = IFontBDFGetChar ( gcp->font->name, ch, &bitdata, &width, &height,
         &actual_width, &size, &xoffset, &yoffset );
-      chary += ( 8 - ( char_num % 8 ) ) * actual_width;
+      if ( ! ret )
+        chary += ( 8 - ( char_num % 8 ) ) * actual_width;
       continue;
     }
     else if ( *ptr != '\033' ) {

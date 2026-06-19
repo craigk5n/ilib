@@ -115,14 +115,18 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
   int transparent = -1, interlaced = 0;
   int fd;
   int gif_err = 0;
-  GifFileType *gft;
+  GifFileType *gft = NULL;
   GifByteType ext[4];
   unsigned char *data;
+  IError ret = INoError;
 
-  /* first make an 8-bit version of the image */
+  GIFcolormap = NULL;
+
+  /* first make an 8-bit version of the image (calloc zero-fills) */
   data = (unsigned char *) calloc ( image->width * image->height,
     sizeof ( unsigned char ) );
-  memset ( data, '\0', sizeof ( image->width * image->height ) );
+  if ( ! data )
+    return ( IGIFError );
 
   /* Reduce to 256 colors
   ** This is a god-awful hack of an algorithm.  Should really use a
@@ -182,6 +186,10 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
   fd = fileno ( fp );
 
   GIFcolormap = GifMakeMapObject ( color_ceil, NULL );
+  if ( ! GIFcolormap ) {
+    ret = IGIFError;
+    goto cleanup;
+  }
   for ( loop = 0; loop < color_ceil; loop++ ) {
     if ( loop < num_colors ) {
       GIFcolormap->Colors[loop].Red = colormap[loop]->red;
@@ -198,8 +206,10 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
 #else
   gft = EGifOpenFileHandle ( fd );
 #endif
-  if ( gft == NULL )
-    return ( IGIFError );
+  if ( gft == NULL ) {
+    ret = IGIFError;
+    goto cleanup;
+  }
 
   /* causes seg fault...
   EGifSetGifVersion ( "89a" );
@@ -220,8 +230,10 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
     transparent = -1;
 
   if ( EGifPutScreenDesc ( gft, image->width, image->height,
-    bits_per_pixel, 0, GIFcolormap ) == GIF_ERROR )
-    return ( IGIFError );
+    bits_per_pixel, 0, GIFcolormap ) == GIF_ERROR ) {
+    ret = IGIFError;
+    goto cleanup;
+  }
 
   if ( image->comments )
     EGifPutComment ( gft, image->comments );
@@ -235,8 +247,10 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
   }
 
   if ( EGifPutImageDesc ( gft, 0, 0, image->width, image->height,
-    interlaced, NULL ) == GIF_ERROR )
-    return ( IGIFError );
+    interlaced, NULL ) == GIF_ERROR ) {
+    ret = IGIFError;
+    goto cleanup;
+  }
 
   /* for interlaced images, we need to write the rows in a different order */
   if ( interlaced ) {
@@ -244,30 +258,38 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
       for ( loop2 = InterlacedOffset[loop]; loop2 < image->height;
         loop2 += InterlacedJumps[loop] ) {
         if ( EGifPutLine ( gft, data + ( loop2 * image->width ), image->width )
-          == GIF_ERROR )
-         return ( IGIFError );
+          == GIF_ERROR ) {
+         ret = IGIFError;
+         goto cleanup;
+        }
       }
     }
   } else {
     /* Write the data all at once */
-    if ( EGifPutLine ( gft, data, image->width * image->height ) == GIF_ERROR )
-      return ( IGIFError );
+    if ( EGifPutLine ( gft, data, image->width * image->height ) == GIF_ERROR ) {
+      ret = IGIFError;
+      goto cleanup;
+    }
   }
 
+cleanup:
+  if ( gft ) {
 #if ILIB_GIF_CLOSE_HAS_ERR
-  EGifCloseFile ( gft, &gif_err );
+    EGifCloseFile ( gft, &gif_err );
 #else
-  EGifCloseFile ( gft );
+    EGifCloseFile ( gft );
 #endif
+  }
 
   /* free up allocated resources */
   free ( data );
   for ( loop = 0; loop < num_colors; loop++ ) {
     free ( colormap[loop] );
   }
-  GifFreeMapObject ( GIFcolormap );
+  if ( GIFcolormap )
+    GifFreeMapObject ( GIFcolormap );
 
-  return ( INoError );
+  return ( ret );
 }
 
 

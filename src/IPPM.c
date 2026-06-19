@@ -97,7 +97,7 @@ IError _IReadPPM ( FILE *fp, IOptions options, IImageP **image_return )
   if ( strncmp ( data, "P5", 2 ) == 0 ) {
     greyscale = 1;
     options |= IOPTION_GREYSCALE;
-  } else if ( strncmp ( data, "P6", 2 ) )
+  } else if ( strncmp ( data, "P6", 2 ) != 0 )
     goto fail;
 
   if ( fgets ( data, 1024, fp ) == NULL )
@@ -146,11 +146,11 @@ IError _IReadPPM ( FILE *fp, IOptions options, IImageP **image_return )
   }
 
   if ( greyscale ) {
-    if ( fread ( image->data, 1, w * h, fp ) != (size_t) ( w * h ) )
+    if ( fread ( image->data, 1, (size_t) w * h, fp ) != (size_t) w * h )
       goto fail;
   }
   else {
-    if ( fread ( image->data, 1, w * h * 3, fp ) != (size_t) ( w * h * 3 ) )
+    if ( fread ( image->data, 1, (size_t) w * h * 3, fp ) != (size_t) w * h * 3 )
       goto fail;
   }
 
