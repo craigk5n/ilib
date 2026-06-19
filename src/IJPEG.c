@@ -119,7 +119,8 @@ IError _IWriteJPEG ( FILE *fp, IImageP *image, IOptions options )
 
 IError _IReadJPEG ( FILE *fp, IOptions options, IImageP **image_return )
 {
-  IImageP *image;
+  /* volatile: read in the setjmp() handler after a libjpeg longjmp */
+  IImageP * volatile image = NULL;
   struct jpeg_decompress_struct cinfo;
   struct my_error_mgr jerr;
   JSAMPROW row_pointer[1];
@@ -134,6 +135,8 @@ IError _IReadJPEG ( FILE *fp, IOptions options, IImageP **image_return )
   jerr.pub.error_exit = my_error_exit;
   if (setjmp (jerr.setjmp_buffer))  {
     /* If we get here, then the JPEG library has signalled an event */
+    if ( image )
+      _IFreeImage ( image );
     jpeg_destroy_decompress (&cinfo);
     return IInvalidImage;
   }
@@ -153,6 +156,10 @@ IError _IReadJPEG ( FILE *fp, IOptions options, IImageP **image_return )
   /* allocate Ilib image as either grayscale or rgb */
   image = (IImageP *) ICreateImage ( cinfo.output_width, cinfo.output_height,
     cinfo.output_components == 1 ? IOPTION_GREYSCALE : IOPTION_NONE );
+  if ( ! image ) {
+    jpeg_destroy_decompress ( &cinfo );
+    return ( IInvalidImage );
+  }
   image->comments = (char *) malloc ( strlen ( IDEFAULT_COMMENT ) + 1 );
   strcpy ( image->comments, IDEFAULT_COMMENT );
 

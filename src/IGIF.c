@@ -277,7 +277,7 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
 IError _IReadGIF ( FILE *fp, IOptions options, IImageP **image_return )
 {
   IImageP *image = NULL;
-  GifFileType *gft;
+  GifFileType *gft = NULL;
   (void) options;
   GifRecordType rt;
   GifPixelType *gifdata = NULL;
@@ -301,18 +301,22 @@ IError _IReadGIF ( FILE *fp, IOptions options, IImageP **image_return )
   gft = DGifOpenFileHandle ( fd );
 #endif
   if ( gft == NULL )
-    return ( IGIFError );
+    goto fail;
 
   while ( image == NULL ) {
     rt = UNDEFINED_RECORD_TYPE;
     if ( DGifGetRecordType ( gft, &rt ) == GIF_ERROR )
-      return ( IGIFError );
+      goto fail;
     if ( rt == IMAGE_DESC_RECORD_TYPE ) {
       if ( DGifGetImageDesc ( gft ) == GIF_ERROR )
-        return ( IGIFError );
+        goto fail;
       image = (IImageP *) ICreateImage ( gft->Image.Width,
         gft->Image.Height, IOPTION_NONE );
+      if ( ! image )
+        goto fail;
       gifdata = (GifPixelType *) malloc ( image->width  * image->height );
+      if ( ! gifdata )
+        goto fail;
       /* we read the lines out of order for interlaced images (yuck) */
       if ( gft->Image.Interlace ) {
         for ( loop = 0; loop < 4; loop++ ) {
@@ -320,13 +324,13 @@ IError _IReadGIF ( FILE *fp, IOptions options, IImageP **image_return )
             loop2 += InterlacedJumps[loop] ) {
             if ( DGifGetLine ( gft, gifdata + ( loop2 * image->width ),
               image->width ) == GIF_ERROR )
-              return ( IGIFError );
+              goto fail;
           }
         }
       } else {
         if ( DGifGetLine ( gft, gifdata, image->width * image->height )
           == GIF_ERROR )
-          return ( IGIFError );
+          goto fail;
       }
       /* convert to a 24-bit image ONLY if its got a valid colormap -- GLM 2000*/
       if (gft -> SColorMap)  {
@@ -383,6 +387,7 @@ IError _IReadGIF ( FILE *fp, IOptions options, IImageP **image_return )
   }
 
   image->comments = comments;
+  comments = NULL;   /* ownership transferred to image */
 
   if ( gifdata )
     free ( gifdata );
@@ -395,6 +400,21 @@ IError _IReadGIF ( FILE *fp, IOptions options, IImageP **image_return )
   *image_return = image;
 
   return ( INoError );
+
+fail:
+  if ( gifdata )
+    free ( gifdata );
+  if ( comments )
+    free ( comments );
+  if ( image )
+    _IFreeImage ( image );
+  if ( gft )
+#if ILIB_GIF_CLOSE_HAS_ERR
+    DGifCloseFile ( gft, &gif_err );
+#else
+    DGifCloseFile ( gft );
+#endif
+  goto fail;
 }
 
 

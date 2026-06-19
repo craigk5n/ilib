@@ -226,10 +226,12 @@ IError _IReadXPM ( FILE *fp, IOptions options, IImageP **image_return )
 {
   IImageP *image = NULL;
   char line[1024], *ptr, *r, *g, *b, *cur;
+  char *rowbuf = NULL;
   xpmcolor *colors = NULL;
-  int w, h, num_colors, colorw, loop, loop2, loop3;
+  int w, h, num_colors = 0, colorw, loop, loop2, loop3;
   int found;
   IColor t;
+  IError ret;
 
   /* look for first line that starts with " */
   while ( fgets ( line, 1024, fp ) ) {
@@ -237,47 +239,49 @@ IError _IReadXPM ( FILE *fp, IOptions options, IImageP **image_return )
       break;
   }
   if ( line[0] != '"' )
-    return IInvalidFormat;
+    goto fail;
 
   ptr = strtok ( line + 1, " " );
   if ( ! ptr )
-    return IInvalidFormat;
+    goto fail;
   w = atoi ( ptr );
   ptr = strtok ( NULL, " " );
   if ( ! ptr )
-    return IInvalidFormat;
+    goto fail;
   h = atoi ( ptr );
   ptr = strtok ( NULL, " " );
   if ( ! ptr )
-    return IInvalidFormat;
+    goto fail;
   num_colors = atoi ( ptr );
   ptr = strtok ( NULL, " " );
   if ( ! ptr )
-    return IInvalidFormat;
+    goto fail;
   colorw = atoi ( ptr );
 
   /* Validate the untrusted header before any file-driven allocation:
      positive values, sane caps, and no integer overflow in the image size
      (w*h*3) or the per-row buffer (colorw*w + 20). */
   if ( w <= 0 || h <= 0 )
-    return IInvalidFormat;
+    goto fail;
   if ( num_colors <= 0 || num_colors > ( 1 << 20 ) )
-    return IInvalidFormat;
+    goto fail;
   if ( colorw <= 0 || colorw > 32 )
-    return IInvalidFormat;
+    goto fail;
   if ( w > INT_MAX / 3 / h )
-    return IInvalidFormat;
+    goto fail;
   if ( w > ( INT_MAX - 20 ) / colorw )
-    return IInvalidFormat;
+    goto fail;
 
-  colors = (xpmcolor *) malloc ( sizeof ( xpmcolor ) * num_colors );
+  /* calloc so every abbrev pointer starts NULL -> the cleanup can free them
+     all unconditionally even on a mid-loop failure */
+  colors = (xpmcolor *) calloc ( num_colors, sizeof ( xpmcolor ) );
   if ( ! colors )
-    return IInvalidFormat;
+    goto fail;
 
   for ( loop = 0; loop < num_colors; loop++ ) {
     while ( 1 ) {
       if ( ! fgets ( line, 1024, fp ) )
-        return IInvalidFormat; /* small memory leak */
+        goto fail;
       if ( line[0] == '"' )
         break;
     }
@@ -288,7 +292,7 @@ IError _IReadXPM ( FILE *fp, IOptions options, IImageP **image_return )
     colors[loop].abbrev[colorw] = '\0';
     for ( ptr = line + 1 + colorw; *ptr != 'c' && *ptr != '\0'; ptr++ ) ;
     if ( *ptr != 'c' )
-      return IInvalidFormat; /* small memory leak */
+      goto fail;
     do {
       ptr++;
     } while ( *ptr == ' ' );
@@ -296,24 +300,26 @@ IError _IReadXPM ( FILE *fp, IOptions options, IImageP **image_return )
     /* parse color */
     if ( parse_color ( ptr, &colors[loop].r, &colors[loop].g, &colors[loop].b,
       &colors[loop].transparent ) )
-      return IInvalidFormat; /* small memory leak */
+      goto fail;
   }
 
   image = (IImageP *) ICreateImage ( w, h, options );
   if ( ! image )
-    return ( IInvalidFormat );
+    goto fail;
 
   /* now read row by row of data */
-  ptr = (char *) malloc ( colorw * w + 20 );
+  rowbuf = (char *) malloc ( colorw * w + 20 );
+  if ( ! rowbuf )
+    goto fail;
   for ( loop = 0; loop < h; loop++ ) {
-    if ( ! fgets ( ptr, colorw * w + 20, fp ) )
-      return IInvalidFormat; /* small memory leak */
-    while ( ptr[0] != '"' ) {
-      if ( ! fgets ( ptr, colorw * w + 20, fp ) )
-        return IInvalidFormat; /* small memory leak */
+    if ( ! fgets ( rowbuf, colorw * w + 20, fp ) )
+      goto fail;
+    while ( rowbuf[0] != '"' ) {
+      if ( ! fgets ( rowbuf, colorw * w + 20, fp ) )
+        goto fail;
     }
     for ( loop2 = 0; loop2 < w; loop2++ ) {
-      cur = ptr + 1 + loop2 * colorw;
+      cur = rowbuf + 1 + loop2 * colorw;
       /* find color in colormap */
       for ( loop3 = 0, found = 0; loop3 < num_colors && ! found; loop3++ ) {
         if ( strncmp ( colors[loop3].abbrev, cur, colorw ) == 0 ) {
@@ -327,22 +333,35 @@ IError _IReadXPM ( FILE *fp, IOptions options, IImageP **image_return )
         }
       }
       if ( ! found )
-        return IInvalidFormat; /* small memory leak */
+        goto fail;
     }
   }
-  free ( ptr );
-
-  *image_return = image;
-
   for ( loop = 0; loop < num_colors; loop++ ) {
     if ( colors[loop].transparent ) {
       t = IAllocColor ( colors[loop].r, colors[loop].g, colors[loop].b );
       ISetTransparent ( image, t );
     }
-    free ( colors[loop].abbrev );
   }
-  free ( colors );
 
-  return ( INoError );
+  *image_return = image;
+  ret = INoError;
+  goto cleanup;
+
+fail:
+  ret = IInvalidFormat;
+  if ( image )
+    _IFreeImage ( image );
+
+cleanup:
+  /* free the temporary parsing structures (the image, on success, keeps its
+     own data and is returned via *image_return) */
+  if ( colors ) {
+    for ( loop = 0; loop < num_colors; loop++ )
+      free ( colors[loop].abbrev );   /* NULL-safe: colors was calloc'd */
+    free ( colors );
+  }
+  free ( rowbuf );
+
+  return ( ret );
 }
 
