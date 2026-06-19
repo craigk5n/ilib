@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <memory.h>
+#include <string.h>
 
 #include "Ilib.h"
 #include "IlibP.h"
@@ -72,8 +72,8 @@ int dest_x, dest_y;
   colorp = _IGetColor ( color );
   ISetForeground ( gc, color );
 
-  for ( row = src_y, y = dest_y; row < src_y + height; row++, y++ ) {
-    for ( col = src_x, x = dest_x; col < src_x + width; col++, x++ ) {
+  for ( row = src_y, y = dest_y; row < src_y + (int) height; row++, y++ ) {
+    for ( col = src_x, x = dest_x; col < src_x + (int) width; col++, x++ ) {
       if ( i1->greyscale ) {
         ptr = i1->data + ( row * i1->width ) + col;
         colorp->red = colorp->green = colorp->blue = *(ptr);
@@ -164,8 +164,8 @@ unsigned int dest_width, dest_height;
   */
   scalex = (double) dest_width / (double) src_width;
   scaley = (double) dest_height / (double) src_height;
-  for ( y = dest_y; y < dest_y + dest_height; y++ ) {
-    for ( x = dest_x; x < dest_x + dest_width; x++ ) {
+  for ( y = dest_y; y < dest_y + (int) dest_height; y++ ) {
+    for ( x = dest_x; x < dest_x + (int) dest_width; x++ ) {
       /* get location from source image for this location
       ** x2,y2 is location in source image.
       */

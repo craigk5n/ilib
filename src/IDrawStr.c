@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <memory.h>
+#include <string.h>
 #include <math.h>
 
 #include "Ilib.h"
@@ -224,7 +224,7 @@ ITextDirection direction;
 
   IFontSize ( (IFont)gcp->font, &font_height );
 
-  for ( ptr = text, loop = 0; loop < len; loop++, ptr++ ) {
+  for ( ptr = text, loop = 0; (unsigned int) loop < len; loop++, ptr++ ) {
     if ( *ptr == '\012' ) {
       switch ( direction ) {
         case ITEXT_LEFT_TO_RIGHT:
@@ -266,7 +266,7 @@ ITextDirection direction;
     else {
       loop2 = 0;
       ptr++;
-      while ( *ptr != ';' && loop < len && loop2 < 256 ) {
+      while ( *ptr != ';' && (unsigned int) loop < len && loop2 < 256 ) {
         ch[loop2] = *ptr;
         ptr++;
         loop++;
@@ -280,11 +280,11 @@ ITextDirection direction;
     ret = IFontBDFGetChar ( gcp->font->name, ch, &bitdata, &width, &height,
       &actual_width, &size, &xoffset, &yoffset );
     if ( ! ret ) {
-      for ( loop3 = 0; loop3 < height; loop3++ ) {
+      for ( loop3 = 0; (unsigned int) loop3 < height; loop3++ ) {
         switch ( direction ) {
           case ITEXT_LEFT_TO_RIGHT:
             myy = chary - ( height + yoffset ) + loop3;
-            for ( loop2 = 0; loop2 < width; loop2++ ) {
+            for ( loop2 = 0; (unsigned int) loop2 < width; loop2++ ) {
               if ( bitdata[loop3 * width + loop2] ) {
                 myx = charx + xoffset + loop2;
                 _ISetPoint ( imagep, gcp, myx, myy );
@@ -293,7 +293,7 @@ ITextDirection direction;
             break;
           case ITEXT_TOP_TO_BOTTOM:
             myx = charx + ( height + yoffset ) - loop3;
-            for ( loop2 = 0; loop2 < width; loop2++ ) {
+            for ( loop2 = 0; (unsigned int) loop2 < width; loop2++ ) {
               if ( bitdata[loop3 * width + loop2] ) {
                 myy = chary + xoffset + loop2;
                 _ISetPoint ( imagep, gcp, myx, myy );
@@ -302,7 +302,7 @@ ITextDirection direction;
             break;
           case ITEXT_BOTTOM_TO_TOP:
             myx = charx - ( height + yoffset ) + loop3;
-            for ( loop2 = 0; loop2 < width; loop2++ ) {
+            for ( loop2 = 0; (unsigned int) loop2 < width; loop2++ ) {
               if ( bitdata[loop3 * width + loop2] ) {
                 myy = chary - xoffset - loop2;
                 _ISetPoint ( imagep, gcp, myx, myy );
@@ -374,7 +374,7 @@ double angle;
 
   IFontSize ( (IFont)gcp->font, &font_height );
 
-  for ( ptr = text, loop = 0; loop < len; loop++, ptr++ ) {
+  for ( ptr = text, loop = 0; (unsigned int) loop < len; loop++, ptr++ ) {
     
     if ( *ptr == '\012' ) {
       chary += font_height;
@@ -395,7 +395,7 @@ double angle;
     else {
       loop2 = 0;
       ptr++;
-      while ( *ptr != ';' && loop < len && loop2 < 256 ) {
+      while ( *ptr != ';' && (unsigned int) loop < len && loop2 < 256 ) {
         ch[loop2] = *ptr;
         ptr++;
         loop++;
@@ -414,8 +414,8 @@ double angle;
     alpha = angle;
           
     if ( ! ret ) {
-      for ( loop3 = 0; loop3 < height; loop3++ ) {
-        for ( loop2 = 0; loop2 < width; loop2++ ) {
+      for ( loop3 = 0; (unsigned int) loop3 < height; loop3++ ) {
+        for ( loop2 = 0; (unsigned int) loop2 < width; loop2++ ) {
           if ( bitdata[loop3 * width + loop2] ) {
             x1 = loop2 + xoffset;
             y1 = loop3 + size - height;

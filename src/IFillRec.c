@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <memory.h>
+#include <string.h>
 
 #include "Ilib.h"
 #include "IlibP.h"
@@ -42,8 +42,8 @@ unsigned int h;
   if ( imagep->magic != IMAGIC_IMAGE )
     return ( IInvalidImage );
 
-  for ( row = y; row < y + h && row < imagep->height; row++ ) {
-    for ( col = x; col < x + w && col < imagep->width; col++ ) {
+  for ( row = y; row < y + (int) h && row < imagep->height; row++ ) {
+    for ( col = x; col < x + (int) w && col < imagep->width; col++ ) {
       if ( row >= 0 && col >= 0 ) {
         _ISetPoint ( imagep, gcp, col, row );
       }

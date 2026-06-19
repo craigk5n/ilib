@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <memory.h>
+#include <string.h>
 #include <setjmp.h>
 
 #include <jpeglib.h>
@@ -75,6 +75,7 @@ IOptions options;
   struct jpeg_error_mgr jerr;
   JSAMPROW row_pointer[1];
   int loop;
+  (void) options;
 
   /* Step 1: allocate and initialize JPEG compression object */
   cinfo.err = jpeg_std_error ( &jerr );
@@ -129,6 +130,7 @@ IImageP **image_return;
   struct my_error_mgr jerr;
   JSAMPROW row_pointer[1];
   int loop;
+  (void) options;
   
   /* We set up the normal JPEG error routines */
   cinfo.err = jpeg_std_error ( &jerr.pub );
@@ -161,7 +163,7 @@ IImageP **image_return;
   strcpy ( image->comments, IDEFAULT_COMMENT );
 
   /* Step 6: while (scan lines remain to be read) */
-  for ( loop = 0; loop < cinfo.output_height; loop++ ) {
+  for ( loop = 0; (JDIMENSION) loop < cinfo.output_height; loop++ ) {
     row_pointer[0] = &image->data[loop * cinfo.output_width *
       cinfo.output_components];
     (void) jpeg_read_scanlines ( &cinfo, row_pointer, 1 );

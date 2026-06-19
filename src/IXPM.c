@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <memory.h>
 #include <string.h>
 
 #include "Ilib.h"
@@ -48,6 +47,7 @@ IOptions options;
   int num_colors = 0;
   int loop, loop2;
   int offset;
+  (void) options;
   unsigned short *data;
   int color_found, chars_per_pixel;
   static char *xpm_chars = \
@@ -97,7 +97,7 @@ IOptions options;
     fprintf ( fp, "/* %s */\n", image->comments );
   fprintf ( fp, "static char *image[] = {\n" );
   fprintf ( fp, "/* width height num_colors chars_per_pixel */\n" );
-  if ( num_colors > strlen ( xpm_chars ) )
+  if ( (size_t) num_colors > strlen ( xpm_chars ) )
     chars_per_pixel = 2;
   else
     chars_per_pixel = 1;
@@ -306,7 +306,7 @@ IImageP **image_return;
       /* find color in colormap */
       for ( loop3 = 0, found = 0; loop3 < num_colors && ! found; loop3++ ) {
         if ( strncmp ( colors[loop3].abbrev, cur, colorw ) == 0 ) {
-          r = image->data + ( loop * w * 3 ) + ( loop2 * 3 );
+          r = (char *)image->data + ( loop * w * 3 ) + ( loop2 * 3 );
           g = r + 1;
           b = r + 2;
           *r = colors[loop3].r;

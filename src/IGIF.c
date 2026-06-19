@@ -47,7 +47,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <memory.h>
+#include <string.h>
 
 #define PROGRAM_NAME	"Ilib"
 
@@ -286,6 +286,7 @@ IImageP **image_return;
 {
   IImageP *image = NULL;
   GifFileType *gft;
+  (void) options;
   GifRecordType rt;
   GifPixelType *gifdata = NULL;
   GifByteType *extension;
@@ -296,7 +297,7 @@ IImageP **image_return;
   unsigned char *ptr, *r, *g, *b;
   unsigned int temp;
   char *comments = NULL;
-  unsigned int transparent_ind;
+  unsigned int transparent_ind = 0;
   int trans_set = 0;
   IColor transcolor;
 
@@ -344,7 +345,7 @@ IImageP **image_return;
             r = image->data + ( loop * image->width * 3 ) + ( col * 3 );
             g = r + 1;
             b = r + 2;
-            if ( temp > gft->SColorMap->ColorCount ) {
+            if ( temp > (unsigned int) gft->SColorMap->ColorCount ) {
               temp = gft->SColorMap->ColorCount - 1;
               fprintf ( stderr, "ILib Warning: Invalid color found in GIF.\n" );
             }
@@ -361,8 +362,8 @@ IImageP **image_return;
         if ( extcode == COMMENT_EXT_FUNC_CODE ) {
           if ( comments != NULL )
             free ( comments );
-          comments = (char *) malloc ( strlen ( extension + 1 ) + 1 );
-          strcpy ( comments, extension + 1 );
+          comments = (char *) malloc ( strlen ( (char *)( extension + 1 ) ) + 1 );
+          strcpy ( comments, (char *)( extension + 1 ) );
         } else if ( extcode == GRAPHICS_EXT_FUNC_CODE ) {
           /* this is used to set transparent color index */
           if ( extension[1] & 0x01 ) {

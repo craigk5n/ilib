@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <memory.h>
+#include <string.h>
 #include <math.h>
 
 #include "Ilib.h"

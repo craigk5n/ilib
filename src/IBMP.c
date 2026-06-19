@@ -15,7 +15,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <memory.h>
 #include <string.h>
 
 #include "Ilib.h"
@@ -76,9 +75,9 @@ IImageP **image_return;
   IImageP *image = NULL;
   int scratch, fileSize, offset, w, h, depth, compression,
       imagesize, xpelspermeter, ypelspermeter, colorsused, colorsimportant;
-  int redmask, greenmask, bluemask,
-      redshift, greenshift, blueshift,
-      redbits, greenbits, bluebits;
+  int redmask = 0, greenmask = 0, bluemask = 0,
+      redshift = 0, greenshift = 0, blueshift = 0,
+      redbits = 0, greenbits = 0, bluebits = 0;
   int *colortable = NULL;
 
   /* read the header and make sure this is a BMP file */
@@ -176,7 +175,7 @@ IImageP **image_return;
     /* slurp in the data */
     for (y = h - 1; y >= 0; y--) {
       for (x = 0; x < w; x++) {
-        char *pixel = image->data + (y*3*w) + (x*3);
+        char *pixel = (char *)image->data + (y*3*w) + (x*3);
         int color;
         /* this leaks the image object if we hit a premature EOF */
         if (!ReadShort(fp, &color)) return (IInvalidFormat);
@@ -192,7 +191,7 @@ IImageP **image_return;
     /*fprintf(stderr, "8 bit, no compression\n");*/
     for (y = h - 1; y >= 0; y--) {
       for (x = 0; x < w; x++) {
-        char *pixel = image->data+(y*w*3)+(x*3);
+        char *pixel = (char *)image->data+(y*w*3)+(x*3);
         int byte = fgetc(fp); if (byte == EOF) return IInvalidFormat;
         SET_PIXEL(pixel, byte);
       }
@@ -200,7 +199,7 @@ IImageP **image_return;
 
   } else if (depth <= 8 && compression) {
     int byte, count, x, y;
-    char *buffer = image->data+w*(h-1)*3;
+    char *buffer = (char *)image->data+w*(h-1)*3;
     for (y = 0; y < h; ) {
       count = fgetc(fp);
       if (count == EOF) return (IInvalidFormat);
@@ -226,14 +225,14 @@ IImageP **image_return;
         case 0x00: /* end of the line */
           /*fprintf(stderr, "hit end of line %d\n", y);*/
           y++;
-          buffer = image->data+w*(h-y-1)*3;
+          buffer = (char *)image->data+w*(h-y-1)*3;
           break;
         case 0x02: /* goto specific position */
           x = fgetc(fp);
           y = fgetc(fp);
           /*fprintf(stderr, "going to %d,%d\n", x, y);*/
           if (x == EOF || y == EOF) return (IInvalidFormat);
-          buffer = image->data+w*(h-y-1)*3+(x*3);
+          buffer = (char *)image->data+w*(h-y-1)*3+(x*3);
           break;
         default: /* a bunch of literal bytes */
           /*fprintf(stderr, "handling %d literal bytes\n", count);*/

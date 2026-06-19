@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <memory.h>
+#include <string.h>
 #include <math.h>
 
 #include "Ilib.h"
@@ -42,7 +42,7 @@ int *middle_x;
 int *middle_y;
 {
   IGCP *gcp = (IGCP *)gc;
-  double a, adiff;
+  double a;
   int x1, y1, x2, y2, mx, my;
 
   if ( ! gcp )
@@ -53,8 +53,6 @@ int *middle_y;
   /* because our y is upside down, make all angles their negative */
   a1 = 360 - a1;
   a2 = 360 - a2;
-
-  adiff = fabs ( a2 - a1 );
 
   x1 = x + (int)( r1 * cos ( deg2rad ( a1 ) ) );
   if ( a1_x )
