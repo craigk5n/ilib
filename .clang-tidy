@@ -1,0 +1,19 @@
+# clang-tidy configuration for Ilib.
+#
+# Scoped to bug-finding checks that matter for a C image library handling
+# untrusted file input: the static analyzer, bugprone-*, and a few cert/misc
+# memory-safety checks. Style/readability/modernize checks are intentionally
+# left off — this is legacy K&R-derived C and those would be pure noise.
+Checks: >
+  -*,
+  bugprone-*,
+  clang-analyzer-*,
+  cert-err34-c,
+  cert-flp30-c,
+  misc-misplaced-const,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions,
+  -bugprone-assignment-in-if-condition
+WarningsAsErrors: ''
+HeaderFilterRegex: 'src/.*\.h$'
+FormatStyle: none
