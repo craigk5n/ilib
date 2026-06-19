@@ -13,7 +13,10 @@ Checks: >
   misc-misplaced-const,
   -bugprone-easily-swappable-parameters,
   -bugprone-narrowing-conversions,
-  -bugprone-assignment-in-if-condition
+  -bugprone-assignment-in-if-condition,
+  -bugprone-reserved-identifier,
+  -cert-dcl37-c,
+  -cert-dcl51-cpp
 WarningsAsErrors: ''
 HeaderFilterRegex: 'src/.*\.h$'
 FormatStyle: none
