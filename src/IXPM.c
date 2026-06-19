@@ -256,7 +256,23 @@ IError _IReadXPM ( FILE *fp, IOptions options, IImageP **image_return )
     return IInvalidFormat;
   colorw = atoi ( ptr );
 
+  /* Validate the untrusted header before any file-driven allocation:
+     positive values, sane caps, and no integer overflow in the image size
+     (w*h*3) or the per-row buffer (colorw*w + 20). */
+  if ( w <= 0 || h <= 0 )
+    return IInvalidFormat;
+  if ( num_colors <= 0 || num_colors > ( 1 << 20 ) )
+    return IInvalidFormat;
+  if ( colorw <= 0 || colorw > 32 )
+    return IInvalidFormat;
+  if ( w > INT_MAX / 3 / h )
+    return IInvalidFormat;
+  if ( w > ( INT_MAX - 20 ) / colorw )
+    return IInvalidFormat;
+
   colors = (xpmcolor *) malloc ( sizeof ( xpmcolor ) * num_colors );
+  if ( ! colors )
+    return IInvalidFormat;
 
   for ( loop = 0; loop < num_colors; loop++ ) {
     while ( 1 ) {
@@ -280,10 +296,6 @@ IError _IReadXPM ( FILE *fp, IOptions options, IImageP **image_return )
       &colors[loop].transparent ) )
       return IInvalidFormat; /* small memory leak */
   }
-
-  /* Validate untrusted dimensions: positive and no w*h*3 overflow. */
-  if ( w <= 0 || h <= 0 || w > INT_MAX / 3 / h )
-    return ( IInvalidFormat );
 
   image = (IImageP *) ICreateImage ( w, h, options );
   if ( ! image )

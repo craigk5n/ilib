@@ -122,15 +122,17 @@ IError _IReadBMP ( FILE *fp, IOptions options, IImageP **image_return )
 
   /* get the masks, shifts, and bits for bitfields (16 and 32 bits) */
   if (compression == BI_BITFIELDS) {
+    /* Shift as unsigned and bound the shift count *before* shifting: a value
+       comes from the file, and 1<<31 (signed) or 1<<>=32 is undefined. */
     if (!ReadLong(fp,&redmask)) return IInvalidImage;
-    for (redshift = 0; !(redmask&(1<<redshift)) && redshift<32; redshift++);
-    for (redbits = 0; (redmask&(1<<(redshift+redbits))) && redshift<32; redbits++);
+    for (redshift = 0; redshift<32 && !(redmask&(1U<<redshift)); redshift++);
+    for (redbits = 0; (redshift+redbits)<32 && (redmask&(1U<<(redshift+redbits))); redbits++);
     if (!ReadLong(fp,&greenmask)) return IInvalidImage;
-    for (greenshift = 0; !(greenmask&(1<<greenshift)) && greenshift<32; greenshift++);
-    for (greenbits = 0; (greenmask&(1<<(greenshift+greenbits))) && greenshift<32; greenbits++);
+    for (greenshift = 0; greenshift<32 && !(greenmask&(1U<<greenshift)); greenshift++);
+    for (greenbits = 0; (greenshift+greenbits)<32 && (greenmask&(1U<<(greenshift+greenbits))); greenbits++);
     if (!ReadLong(fp,&bluemask)) return IInvalidImage;
-    for (blueshift = 0; !(bluemask&(1<<blueshift)) && blueshift<32; blueshift++);
-    for (bluebits = 0; (bluemask&(1<<(blueshift+bluebits))) && blueshift<32; bluebits++);
+    for (blueshift = 0; blueshift<32 && !(bluemask&(1U<<blueshift)); blueshift++);
+    for (bluebits = 0; (blueshift+bluebits)<32 && (bluemask&(1U<<(blueshift+bluebits))); bluebits++);
     /*fprintf(stderr, "masks: %x %x %x\n", redmask, greenmask, bluemask);*/
     /*fprintf(stderr, "shifts: %d %d %d\n", redshift, greenshift, blueshift);*/
     /*fprintf(stderr, "bits: %d %d %d\n", redbits, greenbits, bluebits);*/
@@ -143,7 +145,9 @@ IError _IReadBMP ( FILE *fp, IOptions options, IImageP **image_return )
     if (depth < 1) return (IInvalidFormat);
     if (!colorsused) colorsused = 2<<depth;
     if (colorsused < 0 || colorsused > (2<<depth)) return (IInvalidFormat);
-    colortable = malloc(colorsused*sizeof(int));
+    /* Always allocate >=256 entries (zero-filled): the pixel decoders index
+       colortable[byte & 0xff], i.e. up to 255, regardless of colorsused. */
+    colortable = calloc((colorsused < 256 ? 256 : colorsused), sizeof(int));
     if (!colortable) return (IInvalidFormat);
     for (scratch = 0; scratch < colorsused; scratch++) {
       if (!ReadLong(fp,(colortable+scratch))) return (IInvalidFormat);
@@ -207,7 +211,11 @@ IError _IReadBMP ( FILE *fp, IOptions options, IImageP **image_return )
 
   } else if (depth <= 8 && compression) {
     int byte, count, x, y;
+    char *data_start = (char *)image->data;
+    char *data_end = (char *)image->data + (size_t)w * h * 3;
     char *buffer = (char *)image->data+w*(h-1)*3;
+    /* bail on any RLE write that would land outside the pixel buffer */
+#define BMP_RLE_INBOUNDS(b) ((b) >= data_start && (b) + 3 <= data_end)
     for (y = 0; y < h; ) {
       count = fgetc(fp);
       if (count == EOF) return (IInvalidFormat);
@@ -215,6 +223,7 @@ IError _IReadBMP ( FILE *fp, IOptions options, IImageP **image_return )
         /*fprintf(stderr, "stretch of %d bytes\n", count);*/
         byte = fgetc(fp); if (byte == EOF) return (IInvalidFormat);
         for (scratch = 0; scratch < count; scratch++) {
+          if (!BMP_RLE_INBOUNDS(buffer)) return (IInvalidFormat);
           if (compression == 1) {
             SET_PIXEL(buffer, byte);
           }
@@ -233,19 +242,22 @@ IError _IReadBMP ( FILE *fp, IOptions options, IImageP **image_return )
         case 0x00: /* end of the line */
           /*fprintf(stderr, "hit end of line %d\n", y);*/
           y++;
-          buffer = (char *)image->data+w*(h-y-1)*3;
+          if (y < h)
+            buffer = (char *)image->data+w*(h-y-1)*3;
           break;
         case 0x02: /* goto specific position */
           x = fgetc(fp);
           y = fgetc(fp);
           /*fprintf(stderr, "going to %d,%d\n", x, y);*/
           if (x == EOF || y == EOF) return (IInvalidFormat);
+          if (x < 0 || x >= w || y < 0 || y >= h) return (IInvalidFormat);
           buffer = (char *)image->data+w*(h-y-1)*3+(x*3);
           break;
         default: /* a bunch of literal bytes */
           /*fprintf(stderr, "handling %d literal bytes\n", count);*/
           for (scratch = 0; scratch < count; scratch++) {
             byte = fgetc(fp); if (byte == EOF) return (IInvalidFormat);
+            if (!BMP_RLE_INBOUNDS(buffer)) return (IInvalidFormat);
             if (compression == 1) {
               SET_PIXEL(buffer, byte);
             }
@@ -269,6 +281,7 @@ IError _IReadBMP ( FILE *fp, IOptions options, IImageP **image_return )
         }
       }
     }
+#undef BMP_RLE_INBOUNDS
   }
   else {
     _IFreeImage(image);
