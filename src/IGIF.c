@@ -79,12 +79,12 @@
 #endif
 
 #define colors_match(color,r,g,b) \
- (color->red == r && color->green == g && color->blue == b )
+ ((color)->red == (r) && (color)->green == (g) && (color)->blue == (b) )
 
 #define MAX_COLORMAP_SIZE       (256)
 
 
-#define ABS(a)	(a < 0 ? (0-a) : a )
+#define ABS(a)	((a) < 0 ? (0-(a)) : (a) )
 
 static int InterlacedOffset[] = { 0, 4, 2, 1 };
 static int InterlacedJumps[] = { 8, 8, 4, 2 };

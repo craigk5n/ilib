@@ -35,9 +35,9 @@ typedef struct {
 
 
 #undef max
-#define max(a,b)	( a > b ) ? a : b
+#define max(a,b)	(((a) > (b)) ? (a) : (b))
 #undef min
-#define min(a,b)	( a < b ) ? a : b
+#define min(a,b)	(((a) < (b)) ? (a) : (b))
 
 /*
 ** Calculate slope.  Keep in mind that our y coordinate is reverse
