@@ -31,7 +31,7 @@
 #include "IlibP.h"
 
 #define colors_match(color,r,g,b) \
- (color->red == red && color->green == green && color->blue == blue )
+ ((color)->red == red && (color)->green == green && (color)->blue == blue )
 
 #define MAX_COLORMAP_SIZE	(256*256)
 

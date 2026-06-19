@@ -31,9 +31,9 @@
 
 #define SET_PIXEL(buffer, byte) \
 	do { \
-		*(buffer+0) = (colortable[byte&0xff]&(0xff<<16))>>16; \
-		*(buffer+1) = (colortable[byte&0xff]&(0xff<<8))>>8; \
-		*(buffer+2) = (colortable[byte&0xff]&(0xff<<0))>>0; \
+		*((buffer)+0) = (colortable[(byte)&0xff]&(0xff<<16))>>16; \
+		*((buffer)+1) = (colortable[(byte)&0xff]&(0xff<<8))>>8; \
+		*((buffer)+2) = (colortable[(byte)&0xff]&(0xff<<0))>>0; \
 	} while (0);
 
 static int ReadShort (FILE *fp, int *ret)

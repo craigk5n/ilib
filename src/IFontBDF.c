@@ -126,6 +126,9 @@ typedef struct {
 } Font;
 
 
+static void free_character ( Char *ch );
+static void free_font ( Font *font );
+
 static Font **fonts = NULL;
 static int num_fonts = 0;
 
@@ -228,6 +231,9 @@ IError IFontBDFReadData ( char *name, char **lines )
         }
       }
       in_bitmap = 0;
+      /* A previous STARTCHAR with no ENDCHAR leaves a dangling character. */
+      if ( character )
+        free_character ( character );
       character = (Char *) malloc ( sizeof ( Char ) );
       memset ( character, '\0', sizeof ( Char ) );
       character->name = (char *) malloc ( strlen ( ch ) + 1 );
@@ -274,9 +280,10 @@ IError IFontBDFReadData ( char *name, char **lines )
         character->height = 0;
       }
       /* use the width and height to allocate space for the data */
-      character->data = (unsigned int *) calloc (
-        (size_t) character->height * character->width,
-        sizeof ( unsigned int ) );
+      if ( character->width > 0 && character->height > 0 )
+        character->data = (unsigned int *) calloc (
+          (size_t) character->height * character->width,
+          sizeof ( unsigned int ) );
     }
     else if ( strncmp ( text, "DWIDTH", 6 ) == 0 && character != NULL ) {
       sscanf ( text, "DWIDTH %d %d", &character->actual_width, &temp );
@@ -294,6 +301,7 @@ IError IFontBDFReadData ( char *name, char **lines )
       if ( in_bitmap ) {
         in_bitmap = 0;
         if ( ! character ) {
+          free_font ( font );
           return ( IFontError );
         }
         if ( strlen ( character->name ) == 1 )
@@ -302,14 +310,14 @@ IError IFontBDFReadData ( char *name, char **lines )
           Char **ctmp = (Char **) realloc ( font->other_chars,
             ( font->num_other_chars + 1 ) * sizeof ( Char * ) );
           if ( ! ctmp ) {
-            free ( character->name );
-            free ( character->data );
-            free ( character );
+            free_character ( character );
+            free_font ( font );
             return ( IFontError );
           }
           font->other_chars = ctmp;
           font->other_chars[font->num_other_chars++] = character;
         }
+        character = NULL;   /* ownership transferred to font */
       }
 /*
       for ( loop = 0; loop < character->width * character->height; loop++ ) {
@@ -346,6 +354,10 @@ IError IFontBDFReadData ( char *name, char **lines )
     line_no++;
   }
 
+  /* A trailing STARTCHAR with no ENDCHAR leaves an unattached character. */
+  if ( character )
+    free_character ( character );
+
   /* Now add this font to the tree of loaded fonts */
   {
     Font **ftmp;
@@ -354,8 +366,10 @@ IError IFontBDFReadData ( char *name, char **lines )
     else
       ftmp = (Font **) realloc ( fonts,
         ( num_fonts + 1 ) * sizeof ( Font * ) );
-    if ( ! ftmp )
+    if ( ! ftmp ) {
+      free_font ( font );
       return ( IFontError );
+    }
     fonts = ftmp;
   }
   fonts[num_fonts++] = font;
@@ -389,6 +403,30 @@ static void free_character ( Char *ch )
 }
 
 
+/* Free a font and everything it owns. Does NOT touch the global cache. */
+static void free_font ( Font *font )
+{
+  unsigned int loop;
+
+  if ( ! font )
+    return;
+  for ( loop = 0; loop < 256; loop++ ) {
+    if ( font->chars[loop] )
+      free_character ( font->chars[loop] );
+  }
+  for ( loop = 0; loop < font->num_other_chars; loop++ ) {
+    free_character ( font->other_chars[loop] );
+  }
+  free ( font->other_chars );
+  free ( font->name );
+  free ( font->family );
+  free ( font->face_name );
+  free ( font->width_name );
+  free ( font->weight );
+  free ( font );
+}
+
+
 IError IFontBDFFree ( char *name )
 {
   Font *font;
@@ -405,26 +443,7 @@ IError IFontBDFFree ( char *name )
       fonts[loop] = NULL;
   }
 
-  for ( loop = 0; loop < 256; loop++ ) {
-    if ( font->chars[loop] )
-      free_character ( font->chars[loop] );
-  }
-  for ( loop = 0; loop < font->num_other_chars; loop++ ) {
-    free_character ( font->other_chars[loop] );
-  }
-  free ( font->other_chars );
-
-  if ( font->name )
-    free ( font->name );
-  if ( font->family )
-    free ( font->family );
-  if ( font->face_name )
-    free ( font->face_name );
-  if ( font->width_name )
-    free ( font->width_name );
-  if ( font->weight )
-    free ( font->weight );
-  free ( font );
+  free_font ( font );
 
   return ( INoError );
 }
