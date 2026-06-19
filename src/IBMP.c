@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <limits.h>
 
 #include "Ilib.h"
 #include "IlibP.h"
@@ -146,8 +147,15 @@ IError _IReadBMP ( FILE *fp, IOptions options, IImageP **image_return )
   /* seek to the beginning of the image data */
   if (fseek(fp, offset, SEEK_SET) < 0) return (IInvalidFormat);
 
+  /* Validate untrusted dimensions: the decode loops below assume positive
+     w/h, and w*h*3 must not overflow. */
+  if ( w <= 0 || h <= 0 || w > INT_MAX / 3 / h )
+    return ( IInvalidFormat );
+
   /* create a new image object */
   image = (IImageP *) ICreateImage ( w, h, options );
+  if ( ! image )
+    return ( IInvalidFormat );
 
   if (depth == 24 && compression == BI_RGB) {
     int x, y;
