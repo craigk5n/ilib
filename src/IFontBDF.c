@@ -353,6 +353,13 @@ IError IFontBDFFree ( char *name )
   if ( ! font )
     return ( INoSuchFont );
 
+  /* Remove this font from the cache *before* freeing it, so a later
+     _IGetFont() does not walk a dangling pointer (use-after-free). */
+  for ( loop = 0; loop < (unsigned int) num_fonts; loop++ ) {
+    if ( fonts[loop] == font )
+      fonts[loop] = NULL;
+  }
+
   for ( loop = 0; loop < 256; loop++ ) {
     if ( font->chars[loop] )
       free_character ( font->chars[loop] );
