@@ -36,7 +36,12 @@ target_include_directories(ilib
 target_compile_options(ilib PRIVATE
   $<$<C_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>
   $<$<C_COMPILER_ID:GNU,Clang,AppleClang>:-Wextra>
-  $<$<AND:$<BOOL:${ILIB_WERROR}>,$<C_COMPILER_ID:GNU,Clang,AppleClang>>:-Werror>)
+  $<$<AND:$<BOOL:${ILIB_WERROR}>,$<C_COMPILER_ID:GNU,Clang,AppleClang>>:-Werror>
+  # TEMPORARY: the sources are still K&R-style. Modern Clang flags every such
+  # definition (-Wdeprecated-non-prototype). Exempt only that one category
+  # until the K&R -> ISO C prototype conversion (next PR) lands, so -Werror
+  # still enforces all other warnings.
+  $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-deprecated-non-prototype>)
 
 # --- Optional image-format backends -----------------------------------------
 # The sources gate support on HAVE_GIFLIB / HAVE_PNGLIB / HAVE_JPEGLIB and
