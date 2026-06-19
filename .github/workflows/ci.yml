@@ -35,7 +35,7 @@ jobs:
         run: brew install giflib jpeg libpng
 
       - name: Configure
-        run: cmake -B build -DILIB_BUILD_TESTS=ON
+        run: cmake -B build -DILIB_BUILD_TESTS=ON -DILIB_WERROR=ON
 
       - name: Build
         run: cmake --build build --parallel
