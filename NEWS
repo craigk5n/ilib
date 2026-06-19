@@ -1,0 +1,17 @@
+Ilib NEWS -- user-visible changes between releases.
+See ChangeLog for the full, detailed history.
+
+1.1.10
+  * Fix for newer versions of libpng that caused a compiler error.
+  * Build, documentation, and repository modernization (in progress).
+
+1.1.9
+  * Added IFloodFill().
+
+1.1.8
+  * The Perl module is now bundled with the main distribution.
+  * Fixed a bug in ICopyImageScaled().
+  * libjpeg no longer calls exit() on input errors; an error code is
+    returned instead.
+
+Older releases: see ChangeLog.

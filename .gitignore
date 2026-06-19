@@ -1,7 +1,67 @@
-*.O
+# CMake build directories
+/build/
+/build-*/
+CMakeUserPresets.json
+
+# Compiled objects and libraries
 *.o
+*.O
 *.a
+*.lo
+*.la
+*.so
+*.so.*
+*.dylib
+.libs/
+.deps/
+
+# Editor backups
 *~
+*.swp
+
+# Generated font headers (produced by ifont2h from .bdf fonts)
 helv*.h
 cour*.h
-libIlib.so.*
+
+# Generated public header (linked from src/Ilib.h by include/Makefile)
+/include/Ilib.h
+
+# GNU Autotools generated output (build inputs configure.ac / *.am are NOT ignored)
+/configure
+/config.h
+/config.h.in
+/config.log
+/config.status
+/config.guess
+/config.sub
+/stamp-h1
+/aclocal.m4
+/autom4te.cache/
+/libtool
+Makefile.in
+
+# Autotools auxiliary files (usually symlinks installed by automake --add-missing)
+/INSTALL
+/depcomp
+/install-sh
+/missing
+/compile
+/ltmain.sh
+
+# Built client/example binaries
+/ifont2h
+/clients/ifont2h/ifont2h
+/clients/idisplayfont/idisplayfont
+/clients/ifraggraph/ifraggraph
+/clients/iindex/iindex
+/clients/iwebreprt/iwebreprt
+/examples/iconvert/iconvert
+/examples/isample/isample
+
+# Perl module build artifacts
+/perl/Makefile
+/perl/Makefile.old
+/perl/blib/
+/perl/pm_to_blib
+/perl/*.bs
+/perl/Ilib.c
