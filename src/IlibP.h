@@ -222,7 +222,11 @@ typedef struct {
 } IFormatDef;
 #ifdef IIncludeFileFormats
 static IFormatDef IFileFormats[] = {
+#ifdef HAVE_GIFLIB
   { /* IFORMAT_GIF */ "GIF", _IReadGIF, _IWriteGIF, 8, 0 },
+#else
+  { /* IFORMAT_GIF */ "GIF", NULL, NULL, 8, 0 },
+#endif
   { /* IFORMAT_PPM */ "PPM", _IReadPPM, _IWritePPM, 24, 0 },
   { /* IFORMAT_PGM */ "PGM", _IReadPPM, _IWritePGM, 8, 1 },
   { /* IFORMAT_PBM */ "PBM", NULL, NULL, 1, 1 },
