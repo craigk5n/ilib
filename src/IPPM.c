@@ -152,9 +152,12 @@ IError _IReadPPM ( FILE *fp, IOptions options, IImageP **image_return )
       return ( IFileInvalid );
   }
 
-  /* Normalize to 255 if not already */
+  /* Normalize to 255 if not already. The buffer is w*h bytes for greyscale
+     (P5) and w*h*3 for RGB (P6) -- using w*h*3 unconditionally overran a
+     greyscale image by 3x. */
   if ( maxcolors != 255 ) {
-    for ( i = 0; i < ( w * h * 3 ); i++ ) {
+    int nbytes = greyscale ? ( w * h ) : ( w * h * 3 );
+    for ( i = 0; i < nbytes; i++ ) {
       ptr = image->data + i;
       temp = *ptr;
       temp = 255 * temp / maxcolors;
