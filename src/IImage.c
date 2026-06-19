@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <memory.h>
+#include <string.h>
 
 #include "Ilib.h"
 #define IIncludeFileFormats	/* add some static defines */
@@ -149,9 +149,11 @@ IOptions options;
 
   if ( IFileFormats[format].write_func )
     ret = IFileFormats[format].write_func ( fp, imagep, options );
-  else
+  else {
     fprintf ( stderr, "IWriteImageFile: %s format write not implemented.\n",
       IFileFormats[format].name );
+    ret = IFunctionNotImplemented;
+  }
 
   return ( ret );
 }
@@ -164,7 +166,7 @@ IFileFormat format;
 IOptions options;
 IImage *image_return;
 {
-  IError ret;
+  IError ret = INoError;
 
   if ( format < 0 || format >= INUM_FORMATS ) {
     fprintf ( stderr, "IReadImageFile: invalid format %d\n", format );

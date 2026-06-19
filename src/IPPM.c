@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <memory.h>
+#include <string.h>
 
 #include "Ilib.h"
 #include "IlibP.h"
@@ -97,14 +97,16 @@ IImageP **image_return;
   int maxcolors = 255;
   int greyscale = 0;
 
-  fgets ( data, 1024, fp );
+  if ( fgets ( data, 1024, fp ) == NULL )
+    return ( IFileInvalid );
   if ( strncmp ( data, "P5", 2 ) == 0 ) {
     greyscale = 1;
     options |= IOPTION_GREYSCALE;
   } else if ( strncmp ( data, "P6", 2 ) )
     return ( IFileInvalid );
 
-  fgets ( data, 1024, fp );
+  if ( fgets ( data, 1024, fp ) == NULL )
+    return ( IFileInvalid );
   while ( data[0] == '#' ) {
     if ( comments == NULL ) {
       for ( p = data + 1; *p != ' ' && *p != '\0'; p++) ;
@@ -113,14 +115,17 @@ IImageP **image_return;
         strcpy ( comments, p );
       }
     }
-    fgets ( data, 1024, fp );
+    if ( fgets ( data, 1024, fp ) == NULL )
+      return ( IFileInvalid );
   }
   /* should now contain width and height */
   if ( sscanf ( data, "%d %d", &w, &h ) != 2 )
     return ( IFileInvalid );
-  fgets ( data, 1024, fp );
+  if ( fgets ( data, 1024, fp ) == NULL )
+    return ( IFileInvalid );
   while ( data[0] == '#' )
-    fgets ( data, 1024, fp );
+    if ( fgets ( data, 1024, fp ) == NULL )
+      return ( IFileInvalid );
   /* should now contain maxcolor value */
   if ( sscanf ( data, "%d", &maxcolors ) != 1 )
     return ( IFileInvalid );
@@ -133,10 +138,14 @@ IImageP **image_return;
     strcpy ( image->comments, IDEFAULT_COMMENT );
   }
 
-  if ( greyscale )
-    fread ( image->data, 1, w * h, fp );
-  else
-    fread ( image->data, 1, w * h * 3, fp );
+  if ( greyscale ) {
+    if ( fread ( image->data, 1, w * h, fp ) != (size_t) ( w * h ) )
+      return ( IFileInvalid );
+  }
+  else {
+    if ( fread ( image->data, 1, w * h * 3, fp ) != (size_t) ( w * h * 3 ) )
+      return ( IFileInvalid );
+  }
 
   /* Normalize to 255 if not already */
   if ( maxcolors != 255 ) {

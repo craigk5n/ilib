@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <memory.h>
+#include <string.h>
 
 #include "Ilib.h"
 #include "IlibP.h"
@@ -92,7 +92,7 @@ unsigned int *height_return;
 
   ret_height = font_height;
 
-  for ( ptr = text, loop = 0; loop < len; loop++, ptr++ ) {
+  for ( ptr = text, loop = 0; (unsigned int) loop < len; loop++, ptr++ ) {
     if ( *ptr == '\012' ) {
       charx = 0;
       chary += font_height;
@@ -115,7 +115,7 @@ unsigned int *height_return;
     else {
       loop2 = 0;
       ptr++;
-      while ( *ptr != ';' && loop < len && loop2 < 256 ) {
+      while ( *ptr != ';' && (unsigned int) loop < len && loop2 < 256 ) {
         ch[loop2] = *ptr;
         ptr++;
         loop++;

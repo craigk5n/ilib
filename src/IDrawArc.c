@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <memory.h>
+#include <string.h>
 #include <math.h>
 
 #include "Ilib.h"
@@ -37,7 +37,7 @@ double a2; /* arc 2 (in degrees) */
 {
   IGCP *gcp = (IGCP *)gc;
   IImageP *imagep = (IImageP *)image;
-  int myx, myy, lastx, lasty, N, loop;
+  int myx, myy, lastx = 0, lasty = 0, N, loop;
   double a, da;
 
   if ( ! gcp )
@@ -87,7 +87,7 @@ double a2; /* arc 2 (in degrees) */
 {
   IGCP *gcp = (IGCP *)gc;
   IImageP *imagep = (IImageP *)image;
-  int myx, myy, lastx, lasty, N, loop;
+  int myx, myy, lastx = 0, lasty = 0, N, loop;
   double a, da;
 
   if ( ! gcp )

@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <memory.h>
+#include <string.h>
 
 #include <png.h>
 
@@ -45,6 +45,7 @@ IOptions options;
   png_infop info_ptr;
   png_text comment;
   int row;
+  (void) options;
 
   png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING,
     (png_voidp) NULL, (png_error_ptr) NULL, (png_error_ptr) NULL );
@@ -108,6 +109,7 @@ IImageP **image_return;
   png_uint_32 width, height;
   int bit_depth, color_type, interlace_type, row;
   png_bytep row_pointer;
+  (void) options;
 
   png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
     (png_voidp) NULL, (png_error_ptr) NULL, (png_error_ptr) NULL );
@@ -153,7 +155,7 @@ IImageP **image_return;
       png_get_rowbytes ( png_ptr, info_ptr ) );
 
   row_pointer = (png_bytep) malloc ( image->width * 3 );
-  for ( row = 0; row < height; row++ ) {
+  for ( row = 0; (png_uint_32) row < height; row++ ) {
     png_read_rows ( png_ptr, &row_pointer, NULL, 1 );
     memcpy ( image->data + ( row * image->width * 3 ),
       row_pointer, ( image->width * 3 ) );

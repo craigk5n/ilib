@@ -173,11 +173,10 @@ char **lines;
   int temp;
   int in_bitmap = 0, hexval;
   int loop, which_char, which_bit;
-  int num_ret;
   char c;
   Font *font;
-  Char *character;
-  int xpos, ypos;
+  Char *character = NULL;
+  int xpos, ypos = 0;
   static int first = 1;
   int line_no = 0;
 
@@ -211,7 +210,6 @@ char **lines;
       in_bitmap = 0;
       character = (Char *) malloc ( sizeof ( Char ) );
       memset ( character, '\0', sizeof ( Char ) );
-      num_ret = 1;
       character->name = (char *) malloc ( strlen ( ch ) + 1 );
       strcpy ( character->name, ch );
     }
@@ -289,7 +287,7 @@ char **lines;
 */
     } else if ( in_bitmap ) {
       xpos = 0;
-      for ( loop = 0; loop < character->width; loop++ ) {
+      for ( loop = 0; (unsigned int) loop < character->width; loop++ ) {
         which_char = loop / 4;
         c = text[which_char];
         if ( isdigit ( c ) )

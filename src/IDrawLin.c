@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <memory.h>
+#include <string.h>
 #include <math.h>
 
 #include "Ilib.h"
@@ -35,7 +35,7 @@ int y2;
   IGCP *gcp = (IGCP *)gc;
   IImageP *imagep = (IImageP *)image;
   int myx, myy;
-  double slope;
+  double slope = 0.0;
   double myslope;
   double curx, cury;
   int done = 0;
@@ -83,11 +83,11 @@ int y2;
 
   /* handle dashes */
   if ( gcp->line_style == ILINE_ON_OFF_DASH ) {
-    if ( x1 == x2 || abs ( slope ) < 0.1 || abs ( slope ) > 10 ) {
+    if ( x1 == x2 || fabs ( slope ) < 0.1 || fabs ( slope ) > 10 ) {
       on_off_size = ON_OFF_PIXELS;
     }
     else {
-      myslope = abs ( slope );
+      myslope = fabs ( slope );
       if ( myslope > 1.0 )
         myslope = 1.0 / myslope;
       /* myslope now between 0 and 1.0 */

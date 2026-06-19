@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <memory.h>
+#include <string.h>
 #include <math.h>
 
 #include "Ilib.h"
@@ -111,7 +111,7 @@ int npoints;
   int loop;
   int maxY, minY;
   IPoint *pts;
-  int left, right, xval;
+  int left = 0, right = 0, xval;
   int npts, yloop;
   linetype *lines;
   int nlines;

@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "Ilib.h"
 #include "IlibP.h"
@@ -91,7 +92,7 @@ unsigned int red, green, blue;
 IError _IFreeColor ( color )
 IColor color;
 {
-  IColorP *c = (IColorP *)color;
+  IColorP *c = (IColorP *)(intptr_t)color;
 
   if ( color ) {
     c = _IGetColor ( color );
@@ -99,7 +100,7 @@ IColor color;
       return ( IInvalidColor );
     if ( c->magic != IMAGIC_COLOR )
       return ( IInvalidColor );
-    if ( color >= 0 && color < num_colors && colors[color] ) {
+    if ( color < (unsigned int) num_colors && colors[color] ) {
       colors[color]->magic = 0;
       free ( colors[color] );
       colors[color] = NULL;
