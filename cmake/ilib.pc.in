@@ -1,0 +1,14 @@
+# Relocatable: derive the prefix from this file's own location so the .pc is
+# correct regardless of the install prefix (including `cmake --install --prefix`).
+prefix=${pcfiledir}/@ILIB_PC_REL_PREFIX@
+exec_prefix=${prefix}
+libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: Ilib
+Description: @PROJECT_DESCRIPTION@
+URL: @PROJECT_HOMEPAGE_URL@
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -lilib
+Libs.private: -lm
+Cflags: -I${includedir}
