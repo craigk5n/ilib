@@ -282,7 +282,9 @@ IError _IReadXPM ( FILE *fp, IOptions options, IImageP **image_return )
         break;
     }
     colors[loop].abbrev = (char *) malloc ( colorw + 1 );
-    strncpy ( colors[loop].abbrev, line + 1, colorw );
+    /* copy exactly colorw bytes (line is a 1024-byte buffer, colorw <= 32),
+       then terminate; memcpy avoids -Wstringop-truncation from strncpy */
+    memcpy ( colors[loop].abbrev, line + 1, colorw );
     colors[loop].abbrev[colorw] = '\0';
     for ( ptr = line + 1 + colorw; *ptr != 'c' && *ptr != '\0'; ptr++ ) ;
     if ( *ptr != 'c' )
