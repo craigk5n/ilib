@@ -25,6 +25,8 @@ option(ILIB_BUILD_CLIENTS  "Build the bundled client tools"        ON)
 option(ILIB_BUILD_EXAMPLES "Build the bundled example programs"    ON)
 option(ILIB_BUILD_TESTS    "Build the test suite"                  OFF)
 option(ILIB_WERROR         "Treat compiler warnings as errors (CI)" OFF)
+option(ILIB_SANITIZE       "Build with AddressSanitizer + UBSan"   OFF)
+option(ILIB_COVERAGE       "Build with coverage instrumentation"   OFF)
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build type" FORCE)
@@ -32,6 +34,17 @@ endif()
 
 # Emit compile_commands.json for clang-tidy / clangd / IDE tooling (Phase 3+).
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Instrumentation (applied to every target). Used by the CI sanitizer and
+# coverage jobs; off by default for normal builds.
+if(ILIB_SANITIZE)
+  add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer -g)
+  add_link_options(-fsanitize=address,undefined)
+endif()
+if(ILIB_COVERAGE)
+  add_compile_options(--coverage -O0 -g)
+  add_link_options(--coverage)
+endif()
 
 include(GNUInstallDirs)
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/IlibFonts.cmake")

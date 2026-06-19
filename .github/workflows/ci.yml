@@ -42,3 +42,50 @@ jobs:
 
       - name: Test
         run: ctest --test-dir build --output-on-failure
+
+  sanitizers:
+    name: sanitizers (asan+ubsan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake libpng-dev libjpeg-dev libgif-dev
+      - name: Configure
+        run: cmake -B build -DILIB_BUILD_TESTS=ON -DILIB_SANITIZE=ON
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake libpng-dev libjpeg-dev libgif-dev lcov
+      - name: Configure
+        run: cmake -B build -DILIB_BUILD_TESTS=ON -DILIB_COVERAGE=ON
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+      - name: Capture coverage
+        run: |
+          lcov --capture --directory build --output-file coverage.info \
+            --ignore-errors mismatch,negative 2>/dev/null || \
+            lcov --capture --directory build --output-file coverage.info
+          lcov --remove coverage.info '/usr/*' "$PWD/tests/*" \
+            --output-file coverage.info 2>/dev/null || true
+          lcov --list coverage.info
+          genhtml coverage.info --output-directory coverage-html 2>/dev/null || true
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: coverage-html
+          if-no-files-found: ignore
