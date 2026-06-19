@@ -35,6 +35,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(GNUInstallDirs)
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/IlibFonts.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/IlibWarnings.cmake")
 
 add_subdirectory(src)
 

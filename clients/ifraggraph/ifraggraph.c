@@ -136,7 +136,7 @@ static void read_file ( char *filename )
     fprintf ( stderr, "Unable to open log file %s\n", filename );
     return;
   }
-  while ( fgets ( text, 10240, fp ) ) {
+  while ( fgets ( text, sizeof ( text ), fp ) ) {
     ptr = strtok ( text, "\\" );
     if ( ! ptr )
       continue;
@@ -187,8 +187,8 @@ static void generate_gif ( void )
 {
   int loop;
   char temp[200];
-  int x, y, lastx, lasty;
-  int r_x, r_y, r_lastx, r_lasty;
+  int x, y, lastx = 0, lasty = 0;
+  int r_x, r_y, r_lastx = 0, r_lasty = 0;
   IImage im_out;	/* output image */
   IFont helvB18, courR10;
   IColor red, green, blue, black, grey;

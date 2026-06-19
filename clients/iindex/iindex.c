@@ -257,7 +257,7 @@ int main ( int argc, char *argv[] )
     /* don't write more text than will fit under the image. */
     len = strlen ( filename );
     ret = ITextWidth ( gc, font, filename, len, &strw );
-    while ( strw > iconW && len > 0 ) {
+    while ( strw > (unsigned int) iconW && len > 0 ) {
       ret = ITextWidth ( gc, font, filename, --len, &strw );
     }
     IDrawString ( image, gc, x, y + iconH + textspace - 2,
