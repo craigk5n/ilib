@@ -87,15 +87,38 @@ Or with pkg-config:
 cc example.c $(pkg-config --cflags --libs ilib) -o example
 ```
 
+For **static** linking, `pkg-config --static --libs ilib` adds the transitive
+codec/math dependencies (`-lm` plus `-lpng`/`-ljpeg`/`-lgif` for whichever
+backends were enabled at build time).
+
 The `examples/` and `clients/` directories show how to use the API: `iconvert`
 converts images between formats and `isample` demonstrates drawing text, lines,
 and shapes.
 
+### Packaging and releases
+
+Tagged releases (`vX.Y.Z`) publish source and binary tarballs with
+`SHA256SUMS` to [GitHub Releases](https://github.com/craigk5n/ilib/releases),
+built by `.github/workflows/release.yml`. You can produce the same artifacts
+locally from a configured build tree:
+
+```bash
+cd build
+cpack -G TGZ                                  # binary tarball
+cpack --config CPackSourceConfig.cmake        # source tarball
+# cpack -G DEB                                 # Debian package (on a Debian host)
+```
+
+Downstream packaging notes (Homebrew, Debian, vcpkg) live in
+[`packaging/README.md`](packaging/README.md).
+
 ## Fonts
 
-Ilib draws text using X11 BDF fonts. A few sample fonts ship in `fonts/`; you
-can load any BDF font at runtime, or compile one into your program with the
-`ifont2h` tool. More BDF fonts:
+Ilib draws text using X11 BDF fonts. A few sample fonts ship in `fonts/` and are
+installed to `<prefix>/share/ilib/fonts` (query the exact path with
+`pkg-config --variable=fontdir ilib`). Pass a `.bdf` path to
+`ILoadFontFromFile()`, or compile a font into your program with the `ifont2h`
+tool. More BDF fonts:
 
 - [Search the web](https://www.google.com/search?q=timR24.bdf)
 - [Apple X11 fonts](https://opensource.apple.com/source/X11fonts/X11fonts-10.2/font-adobe-100dpi/font-adobe-100dpi-X11R7.0-1.0.0/)
