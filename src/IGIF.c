@@ -56,6 +56,28 @@
 #include "Ilib.h"
 #include "IlibP.h"
 
+/*
+** giflib API compatibility.
+**   - giflib 5.0 renamed MakeMapObject/FreeMapObject to Gif* and added an
+**     Error out-parameter to the *Open* functions.
+**   - giflib 5.1 added an Error out-parameter to the *CloseFile functions.
+** The code below is written against the modern (5.x) API; these shims keep it
+** building against older giflib releases.
+*/
+#if !defined(GIFLIB_MAJOR) || GIFLIB_MAJOR < 5
+#define GifMakeMapObject  MakeMapObject
+#define GifFreeMapObject  FreeMapObject
+#define ILIB_GIF_OPEN_HAS_ERR  0
+#define ILIB_GIF_CLOSE_HAS_ERR 0
+#else
+#define ILIB_GIF_OPEN_HAS_ERR  1
+#if GIFLIB_MAJOR > 5 || (GIFLIB_MAJOR == 5 && GIFLIB_MINOR >= 1)
+#define ILIB_GIF_CLOSE_HAS_ERR 1
+#else
+#define ILIB_GIF_CLOSE_HAS_ERR 0
+#endif
+#endif
+
 #define colors_match(color,r,g,b) \
  (color->red == r && color->green == g && color->blue == b )
 
@@ -97,6 +119,7 @@ IOptions options;
   int color_found;
   int transparent = -1, interlaced = 0;
   int fd;
+  int gif_err = 0;
   GifFileType *gft;
   GifByteType ext[4];
   unsigned char *data;
@@ -163,7 +186,7 @@ IOptions options;
 
   fd = fileno ( fp );
 
-  GIFcolormap = MakeMapObject ( color_ceil, NULL );
+  GIFcolormap = GifMakeMapObject ( color_ceil, NULL );
   for ( loop = 0; loop < color_ceil; loop++ ) {
     if ( loop < num_colors ) {
       GIFcolormap->Colors[loop].Red = colormap[loop]->red;
@@ -175,7 +198,13 @@ IOptions options;
     }
   }
 
-  gft = EGifOpenFileHandle ( fileno ( fp ) );
+#if ILIB_GIF_OPEN_HAS_ERR
+  gft = EGifOpenFileHandle ( fd, &gif_err );
+#else
+  gft = EGifOpenFileHandle ( fd );
+#endif
+  if ( gft == NULL )
+    return ( IGIFError );
 
   /* causes seg fault...
   EGifSetGifVersion ( "89a" );
@@ -230,14 +259,18 @@ IOptions options;
       return ( IGIFError );
   }
 
+#if ILIB_GIF_CLOSE_HAS_ERR
+  EGifCloseFile ( gft, &gif_err );
+#else
   EGifCloseFile ( gft );
+#endif
 
   /* free up allocated resources */
   free ( data );
   for ( loop = 0; loop < num_colors; loop++ ) {
     free ( colormap[loop] );
   }
-  FreeMapObject ( GIFcolormap );
+  GifFreeMapObject ( GIFcolormap );
 
   return ( INoError );
 }
@@ -258,6 +291,7 @@ IImageP **image_return;
   GifByteType *extension;
   int extcode;
   int fd;
+  int gif_err = 0;
   int loop, loop2, col;
   unsigned char *ptr, *r, *g, *b;
   unsigned int temp;
@@ -268,7 +302,12 @@ IImageP **image_return;
 
   fd = fileno ( fp );
 
-  if ( ( gft = DGifOpenFileHandle ( fd ) ) == NULL )
+#if ILIB_GIF_OPEN_HAS_ERR
+  gft = DGifOpenFileHandle ( fd, &gif_err );
+#else
+  gft = DGifOpenFileHandle ( fd );
+#endif
+  if ( gft == NULL )
     return ( IGIFError );
 
   while ( image == NULL ) {
@@ -354,7 +393,11 @@ IImageP **image_return;
 
   if ( gifdata )
     free ( gifdata );
+#if ILIB_GIF_CLOSE_HAS_ERR
+  DGifCloseFile ( gft, &gif_err );
+#else
   DGifCloseFile ( gft );
+#endif
 
   *image_return = image;
 

@@ -30,8 +30,6 @@
 char *IErrorString ( err )
 IError err;
 {
-  static char msg[500];
-
   switch ( err ) {
     case IInvalidImage: return ( "Invalid image" );
     case IInvalidGC: return ( "Invalid GC" );
@@ -51,9 +49,9 @@ IError err;
     case IInvalidColorName: return ( "Invalid color name" );
     case INoGIFSupport: return ( "GIF support not available" );
 #ifdef HAVE_GIFLIB
-    case IGIFError:
-      sprintf ( msg, "GIF Error: %d", GifLastError () );
-      return ( msg );
+    /* giflib 5.x removed the global GifLastError(); errors are reported per
+       call/handle, which this generic routine does not have access to. */
+    case IGIFError: return ( "GIF error" );
 #endif
     case INoPNGSupport: return ( "PNG support not available" );
     case IPNGError: return ( "Unknown PNG error" );
