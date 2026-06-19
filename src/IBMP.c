@@ -137,8 +137,14 @@ IError _IReadBMP ( FILE *fp, IOptions options, IImageP **image_return )
   }
 
   if (depth <= 8) {
+    /* depth/colorsused are untrusted: avoid a negative-shift UB and an
+       unbounded (or negative) colormap allocation. A <=8-bit palette has at
+       most 2<<depth entries by this reader's own convention. */
+    if (depth < 1) return (IInvalidFormat);
     if (!colorsused) colorsused = 2<<depth;
+    if (colorsused < 0 || colorsused > (2<<depth)) return (IInvalidFormat);
     colortable = malloc(colorsused*sizeof(int));
+    if (!colortable) return (IInvalidFormat);
     for (scratch = 0; scratch < colorsused; scratch++) {
       if (!ReadLong(fp,(colortable+scratch))) return (IInvalidFormat);
     }
