@@ -7,8 +7,8 @@ INCLUDES = Ilib.h
 
 all: $(INCLUDES)
 
-Ilib.h:
-	ln ../src/Ilib.h .
+Ilib.h: ../src/Ilib.h
+	ln -sf ../src/Ilib.h .
 
 install:
 	@echo "Install not done from `pwd`"

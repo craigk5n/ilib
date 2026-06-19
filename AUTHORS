@@ -1,0 +1,9 @@
+Ilib was written and is maintained by:
+
+  Craig Knudsen <craig@k5n.us>            Original author and maintainer
+
+Contributors:
+
+  Jim Winstead <jimw@trainedmonkey.com>   BMP read support (_IReadBMP)
+
+See ChangeLog for the detailed history of changes.
