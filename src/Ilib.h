@@ -71,6 +71,8 @@
 #ifndef _ilib_h
 #define _ilib_h
 
+#include <stdio.h>		/* for FILE * in the read/write prototypes */
+
 #define ILIB_MAJOR_VERSION	1
 #define ILIB_MINOR_VERSION	1
 #define ILIB_MICRO_VERSION	10
