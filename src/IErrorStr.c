@@ -27,8 +27,7 @@
 #endif
 
 
-char *IErrorString ( err )
-IError err;
+char *IErrorString ( IError err )
 {
   switch ( err ) {
     case IInvalidImage: return ( "Invalid image" );

@@ -53,8 +53,7 @@
 
 
 
-static char *get_basename ( infile )
-char *infile;
+static char *get_basename ( char *infile )
 {
   char *ptr;
 
@@ -68,7 +67,7 @@ char *infile;
 }
 
 
-static void print_usage ()
+static void print_usage ( void )
 {
   printf ( "Usage:\n  index [options] outfile infile1 infile2 ...\n" );
   printf ( "\nOptions:\n" );
@@ -85,9 +84,7 @@ static void print_usage ()
 /*
 ** Main
 */
-int main ( argc, argv )
-int argc;
-char *argv[];
+int main ( int argc, char *argv[] )
 {
   int loop;
   int force = 0;

@@ -23,15 +23,7 @@
 
 
 
-IError IFillArc ( image, gc, x, y, r1, r2, a1, a2 )
-IImage image;
-IGC gc;
-int x;
-int y;
-int r1;
-int r2;
-double a1; /* arc 1 (in degrees) */
-double a2; /* arc 2 (in degrees) */
+IError IFillArc ( IImage image, IGC gc, int x, int y, int r1, int r2, double a1, double a2 )
 {
   IGCP *gcp = (IGCP *)gc;
   IImageP *imagep = (IImageP *)image;

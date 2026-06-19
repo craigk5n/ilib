@@ -124,9 +124,7 @@ typedef struct {
 static Font **fonts = NULL;
 static int num_fonts = 0;
 
-IError IFontBDFReadFile ( name, path )
-char *name;
-char *path;
+IError IFontBDFReadFile ( char *name, char *path )
 {
   struct stat buf;
   FILE *fp;
@@ -165,9 +163,7 @@ char *path;
 }
 
 
-IError IFontBDFReadData ( name, lines )
-char *name;
-char **lines;
+IError IFontBDFReadData ( char *name, char **lines )
 {
   char ch[256], *text;
   int temp;
@@ -323,8 +319,7 @@ char **lines;
   return ( INoError );
 }
 
-Font *_IGetFont ( name )
-char *name;
+Font *_IGetFont ( char *name )
 {
   int loop;
 
@@ -341,8 +336,7 @@ char *name;
 }
 
 
-static void free_character ( ch )
-Char *ch;
+static void free_character ( Char *ch )
 {
   free ( ch->name );
   free ( ch->data );
@@ -350,8 +344,7 @@ Char *ch;
 }
 
 
-IError IFontBDFFree ( name )
-char *name;
+IError IFontBDFFree ( char *name )
 {
   Font *font;
   unsigned int loop;
@@ -384,9 +377,7 @@ char *name;
   return ( INoError );
 }
 
-IError _IFontBDFGetSize ( name, height_return )
-char *name;
-unsigned int *height_return;
+IError _IFontBDFGetSize ( char *name, unsigned int *height_return )
 {
   Font *font;
 
@@ -401,17 +392,9 @@ unsigned int *height_return;
 
 
 
-IError IFontBDFGetChar ( name, ch, bitdata, width, height,
-  actual_width, size, xoffset, yoffset )
-char *name;
-char *ch;
-unsigned int **bitdata;
-unsigned int *height;
-unsigned int *width;
-unsigned int *actual_width;
-unsigned int *size;
-int *xoffset;
-int *yoffset;
+IError IFontBDFGetChar ( char *name, char *ch, unsigned int **bitdata,
+  unsigned int *width, unsigned int *height, unsigned int *actual_width,
+  unsigned int *size, int *xoffset, int *yoffset )
 {
   Font *font;
   Char *character = NULL;

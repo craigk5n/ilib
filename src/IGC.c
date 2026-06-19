@@ -22,7 +22,7 @@
 #include "IlibP.h"
 
 
-IGC ICreateGC ()
+IGC ICreateGC ( void )
 {
   IGCP *gc;
 
@@ -40,8 +40,7 @@ IGC ICreateGC ()
 }
 
 
-IError _IFreeGC ( gc )
-IGC gc;
+IError _IFreeGC ( IGC gc )
 {
   IGCP *gcp = (IGCP *)gc;
 
@@ -56,9 +55,7 @@ IGC gc;
 }
 
 
-IError ISetFont ( gc, font )
-IGC gc;
-IFont font;
+IError ISetFont ( IGC gc, IFont font )
 {
   IFontP *fontp = (IFontP *)font;
   IGCP *gcp = (IGCP *)gc;
@@ -90,9 +87,7 @@ IFont font;
 ** It produces some pretty ugly text.  Need to look at gimp and
 ** so how they do this.
 */
-IError ISetAntiAliasedFont ( gc, font )
-IGC gc;
-IFont font;
+IError ISetAntiAliasedFont ( IGC gc, IFont font )
 {
   IFontP *fontp = (IFontP *)font;
   IGCP *gcp = (IGCP *)gc;
@@ -118,9 +113,7 @@ IFont font;
 }
 
 
-IError ISetForeground ( gc, color )
-IGC gc;
-IColor color;
+IError ISetForeground ( IGC gc, IColor color )
 {
   IGCP *gcp = (IGCP *)gc;
   IColorP *colorp;
@@ -143,9 +136,7 @@ IColor color;
 
 
 
-IError ISetBackground ( gc, color )
-IGC gc;
-IColor color;
+IError ISetBackground ( IGC gc, IColor color )
 {
   IGCP *gcp = (IGCP *)gc;
   IColorP *colorp;
@@ -167,9 +158,7 @@ IColor color;
 }
 
 
-IError ISetLineWidth ( gc, line_width )
-IGC gc;
-unsigned int line_width;
+IError ISetLineWidth ( IGC gc, unsigned int line_width )
 {
   IGCP *gcp = (IGCP *)gc;
 
@@ -185,9 +174,7 @@ unsigned int line_width;
 
 
 
-IError ISetLineStyle ( gc, line_style )
-IGC gc;
-ILineStyle line_style;
+IError ISetLineStyle ( IGC gc, ILineStyle line_style )
 {
   IGCP *gcp = (IGCP *)gc;
 
@@ -204,9 +191,7 @@ ILineStyle line_style;
 
 
 
-IError ISetTextStyle ( gc, text_style )
-IGC gc;
-ITextStyle text_style;
+IError ISetTextStyle ( IGC gc, ITextStyle text_style )
 {
   IGCP *gcp = (IGCP *)gc;
 

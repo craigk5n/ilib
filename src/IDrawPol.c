@@ -23,11 +23,7 @@
 
 
 
-IError IDrawPolygon ( image, gc, points, npoints )
-IImage image;
-IGC gc;
-IPoint *points;
-int npoints;
+IError IDrawPolygon ( IImage image, IGC gc, IPoint *points, int npoints )
 {
   IGCP *gcp = (IGCP *)gc;
   IImageP *imagep = (IImageP *)image;

@@ -85,9 +85,7 @@ static int line_width = 2;	/* for line graphs (can use 1-3) */
 /*
 ** Main
 */
-int main ( argc, argv )
-int argc;
-char *argv[];
+int main ( int argc, char *argv[] )
 {
   int loop;
 
@@ -128,8 +126,7 @@ char *argv[];
 * Read in the data file
 *
 ****************************************************************************/
-static void read_file ( filename )
-char *filename;
+static void read_file ( char *filename )
 {
   FILE *fp;
   char text[1024], *ptr;
@@ -164,8 +161,7 @@ char *filename;
 
 
 
-static void add_stat ( type )
-int type;
+static void add_stat ( int type )
 {
   num_stats++;
   stats = (int *) realloc ( stats, ( num_stats * sizeof ( int * ) ) );
@@ -187,7 +183,7 @@ int type;
 #define BOTTOM_PAD	75
 #define DATA_WIDTH	20
 #define DATA_HEIGHT	200
-static void generate_gif ()
+static void generate_gif ( void )
 {
   int loop;
   char temp[200];
@@ -352,8 +348,7 @@ static void generate_gif ()
 * Calculate a nice round number to use as the maximum for the y axis.
 *
 ****************************************************************************/
-static int calc_max ( cur_max )
-int cur_max; 	/* the current max value */
+static int calc_max ( int cur_max )	/* the current max value */
 {
   int ret_val;
   int next_round, tens, div_val;

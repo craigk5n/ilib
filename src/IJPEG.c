@@ -66,10 +66,7 @@ my_error_exit (j_common_ptr cinfo)
 
 
 
-IError _IWriteJPEG ( fp, image, options )
-FILE *fp;
-IImageP *image;
-IOptions options;
+IError _IWriteJPEG ( FILE *fp, IImageP *image, IOptions options )
 {
   struct jpeg_compress_struct cinfo;
   struct jpeg_error_mgr jerr;
@@ -120,10 +117,7 @@ IOptions options;
 
 
 
-IError _IReadJPEG ( fp, options, image_return )
-FILE *fp;
-IOptions options;
-IImageP **image_return;
+IError _IReadJPEG ( FILE *fp, IOptions options, IImageP **image_return )
 {
   IImageP *image;
   struct jpeg_decompress_struct cinfo;

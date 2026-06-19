@@ -22,10 +22,7 @@
 #include "IFontBDF.h"
 
 
-IError ILoadFontFromFile ( name, path, font_return )
-char *name;
-char *path;
-IFont *font_return;
+IError ILoadFontFromFile ( char *name, char *path, IFont *font_return )
 {
   IFontP *font = NULL;
   IError ret;
@@ -45,10 +42,7 @@ IFont *font_return;
 }
 
 
-IError ILoadFontFromData ( name, lines, font_return )
-char *name;
-char **lines;
-IFont *font_return;
+IError ILoadFontFromData ( char *name, char **lines, IFont *font_return )
 {
   IFontP *font = NULL;
   IError ret;
@@ -69,8 +63,7 @@ IFont *font_return;
 
 
 
-IError _IFreeFont ( font )
-IFont font;
+IError _IFreeFont ( IFont font )
 {
   IFontP *fontp = (IFontP *)font;
 
@@ -85,9 +78,7 @@ IFont font;
 }
 
 
-IError IFontSize ( font, height_return )
-IFont font;
-unsigned int *height_return;
+IError IFontSize ( IFont font, unsigned int *height_return )
 {
   IFontP *fontp = (IFontP *)font;
 

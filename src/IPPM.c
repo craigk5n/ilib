@@ -25,10 +25,7 @@
 #include "IlibP.h"
 
 
-IError _IWritePPM ( fp, image, options )
-FILE *fp;
-IImageP *image;
-IOptions options;
+IError _IWritePPM ( FILE *fp, IImageP *image, IOptions options )
 {
   int r, c;
   unsigned char *ptr;
@@ -81,10 +78,7 @@ IOptions options;
 
 
 
-IError _IReadPPM ( fp, options, image_return )
-FILE *fp;
-IOptions options;
-IImageP **image_return;
+IError _IReadPPM ( FILE *fp, IOptions options, IImageP **image_return )
 {
   char data[1024];
   IImageP *image;

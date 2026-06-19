@@ -26,9 +26,7 @@
 
 
 
-IError IFileType ( file, format_return )
-char *file;
-IFileFormat *format_return;
+IError IFileType ( char *file, IFileFormat *format_return )
 {
   char *tmp, *ptr;
   IError ret = INoError;

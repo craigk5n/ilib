@@ -28,7 +28,7 @@ static int num_colors = 0;
 static IColorP **colors = NULL;
 
 
-static void init_colors ()
+static void init_colors ( void )
 {
   IColorP *color;
 
@@ -49,8 +49,7 @@ static void init_colors ()
 
 
 
-IColorP *_IGetColor ( color )
-int color;
+IColorP *_IGetColor ( int color )
 {
   if ( colors == NULL )
     init_colors ();
@@ -62,8 +61,7 @@ int color;
 }
 
 
-IColor IAllocColor ( red, green, blue )
-unsigned int red, green, blue;
+IColor IAllocColor ( unsigned int red, unsigned int green, unsigned int blue )
 {
   IColorP *color;
 
@@ -89,8 +87,7 @@ unsigned int red, green, blue;
 }
 
 
-IError _IFreeColor ( color )
-IColor color;
+IError _IFreeColor ( IColor color )
 {
   IColorP *c = (IColorP *)(intptr_t)color;
 
@@ -114,9 +111,7 @@ IColor color;
 
 
 
-IError IAllocNamedColor ( colorname, color_ret )
-char *colorname;
-IColor *color_ret;
+IError IAllocNamedColor ( char *colorname, IColor *color_ret )
 {
   int loop;
   char *cname, *ptr, *ptr2;

@@ -35,10 +35,7 @@
 #define MAX_COLORMAP_SIZE	(256*256)
 
 
-IError _IWriteXPM ( fp, image, options )
-FILE *fp;
-IImageP *image;
-IOptions options;
+IError _IWriteXPM ( FILE *fp, IImageP *image, IOptions options )
 {
   int r, c;
   unsigned char *ptr;
@@ -157,8 +154,7 @@ IOptions options;
 
 
 
-static unsigned char hextochar ( hex )
-char hex;
+static unsigned char hextochar ( char hex )
 {
   switch ( toupper ( hex ) ) {
     case '0': return 0;
@@ -183,10 +179,7 @@ char hex;
 
 
 
-static int parse_color ( str, r, g, b, is_transparent )
-char *str;
-unsigned char *r, *g, *b;
-int *is_transparent;
+static int parse_color ( char *str, unsigned char *r, unsigned char *g, unsigned char *b, int *is_transparent )
 {
   char *ptr;
   int w;
@@ -228,10 +221,7 @@ typedef struct {
 
 
 
-IError _IReadXPM ( fp, options, image_return )
-FILE *fp;
-IOptions options;
-IImageP **image_return;
+IError _IReadXPM ( FILE *fp, IOptions options, IImageP **image_return )
 {
   IImageP *image = NULL;
   char line[1024], *ptr, *r, *g, *b, *cur;

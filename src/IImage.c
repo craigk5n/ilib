@@ -24,8 +24,7 @@
 #include "IlibP.h"
 
 
-IImage ICreateImage ( width, height, options )
-unsigned width, height, options;
+IImage ICreateImage ( unsigned width, unsigned height, unsigned options )
 {
   IImageP *image;
 
@@ -49,9 +48,7 @@ unsigned width, height, options;
 }
 
 
-IError IDuplicateImage ( image, image_return )
-IImage image;
-IImage *image_return;
+IError IDuplicateImage ( IImage image, IImage *image_return )
 {
   IImageP *i = (IImageP *) image;
   IImageP *ret;
@@ -81,8 +78,7 @@ IImage *image_return;
 }
 
 
-unsigned int IImageHeight ( image )
-IImage image;
+unsigned int IImageHeight ( IImage image )
 {
   IImageP *i = (IImageP *) image;
 
@@ -96,8 +92,7 @@ IImage image;
   return ( i->height );
 }
 
-unsigned int IImageWidth ( image )
-IImage image;
+unsigned int IImageWidth ( IImage image )
 {
   IImageP *i = (IImageP *) image;
 
@@ -112,8 +107,7 @@ IImage image;
 }
 
 
-IError _IFreeImage ( image )
-IImage image;
+IError _IFreeImage ( IImage image )
 {
   IImageP *i = (IImageP *) image;
 
@@ -131,11 +125,7 @@ IImage image;
   return ( INoError );
 }
 
-IError IWriteImageFile ( fp, image, format, options )
-FILE *fp;
-IImage image;
-IFileFormat format;
-IOptions options;
+IError IWriteImageFile ( FILE *fp, IImage image, IFileFormat format, IOptions options )
 {
   IError ret;
   IImageP *imagep = (IImageP *)image;
@@ -160,11 +150,7 @@ IOptions options;
 
 
 
-IError IReadImageFile ( fp, format, options, image_return )
-FILE *fp;
-IFileFormat format;
-IOptions options;
-IImage *image_return;
+IError IReadImageFile ( FILE *fp, IFileFormat format, IOptions options, IImage *image_return )
 {
   IError ret = INoError;
 
@@ -186,9 +172,7 @@ IImage *image_return;
 }
 
 
-IError ISetComment ( image, comments )
-IImage image;
-char *comments;
+IError ISetComment ( IImage image, char *comments )
 {
   IImageP *imagep = (IImageP *)image;
 
@@ -210,9 +194,7 @@ char *comments;
   return INoError;
 }
 
-IError IGetComment ( image, comments )
-IImage image;
-char **comments;
+IError IGetComment ( IImage image, char **comments )
 {
   IImageP *imagep = (IImageP *)image;
 
@@ -229,9 +211,7 @@ char **comments;
 
 
 
-IError ISetTransparent ( image, color )
-IImage image;
-IColor color;
+IError ISetTransparent ( IImage image, IColor color )
 {
   IImageP *imagep = (IImageP *)image;
   IColorP *colorp;
@@ -258,9 +238,7 @@ IColor color;
 
 
 
-IError IGetTransparent ( image, color )
-IImage image;
-IColor *color;
+IError IGetTransparent ( IImage image, IColor *color )
 {
   IImageP *imagep = (IImageP *)image;
 
