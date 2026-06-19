@@ -5,6 +5,8 @@
 # image that segfaults a decoder) is reported as that test failing without
 # taking down the rest of the suite.
 
+if(ILIB_BUILD_TESTS)
+
 # Tests that only use the public API.
 set(ILIB_PUBLIC_TESTS test_color test_text)
 
@@ -29,3 +31,14 @@ endforeach()
 # The text tests load BDF fonts from the source tree.
 target_compile_definitions(test_text PRIVATE
   ILIB_TEST_FONT_DIR="${CMAKE_SOURCE_DIR}/fonts")
+
+endif() # ILIB_BUILD_TESTS
+
+# libFuzzer harness over the image decoders (Clang only; see fuzz_decode.c).
+# Run e.g.: ./build/tests/fuzz_decode -max_total_time=60
+if(ILIB_FUZZ)
+  add_executable(fuzz_decode fuzz_decode.c)
+  target_link_libraries(fuzz_decode PRIVATE Ilib::ilib)
+  target_compile_definitions(fuzz_decode PRIVATE _GNU_SOURCE) # fmemopen
+  target_link_options(fuzz_decode PRIVATE -fsanitize=fuzzer)
+endif()
