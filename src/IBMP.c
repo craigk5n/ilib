@@ -53,13 +53,14 @@ static int ReadLong (FILE *fp, int *ret)
   *ret = (c&0xff);
   c = fgetc(fp);
   if (c == EOF) return 0;
-  *ret |= (c&0xff) << 8;
+  *ret |= (int)((unsigned int)(c&0xff) << 8);
   c = fgetc(fp);
   if (c == EOF) return 0;
-  *ret |= (c&0xff) << 16;
+  *ret |= (int)((unsigned int)(c&0xff) << 16);
   c = fgetc(fp);
   if (c == EOF) return 0;
-  *ret |= (c&0xff) << 24;
+  /* shift as unsigned: (c&0xff)<<24 would overflow signed int when bit 7 set */
+  *ret |= (int)((unsigned int)(c&0xff) << 24);
   return 1;
 }
 
