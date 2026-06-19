@@ -1,0 +1,60 @@
+name: Release
+
+# Tagging a version (e.g. `git tag v1.1.10 && git push --tags`) builds the
+# release, produces source + binary tarballs with checksums via CPack, and
+# publishes them to a GitHub Release.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake libpng-dev libjpeg-dev libgif-dev
+
+      - name: Verify tag matches the header version
+        run: |
+          hdr=$(sed -n 's/.*ILIB_VERSION[ \t]*"\([0-9.]*\)".*/\1/p' src/Ilib.h)
+          tag="${GITHUB_REF_NAME#v}"
+          echo "header=$hdr tag=$tag"
+          if [ "$hdr" != "$tag" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match ILIB_VERSION=${hdr}"
+            exit 1
+          fi
+
+      - name: Configure
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release \
+            -DILIB_BUILD_CLIENTS=OFF -DILIB_BUILD_EXAMPLES=OFF
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Package (binary + source tarballs)
+        working-directory: build
+        run: |
+          cpack -G TGZ
+          cpack --config CPackSourceConfig.cmake
+          sha256sum ilib-*.tar.gz > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Publish GitHub release
+        working-directory: build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            ilib-*.tar.gz SHA256SUMS \
+            --title "ilib ${GITHUB_REF_NAME}" \
+            --generate-notes
