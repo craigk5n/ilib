@@ -24,23 +24,39 @@
 #include "IlibP.h"
 
 
+/* Upper bound on total pixels for a single image. Generous for real use
+   (~134 megapixels) but bounds the allocation so a malformed file claiming
+   enormous dimensions cannot trigger a huge allocation / OOM. */
+#define ILIB_MAX_PIXELS ( 1u << 27 )
+
 IImage ICreateImage ( unsigned width, unsigned height, unsigned options )
 {
   IImageP *image;
+  size_t channels = ( options & IOPTION_GREYSCALE ) ? 1 : 3;
+  size_t npixels, nbytes;
+
+  if ( width == 0 || height == 0 )
+    return ( NULL );
+  npixels = (size_t) width * (size_t) height;     /* size_t: no overflow */
+  if ( npixels > ILIB_MAX_PIXELS )
+    return ( NULL );
+  nbytes = npixels * channels;
 
   image = (IImageP *) malloc ( sizeof ( IImageP ) );
+  if ( ! image )
+    return ( NULL );
   memset ( image, '\0', sizeof ( IImageP ) );
   image->width = width;
   image->height = height;
-  if ( options & IOPTION_GREYSCALE ) {
-    image->data = (unsigned char *) malloc ( width * height );
-    memset ( image->data, 255, width * height );
+  if ( options & IOPTION_GREYSCALE )
     image->greyscale = 1;
+
+  image->data = (unsigned char *) malloc ( nbytes );
+  if ( ! image->data ) {
+    free ( image );
+    return ( NULL );
   }
-  else {
-    image->data = (unsigned char *) malloc ( width * height * 3 );
-    memset ( image->data, 255, width * height * 3 );
-  }
+  memset ( image->data, 255, nbytes );
 
   image->magic = IMAGIC_IMAGE;
 
