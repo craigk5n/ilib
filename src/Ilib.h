@@ -73,9 +73,9 @@
 
 #define ILIB_MAJOR_VERSION	1
 #define ILIB_MINOR_VERSION	1
-#define ILIB_MICRO_VERSION	6
+#define ILIB_MICRO_VERSION	10
 
-#define ILIB_VERSION		"1.1.9"
+#define ILIB_VERSION		"1.1.10"
 #define ILIB_VERSION_DATE	"25 Oct 2004"
 #define ILIB_URL		"http://ilib.sourceforge.net"
 
