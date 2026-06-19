@@ -618,7 +618,7 @@ static void generate_gif ( void )
   IFont helvB18, courR10;
   IColor red, blue, black, grey;
   IGC gc;
-  int height, width = 0;
+  int height = 0, width = 0;
 
   /*
   ** Display day of month data

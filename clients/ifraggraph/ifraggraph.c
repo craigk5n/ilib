@@ -196,8 +196,8 @@ static void generate_gif ( void )
   int height, width;
   int max_gibs;
   int gib_step, column;
-  int frags = 0, deaths = 0, suicides = 0;
-  int r_frags = 0, r_deaths = 0, r_suicides = 0;
+  int frags = 0;
+  int r_frags = 0;
   double eff;
 
   max_gibs = calc_max ( num_stats );
@@ -267,8 +267,8 @@ static void generate_gif ( void )
   for ( loop = 0; loop <= num_stats; loop++ ) {
     switch ( stats[loop] ) {
       case FRAG: frags++; r_frags++; break;
-      case DEATH: deaths++; r_deaths++; break;
-      case SUICIDE: suicides++; r_suicides++; break;
+      /* DEATH and SUICIDE are counted only via the overall stat index
+         (loop); they have no separate tally in this graph. */
     }
     if ( gib_step && loop % gib_step == 0 && loop ) {
       column++;
@@ -306,7 +306,7 @@ static void generate_gif ( void )
       lasty = y;
       r_lastx = r_x;
       r_lasty = r_y;
-      r_deaths = r_frags = r_suicides = 0;
+      r_frags = 0;
     }
   }
 
