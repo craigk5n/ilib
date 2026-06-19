@@ -1,0 +1,34 @@
+# Doxygen configuration for Ilib (configured by CMake; see the top-level
+# CMakeLists.txt `docs` target). Replaces the legacy src/h2html.pl generator.
+PROJECT_NAME           = "Ilib"
+PROJECT_NUMBER         = "@PROJECT_VERSION@"
+PROJECT_BRIEF          = "@PROJECT_DESCRIPTION@"
+OUTPUT_DIRECTORY       = "@DOXYGEN_OUTPUT_DIR@"
+
+# Inputs: the single public header carries the API docs and the @mainpage.
+INPUT                  = "@DOXYGEN_INPUT_HEADER@"
+FILE_PATTERNS          = *.h
+
+# This is C, not C++.
+OPTIMIZE_OUTPUT_FOR_C  = YES
+TYPEDEF_HIDES_STRUCT   = YES
+EXTRACT_ALL            = YES
+JAVADOC_AUTOBRIEF      = YES
+
+# The prototypes are wrapped in `#ifndef _NO_PROTO`; leaving _NO_PROTO
+# undefined keeps the parameter lists visible to Doxygen.
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = NO
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+GENERATE_LATEX         = NO
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+
+# The headers' inline parameter comments are not @param tags, so don't nag.
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_AS_ERROR          = NO
+
+SORT_MEMBER_DOCS       = NO
