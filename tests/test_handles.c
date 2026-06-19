@@ -55,6 +55,26 @@ TEST bogus_gc_rejected ( void )
   PASS ();
 }
 
+/* The GC attribute setters must reject a NULL handle with IInvalidGC instead
+   of dereferencing it (regression: they used to validate the magic only when
+   the handle was non-NULL, then dereference unconditionally). */
+TEST gc_setters_reject_null ( void )
+{
+  ASSERT_EQ ( IInvalidGC, ISetLineWidth ( NULL, 2 ) );
+  ASSERT_EQ ( IInvalidGC, ISetLineStyle ( NULL, ILINE_SOLID ) );
+  ASSERT_EQ ( IInvalidGC, ISetTextStyle ( NULL, ITEXT_NORMAL ) );
+  PASS ();
+}
+
+TEST gc_setters_reject_bogus ( void )
+{
+  unsigned int not_a_gc = 0;
+  ASSERT_EQ ( IInvalidGC, ISetLineWidth ( (IGC) &not_a_gc, 2 ) );
+  ASSERT_EQ ( IInvalidGC, ISetLineStyle ( (IGC) &not_a_gc, ILINE_SOLID ) );
+  ASSERT_EQ ( IInvalidGC, ISetTextStyle ( (IGC) &not_a_gc, ITEXT_NORMAL ) );
+  PASS ();
+}
+
 SUITE ( handles )
 {
   RUN_TEST ( create_image_succeeds );
@@ -63,6 +83,8 @@ SUITE ( handles )
   RUN_TEST ( bogus_image_rejected );
   RUN_TEST ( null_gc_rejected );
   RUN_TEST ( bogus_gc_rejected );
+  RUN_TEST ( gc_setters_reject_null );
+  RUN_TEST ( gc_setters_reject_bogus );
 }
 
 GREATEST_MAIN_DEFS ();

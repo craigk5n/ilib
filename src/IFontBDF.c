@@ -239,14 +239,14 @@ IError IFontBDFReadData ( char *name, char **lines )
       font->width_name = (char *) malloc ( strlen ( text + 14 ) + 1 );
       strcpy ( font->width_name, text + 14 );
     }
-    else if ( strncmp ( text, "BBX", 3 ) == 0 ) {
+    else if ( strncmp ( text, "BBX", 3 ) == 0 && character != NULL ) {
       sscanf ( text, "BBX %d %d %d %d", &character->width, &character->height,
         &character->xoffset, &character->yoffset );
       /* use the width and height to allocate space for the data */
       character->data = (unsigned int *) calloc ( character->height * character->width,
         sizeof ( int ) );
     }
-    else if ( strncmp ( text, "DWIDTH", 6 ) == 0 ) {
+    else if ( strncmp ( text, "DWIDTH", 6 ) == 0 && character != NULL ) {
       sscanf ( text, "DWIDTH %d %d", &character->actual_width, &temp );
     }
     else if ( strcmp ( text, "BITMAP" ) == 0 ) {
@@ -281,7 +281,7 @@ IError IFontBDFReadData ( char *name, char **lines )
       }
       printf ( "\n-------------------\n" );
 */
-    } else if ( in_bitmap ) {
+    } else if ( in_bitmap && character != NULL && character->data != NULL ) {
       xpos = 0;
       for ( loop = 0; (unsigned int) loop < character->width; loop++ ) {
         which_char = loop / 4;
@@ -422,6 +422,9 @@ IError IFontBDFGetChar ( char *name, char *ch, unsigned int **bitdata,
     last_name = name;
     last_font = font;
   }
+
+  if ( ! font )
+    return ( INoSuchFont );
 
   /* we got the font.  now get the character */
   if ( strlen ( ch ) == 1 ) {
