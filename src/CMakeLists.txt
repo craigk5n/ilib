@@ -30,10 +30,13 @@ target_include_directories(ilib
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
-# Sensible warnings, but do NOT make them fatal: the K&R sources warn heavily
-# until the Phase 3 ISO C conversion.
+# The library is kept warning-clean under -Wall -Wextra. -Werror is opt-in
+# (ILIB_WERROR, enabled in CI) so new warnings from future compilers do not
+# break ordinary downstream builds.
 target_compile_options(ilib PRIVATE
-  $<$<C_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>)
+  $<$<C_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>
+  $<$<C_COMPILER_ID:GNU,Clang,AppleClang>:-Wextra>
+  $<$<AND:$<BOOL:${ILIB_WERROR}>,$<C_COMPILER_ID:GNU,Clang,AppleClang>>:-Werror>)
 
 # --- Optional image-format backends -----------------------------------------
 # The sources gate support on HAVE_GIFLIB / HAVE_PNGLIB / HAVE_JPEGLIB and

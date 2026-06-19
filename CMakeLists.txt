@@ -24,6 +24,7 @@ option(ILIB_WITH_GIF      "Enable GIF support (requires giflib)"   ON)
 option(ILIB_BUILD_CLIENTS  "Build the bundled client tools"        ON)
 option(ILIB_BUILD_EXAMPLES "Build the bundled example programs"    ON)
 option(ILIB_BUILD_TESTS    "Build the test suite"                  OFF)
+option(ILIB_WERROR         "Treat compiler warnings as errors (CI)" OFF)
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build type" FORCE)
