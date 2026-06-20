@@ -25,6 +25,52 @@
 #include "IlibP.h"
 
 
+/* Blend the foreground at the 8 symmetric octant points of (dx,dy) about the
+   circle center, each with fractional coverage cov. */
+static void circ_plot8 ( IImageP *img, IGCP *gc, int cx, int cy, int dx, int dy,
+  double cov )
+{
+  long c = (long) ( cov * 255.0 + 0.5 );
+  if ( c <= 0 )
+    return;
+  if ( c > 255 )
+    c = 255;
+  _IBlendPoint ( img, gc, cx + dx, cy + dy, (unsigned int) c );
+  _IBlendPoint ( img, gc, cx - dx, cy + dy, (unsigned int) c );
+  _IBlendPoint ( img, gc, cx + dx, cy - dy, (unsigned int) c );
+  _IBlendPoint ( img, gc, cx - dx, cy - dy, (unsigned int) c );
+  /* The (dy,dx) reflection coincides with the above on the 45-degree
+     diagonal; skip it there so those pixels are not blended twice. */
+  if ( dx != dy ) {
+    _IBlendPoint ( img, gc, cx + dy, cy + dx, (unsigned int) c );
+    _IBlendPoint ( img, gc, cx - dy, cy + dx, (unsigned int) c );
+    _IBlendPoint ( img, gc, cx + dy, cy - dx, (unsigned int) c );
+    _IBlendPoint ( img, gc, cx - dy, cy - dx, (unsigned int) c );
+  }
+}
+
+/* Xiaolin Wu's anti-aliased circle outline (radius r about (cx,cy)). */
+static void aa_circle ( IImageP *img, IGCP *gc, int cx, int cy, int r )
+{
+  int xx, yi;
+  double yy, frac;
+
+  if ( r < 1 ) {
+    _IBlendPoint ( img, gc, cx, cy, 255 );
+    return;
+  }
+  for ( xx = 0;; xx++ ) {
+    yy = sqrt ( (double) r * r - (double) xx * xx );
+    yi = (int) floor ( yy );
+    if ( xx > yi ) /* past 45 degrees; the octant symmetry covers the rest */
+      break;
+    frac = yy - yi;
+    circ_plot8 ( img, gc, cx, cy, xx, yi, 1.0 - frac );
+    circ_plot8 ( img, gc, cx, cy, xx, yi + 1, frac );
+  }
+}
+
+
 IError IDrawArc ( IImage image, IGC gc, int x, int y, int r1, int r2, double a1, double a2 )
 {
   IGCP *gcp = (IGCP *) gc;
@@ -40,6 +86,14 @@ IError IDrawArc ( IImage image, IGC gc, int x, int y, int r1, int r2, double a1,
     return ( IInvalidImage );
   if ( imagep->magic != IMAGIC_IMAGE )
     return ( IInvalidImage );
+
+  /* Anti-aliased full circle (r1==r2, full 360 sweep). Partial arcs and
+     ellipses fall through to the segment approximation, which is itself
+     anti-aliased when GC anti-aliasing is on (each segment is an AA line). */
+  if ( gcp->aa && r1 == r2 && fabs ( a2 - a1 ) >= 360.0 ) {
+    aa_circle ( imagep, gcp, x, y, r1 );
+    return ( INoError );
+  }
 
   /* because our y is upside down, make all angles their negative */
   a1 = 360 - a1;

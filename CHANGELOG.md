@@ -10,10 +10,12 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
-- Anti-aliased line drawing — Phase C of the alpha/anti-aliasing work:
-  `ISetAntiAlias()` toggles per-GC anti-aliasing; when on, `IDrawLine()` renders
-  smooth (coverage-blended) thin solid lines via Xiaolin Wu's algorithm. Thick
-  and dashed lines keep the aliased rasterizer.
+- Anti-aliased line and circle drawing — Phase C of the alpha/anti-aliasing
+  work: `ISetAntiAlias()` toggles per-GC anti-aliasing; when on, `IDrawLine()`
+  renders smooth thin solid lines via Xiaolin Wu's algorithm and `IDrawCircle()`
+  uses a dedicated Wu circle rasterizer. Thick/dashed lines, ellipses, and
+  partial arcs keep their existing rasterizers (arcs/ellipses are still
+  anti-aliased through their AA line segments).
 - Optional alpha channel (RGBA) and source-over compositing — Phase A of the
   alpha/anti-aliasing work (see `docs/design/alpha-aa.md`):
   `ICreateImage(IOPTION_ALPHA)`, `IAllocColorAlpha()`, `IGetPixelAlpha()` /
