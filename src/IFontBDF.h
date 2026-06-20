@@ -18,16 +18,16 @@
 */
 IError IFontBDFReadFile (
 #ifndef _NO_PROTO
-  char *name,			/* font name */
-  char *path			/* full path to BDF file */
+  char *name, /* font name */
+  char *path  /* full path to BDF file */
 #endif
 );
 
 IError IFontBDFReadData (
 #ifndef _NO_PROTO
-  char *name,			/* font name */
-  char **lines			/* font file data lines of text */
-				/* terminated with a NULL */
+  char *name,  /* font name */
+  char **lines /* font file data lines of text */
+               /* terminated with a NULL */
 #endif
 );
 
@@ -45,8 +45,8 @@ IError IFontBDFFree (
 */
 IError IFontBDFGetSize (
 #ifndef _NO_PROTO
-  char *name,			/* BDF filename */
-  unsigned int *height_return	/* pixel height */
+  char *name,                 /* BDF filename */
+  unsigned int *height_return /* pixel height */
 #endif
 );
 
@@ -55,10 +55,10 @@ IError IFontBDFGetSize (
 */
 IError IFontBDFTextWidth (
 #ifndef _NO_PROTO
-  char *name,			/* BDF font name */
-  char *ptr,			/* input chars */
-  int len,			/* length of ptr */
-  unsigned int *width_return	/* length of text in pixels */
+  char *name,                /* BDF font name */
+  char *ptr,                 /* input chars */
+  int len,                   /* length of ptr */
+  unsigned int *width_return /* length of text in pixels */
 #endif
 );
 
@@ -67,17 +67,16 @@ IError IFontBDFTextWidth (
 */
 IError IFontBDFGetChar (
 #ifndef _NO_PROTO
-  char *name,			/* BDF font name */
-  char *ch, 			/* char we are looking up ("A", "\033agrave;") */
-  unsigned int **bitdata,	/* array of 0/1 values containing the char definition */
-  unsigned int *width,		/* width of bitdata */
-  unsigned int *height,		/* height of bitdata */
-  unsigned int *actual_width,	/* actual character width */
-  unsigned int *size,		/* size of returned array - same as bdfGetSize() */
-  int *xoffset,			/* pixels to move to the right before drawing */
-  int *yoffset			/* pixel to move up before drawing */
+  char *name,                 /* BDF font name */
+  char *ch,                   /* char we are looking up ("A", "\033agrave;") */
+  unsigned int **bitdata,     /* array of 0/1 values containing the char definition */
+  unsigned int *width,        /* width of bitdata */
+  unsigned int *height,       /* height of bitdata */
+  unsigned int *actual_width, /* actual character width */
+  unsigned int *size,         /* size of returned array - same as bdfGetSize() */
+  int *xoffset,               /* pixels to move to the right before drawing */
+  int *yoffset                /* pixel to move up before drawing */
 #endif
 );
 
 #endif /* _ifontbdf_h */
-

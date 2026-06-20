@@ -20,8 +20,8 @@ TEST draw_point_sets_one_pixel ( void )
 
   /* the drawn pixel is red ... */
   ASSERT_EQ ( 255, px_r ( im, 5, 5 ) );
-  ASSERT_EQ ( 0,   px_g ( im, 5, 5 ) );
-  ASSERT_EQ ( 0,   px_b ( im, 5, 5 ) );
+  ASSERT_EQ ( 0, px_g ( im, 5, 5 ) );
+  ASSERT_EQ ( 0, px_b ( im, 5, 5 ) );
   /* ... and a neighbour is still the white background. */
   ASSERT_EQ ( 255, px_r ( im, 0, 0 ) );
   ASSERT_EQ ( 255, px_g ( im, 0, 0 ) );

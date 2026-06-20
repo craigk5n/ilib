@@ -23,7 +23,6 @@
 #include "IlibP.h"
 
 
-
 IError IDrawEllipse ( IImage image, IGC gc, int x, int y, int r1, int r2 )
 {
   IError ret;
@@ -33,6 +32,3 @@ IError IDrawEllipse ( IImage image, IGC gc, int x, int y, int r1, int r2 )
     return ret;
   return ( IDrawArc ( image, gc, x, y, r1, r2, 90.0, 360.0 ) );
 }
-
-
-

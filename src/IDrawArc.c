@@ -25,19 +25,18 @@
 #include "IlibP.h"
 
 
-
 IError IDrawArc ( IImage image, IGC gc, int x, int y, int r1, int r2, double a1, double a2 )
 {
-  IGCP *gcp = (IGCP *)gc;
-  IImageP *imagep = (IImageP *)image;
+  IGCP *gcp = (IGCP *) gc;
+  IImageP *imagep = (IImageP *) image;
   int myx, myy, lastx = 0, lasty = 0, N, loop;
   double a, da;
 
-  if ( ! gcp )
+  if ( !gcp )
     return ( IInvalidGC );
   if ( gcp->magic != IMAGIC_GC )
     return ( IInvalidGC );
-  if ( ! imagep )
+  if ( !imagep )
     return ( IInvalidImage );
   if ( imagep->magic != IMAGIC_IMAGE )
     return ( IInvalidImage );
@@ -49,9 +48,9 @@ IError IDrawArc ( IImage image, IGC gc, int x, int y, int r1, int r2, double a1,
   N = (int) fabs ( a2 - a1 ) + 8;
   a = a1 * 2.0 * PI / 360.0;
   da = ( a2 - a1 ) * ( 2.0 * PI / 360.0 ) / ( N - 1 );
-  for ( loop = 0; loop < N ; loop++ ) {
-    myx = x + (int)( r1 * cos ( a + loop * da ) );
-    myy = y + (int)( r2 * sin ( a + loop * da ) );
+  for ( loop = 0; loop < N; loop++ ) {
+    myx = x + (int) ( r1 * cos ( a + loop * da ) );
+    myy = y + (int) ( r2 * sin ( a + loop * da ) );
     if ( loop )
       IDrawLine ( image, gc, lastx, lasty, myx, myy );
     lastx = myx;
@@ -62,24 +61,21 @@ IError IDrawArc ( IImage image, IGC gc, int x, int y, int r1, int r2, double a1,
 }
 
 
-
-
-
 /*
 ** Draw an arc and connect it to the center point.
 */
 IError IDrawEnclosedArc ( IImage image, IGC gc, int x, int y, int r1, int r2, double a1, double a2 )
 {
-  IGCP *gcp = (IGCP *)gc;
-  IImageP *imagep = (IImageP *)image;
+  IGCP *gcp = (IGCP *) gc;
+  IImageP *imagep = (IImageP *) image;
   int myx, myy, lastx = 0, lasty = 0, N, loop;
   double a, da;
 
-  if ( ! gcp )
+  if ( !gcp )
     return ( IInvalidGC );
   if ( gcp->magic != IMAGIC_GC )
     return ( IInvalidGC );
-  if ( ! imagep )
+  if ( !imagep )
     return ( IInvalidImage );
   if ( imagep->magic != IMAGIC_IMAGE )
     return ( IInvalidImage );
@@ -91,9 +87,9 @@ IError IDrawEnclosedArc ( IImage image, IGC gc, int x, int y, int r1, int r2, do
   N = (int) fabs ( a2 - a1 ) + 8;
   a = a1 * 2.0 * PI / 360.0;
   da = ( a2 - a1 ) * ( 2.0 * PI / 360.0 ) / ( N - 1 );
-  for ( loop = 0; loop < N ; loop++ ) {
-    myx = x + (int)( r1 * cos ( a + loop * da ) );
-    myy = y + (int)( r2 * sin ( a + loop * da ) );
+  for ( loop = 0; loop < N; loop++ ) {
+    myx = x + (int) ( r1 * cos ( a + loop * da ) );
+    myy = y + (int) ( r2 * sin ( a + loop * da ) );
     if ( loop )
       IDrawLine ( image, gc, lastx, lasty, myx, myy );
     if ( loop == N - 1 || loop == 0 )
@@ -104,7 +100,3 @@ IError IDrawEnclosedArc ( IImage image, IGC gc, int x, int y, int r1, int r2, do
 
   return ( INoError );
 }
-
-
-
-

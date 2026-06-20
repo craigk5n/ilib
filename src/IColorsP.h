@@ -24,9 +24,9 @@ typedef struct {
   unsigned char b;
 } INamedColorP;
 
-#define I_NUM_NAMED_COLORS	143
+#define I_NUM_NAMED_COLORS 143
 
-static INamedColorP named_colors[I_NUM_NAMED_COLORS+1] = {
+static INamedColorP named_colors[I_NUM_NAMED_COLORS + 1] = {
   { "aliceblue", 240, 248, 255 },
   { "antiquewhite", 250, 235, 215 },
   { "aquamarine", 127, 255, 212 },
@@ -170,9 +170,7 @@ static INamedColorP named_colors[I_NUM_NAMED_COLORS+1] = {
   { "whitesmoke", 245, 245, 245 },
   { "yellow", 255, 255, 0 },
   { "yellowgreen", 154, 205, 50 },
-  { NULL, 0, 0, 0 }
-};
+  { NULL, 0, 0, 0 } };
 
 
 #endif /* _icolorsp_h */
-

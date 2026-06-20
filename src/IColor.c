@@ -49,7 +49,6 @@ static void init_colors ( void )
 }
 
 
-
 IColorP *_IGetColor ( int color )
 {
   if ( colors == NULL )
@@ -76,16 +75,16 @@ IColor IAllocColor ( unsigned int red, unsigned int green, unsigned int blue )
   else {
     IColorP **new_colors;
     color = (IColorP *) malloc ( sizeof ( IColorP ) );
-    if ( ! color )
+    if ( !color )
       return ( 0 ); /* black */
     color->magic = IMAGIC_COLOR;
     color->red = red;
     color->green = green;
     color->blue = blue;
     color->value = num_colors++;
-    new_colors = (IColorP **) realloc ( (void *)colors,
+    new_colors = (IColorP **) realloc ( (void *) colors,
       ( num_colors * sizeof ( IColorP * ) ) );
-    if ( ! new_colors ) {
+    if ( !new_colors ) {
       free ( color );
       num_colors--;
       return ( 0 ); /* black */
@@ -99,11 +98,11 @@ IColor IAllocColor ( unsigned int red, unsigned int green, unsigned int blue )
 
 IError _IFreeColor ( IColor color )
 {
-  IColorP *c = (IColorP *)(intptr_t)color;
+  IColorP *c = (IColorP *) (intptr_t) color;
 
   if ( color ) {
     c = _IGetColor ( color );
-    if ( ! c )
+    if ( !c )
       return ( IInvalidColor );
     if ( c->magic != IMAGIC_COLOR )
       return ( IInvalidColor );
@@ -118,7 +117,6 @@ IError _IFreeColor ( IColor color )
 
   return ( INoError );
 }
-
 
 
 IError IAllocNamedColor ( char *colorname, IColor *color_ret )
@@ -136,7 +134,7 @@ IError IAllocNamedColor ( char *colorname, IColor *color_ret )
   }
   *ptr2 = '\0';
 
-  for ( loop = 0; loop < I_NUM_NAMED_COLORS && ! found; loop++ ) {
+  for ( loop = 0; loop < I_NUM_NAMED_COLORS && !found; loop++ ) {
     if ( strcmp ( named_colors[loop].name, cname ) == 0 ) {
       *color_ret = IAllocColor ( named_colors[loop].r,
         named_colors[loop].g, named_colors[loop].b );
@@ -148,4 +146,3 @@ IError IAllocNamedColor ( char *colorname, IColor *color_ret )
 
   return ( found ? INoError : IInvalidColorName );
 }
-

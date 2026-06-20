@@ -11,11 +11,14 @@
 /* Write image to a temp file in `format`, read it back, return the new image
    (or NULL). Sets *write_ret/*read_ret to the IError of each step. */
 static IImage roundtrip ( IImage im, IFileFormat format,
-                          IError *write_ret, IError *read_ret )
+  IError *write_ret, IError *read_ret )
 {
   IImage back = NULL;
   FILE *fp = tmpfile ();
-  if ( ! fp ) { *write_ret = *read_ret = IErrorWriting; return NULL; }
+  if ( !fp ) {
+    *write_ret = *read_ret = IErrorWriting;
+    return NULL;
+  }
   *write_ret = IWriteImageFile ( fp, im, format, IOPTION_NONE );
   rewind ( fp );
   *read_ret = IReadImageFile ( fp, format, IOPTION_NONE, &back );
@@ -41,8 +44,8 @@ TEST ppm_roundtrip ( void )
   ASSERT_EQ ( 6, px_width ( back ) );
   ASSERT_EQ ( 4, px_height ( back ) );
   ASSERT_EQ ( 255, px_r ( back, 2, 1 ) );
-  ASSERT_EQ ( 0,   px_g ( back, 2, 1 ) );
-  ASSERT_EQ ( 0,   px_b ( back, 2, 1 ) );
+  ASSERT_EQ ( 0, px_g ( back, 2, 1 ) );
+  ASSERT_EQ ( 0, px_b ( back, 2, 1 ) );
 
   IFreeImage ( back );
   IFreeColor ( red );
@@ -87,7 +90,8 @@ TEST garbage_ppm_rejected ( void )
   rd = IReadImageFile ( fp, IFORMAT_PPM, IOPTION_NONE, &back );
   fclose ( fp );
   ASSERT ( rd != INoError );
-  if ( back ) IFreeImage ( back );
+  if ( back )
+    IFreeImage ( back );
   PASS ();
 }
 
@@ -102,7 +106,8 @@ TEST truncated_ppm_rejected ( void )
   rd = IReadImageFile ( fp, IFORMAT_PPM, IOPTION_NONE, &back );
   fclose ( fp );
   ASSERT ( rd != INoError );
-  if ( back ) IFreeImage ( back );
+  if ( back )
+    IFreeImage ( back );
   PASS ();
 }
 
@@ -119,7 +124,8 @@ TEST optional_codec_write_is_clean ( void )
     ASSERT ( back != NULL );
     ASSERT_EQ ( 4, px_width ( back ) );
     IFreeImage ( back );
-  } else {
+  }
+  else {
     /* not compiled in: a clean error, and no image produced */
     ASSERT ( back == NULL );
   }

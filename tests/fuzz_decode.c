@@ -24,8 +24,7 @@
 
 static const IFileFormat ALL_FORMATS[] = {
   IFORMAT_PPM, IFORMAT_PGM, IFORMAT_PBM, IFORMAT_XPM,
-  IFORMAT_XBM, IFORMAT_PNG, IFORMAT_JPEG, IFORMAT_GIF, IFORMAT_BMP
-};
+  IFORMAT_XBM, IFORMAT_PNG, IFORMAT_JPEG, IFORMAT_GIF, IFORMAT_BMP };
 
 static void try_one ( const uint8_t *data, size_t size, IFileFormat fmt )
 {
@@ -35,16 +34,17 @@ static void try_one ( const uint8_t *data, size_t size, IFileFormat fmt )
   if ( fmt == IFORMAT_GIF ) {
     /* the GIF decoder uses fileno(), so it needs a real file descriptor */
     fp = tmpfile ();
-    if ( ! fp )
+    if ( !fp )
       return;
     if ( size )
       fwrite ( data, 1, size, fp );
     rewind ( fp );
-  } else {
+  }
+  else {
     /* everyone else reads via stdio: an in-memory stream is much faster */
     fp = fmemopen ( (void *) data, size, "rb" );
-    if ( ! fp )
-      return;   /* e.g. size == 0 */
+    if ( !fp )
+      return; /* e.g. size == 0 */
   }
 
   if ( IReadImageFile ( fp, fmt, IOPTION_NONE, &img ) == INoError && img )
@@ -77,8 +77,8 @@ int main ( int argc, char **argv )
     size_t n, j, off = 0;
     /* half the time, start with a real format prefix */
     if ( rand_r ( &seed ) & 1 ) {
-      const char *p = SEED_PREFIXES[ rand_r ( &seed ) %
-        ( sizeof ( SEED_PREFIXES ) / sizeof ( SEED_PREFIXES[0] ) ) ];
+      const char *p = SEED_PREFIXES[rand_r ( &seed ) %
+                                    ( sizeof ( SEED_PREFIXES ) / sizeof ( SEED_PREFIXES[0] ) )];
       off = strlen ( p );
       memcpy ( buf, p, off );
     }

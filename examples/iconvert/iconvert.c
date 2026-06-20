@@ -43,13 +43,13 @@ int main ( int argc, char *argv[] )
     }
   }
 
-  if ( ! infile )
+  if ( !infile )
     fprintf ( stderr, "No infile specified.  Reading from stdin.\n" );
-  if ( ! outfile ) {
+  if ( !outfile ) {
     outfile = "out.ppm";
     fprintf ( stderr, "No outfile specified.  Writing to %s.\n", outfile );
   }
-  
+
   /* try and determine file types by extension */
   if ( infile ) {
     ret = IFileType ( infile, &input_format );
@@ -68,7 +68,7 @@ int main ( int argc, char *argv[] )
 
   if ( infile ) {
     fp = fopen ( infile, "rb" );
-    if ( ! fp ) {
+    if ( !fp ) {
       perror ( "Error opening input file:" );
       exit ( 1 );
     }
@@ -85,7 +85,7 @@ int main ( int argc, char *argv[] )
 
   if ( outfile ) {
     fp = fopen ( outfile, "wb" );
-    if ( ! fp ) {
+    if ( !fp ) {
       perror ( "Cannot open output file: " );
       exit ( 1 );
     }
@@ -100,5 +100,3 @@ int main ( int argc, char *argv[] )
 
   return ( 0 );
 }
-
-

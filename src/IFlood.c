@@ -23,21 +23,20 @@
 #include "IlibP.h"
 
 
-
 IError IFloodFill ( IImage image, IGC gc, int x, int y )
 {
-  IGCP *gcp = (IGCP *)gc;
-  IImageP *imagep = (IImageP *)image;
+  IGCP *gcp = (IGCP *) gc;
+  IImageP *imagep = (IImageP *) image;
   int fillL, fillR, i;
   int in_line = 1;
   IColorP color = { 0 };
   IColorP origColor = { 0 }; /* color we are replacing with flood fill */
 
-  if ( ! gcp )
+  if ( !gcp )
     return ( IInvalidGC );
   if ( gcp->magic != IMAGIC_GC )
     return ( IInvalidGC );
-  if ( ! imagep )
+  if ( !imagep )
     return ( IInvalidImage );
   if ( imagep->magic != IMAGIC_IMAGE )
     return ( IInvalidImage );
@@ -78,6 +77,3 @@ IError IFloodFill ( IImage image, IGC gc, int x, int y )
 
   return ( INoError );
 }
-
-
-

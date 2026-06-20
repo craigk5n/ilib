@@ -37,10 +37,10 @@
 
 #include <Ilib.h>
 
-#define DEFAULT_FONTNAME_1	"helvR24"
-#define DEFAULT_FONT_1		helvR24_font
-#define DEFAULT_FONTNAME_2	"helvR08"
-#define DEFAULT_FONT_2		helvR08_font
+#define DEFAULT_FONTNAME_1 "helvR24"
+#define DEFAULT_FONT_1 helvR24_font
+#define DEFAULT_FONTNAME_2 "helvR08"
+#define DEFAULT_FONT_2 helvR08_font
 
 /* This will embed the font data within the application so that you can
 ** distribute the binary by itself.
@@ -56,7 +56,7 @@ int main ( int argc, char *argv[] )
   char *fontname1 = NULL, *fontname2 = NULL;
   int loop;
   unsigned int width = 500, height = 150, text_width = 0, text_height = 0,
-    font_height = 0, font_width, sample_width, sample_height;
+               font_height = 0, font_width, sample_width, sample_height;
   int x, y;
   char *outfile = "out.ppm";
   char *sample_text = NULL;
@@ -70,7 +70,7 @@ int main ( int argc, char *argv[] )
 
   for ( loop = 1; loop < argc; loop++ ) {
     if ( strcmp ( argv[loop], "-w" ) == 0 ||
-      strcmp ( argv[loop], "-width" ) == 0 ) {
+         strcmp ( argv[loop], "-width" ) == 0 ) {
       if ( ++loop >= argc ) {
         fprintf ( stderr, "-width requires an argument\n" );
         exit ( 1 );
@@ -78,7 +78,7 @@ int main ( int argc, char *argv[] )
       width = atoi ( argv[loop] );
     }
     else if ( strcmp ( argv[loop], "-h" ) == 0 ||
-      strcmp ( argv[loop], "-height" ) == 0 ) {
+              strcmp ( argv[loop], "-height" ) == 0 ) {
       if ( ++loop >= argc ) {
         fprintf ( stderr, "-height requires an argument\n" );
         exit ( 1 );
@@ -93,7 +93,7 @@ int main ( int argc, char *argv[] )
       fontname1 = argv[loop];
     }
     else if ( strcmp ( argv[loop], "-t" ) == 0 ||
-      strcmp ( argv[loop], "-text" ) == 0 ) {
+              strcmp ( argv[loop], "-text" ) == 0 ) {
       if ( ++loop >= argc ) {
         fprintf ( stderr, "-text requires an argument\n" );
         exit ( 1 );
@@ -101,7 +101,7 @@ int main ( int argc, char *argv[] )
       sample_text = argv[loop];
     }
     else if ( strcmp ( argv[loop], "-o" ) == 0 ||
-      strcmp ( argv[loop], "-out" ) == 0 ) {
+              strcmp ( argv[loop], "-out" ) == 0 ) {
       if ( ++loop >= argc ) {
         fprintf ( stderr, "-out requires an argument\n" );
         exit ( 1 );
@@ -109,7 +109,7 @@ int main ( int argc, char *argv[] )
       outfile = argv[loop];
     }
     else if ( strcmp ( argv[loop], "-i" ) == 0 ||
-      strcmp ( argv[loop], "-infile" ) == 0 ) {
+              strcmp ( argv[loop], "-infile" ) == 0 ) {
       if ( ++loop >= argc ) {
         fprintf ( stderr, "-infile requires an argument\n" );
         exit ( 1 );
@@ -123,10 +123,10 @@ int main ( int argc, char *argv[] )
     sprintf ( sample_text, "Ilib v%s (%s)\n%s", ILIB_VERSION, ILIB_VERSION_DATE,
       ILIB_URL );
   }
-  
+
   if ( infile ) {
     fp = fopen ( infile, "r" );
-    if ( ! fp ) {
+    if ( !fp ) {
       perror ( "Error opening input file:" );
       exit ( 1 );
     }
@@ -172,7 +172,7 @@ int main ( int argc, char *argv[] )
   else {
     fontname1 = DEFAULT_FONTNAME_1;
     if ( ( ret = ILoadFontFromData ( fontname1, DEFAULT_FONT_1, &largefont ) ) ) {
-      fprintf ( stderr, "Error (%s) loading font: %s\n", 
+      fprintf ( stderr, "Error (%s) loading font: %s\n",
         IErrorString ( ret ), fontname1 );
       exit ( 1 );
     }
@@ -188,8 +188,8 @@ int main ( int argc, char *argv[] )
   ret = ITextDimensions ( gc, largefont, sample_text, strlen ( sample_text ),
     &text_width, &text_height );
   ret = ITextDimensions ( gc, largefont, "X", 1, &font_width, &font_height );
-  x = ( (int)width - (int)text_width ) / 2;
-  y = ( ( (int)height - (int)text_height ) / 2 ) + (int)font_height;
+  x = ( (int) width - (int) text_width ) / 2;
+  y = ( ( (int) height - (int) text_height ) / 2 ) + (int) font_height;
 
   /* draw arc */
   ISetForeground ( gc, topshadow );
@@ -239,7 +239,7 @@ int main ( int argc, char *argv[] )
     }
     /* make sure to include "b" (for binary) for Win32 */
     fp = fopen ( outfile, "wb" );
-    if ( ! fp ) {
+    if ( !fp ) {
       perror ( "Cannot open output file: " );
       exit ( 1 );
     }
@@ -259,5 +259,3 @@ int main ( int argc, char *argv[] )
 
   return ( 0 );
 }
-
-

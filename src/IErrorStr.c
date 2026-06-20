@@ -31,33 +31,54 @@
 char *IErrorString ( IError err )
 {
   switch ( err ) {
-    case IInvalidImage: return ( "Invalid image" );
-    case IInvalidGC: return ( "Invalid GC" );
-    case IInvalidColor: return ( "Invalid color" );
-    case INoTransparentColor: return ( "No transparent color set" );
-    case IInvalidFont: return ( "Invalid font" );
-    case IFunctionNotImplemented: return ( "Function not implemented" );
-    case IInvalidFormat: return ( "Invalid file format" );
-    case IFileInvalid: return ( "Invalid file" );
-    case IErrorWriting: return ( "Error writing file" );
-    case INoFontSet: return ( "No font set" );
-    case INoSuchFont: return ( "Font not found" );
-    case INoSuchFile: return ( "No such file" );
-    case IFontError: return ( "Font error" );
-    case IInvalidEscapeSequence: return ( "Invalid escape sequence in text" );
-    case IInvalidArgument: return ( "Invalid argument" );
-    case IInvalidColorName: return ( "Invalid color name" );
-    case INoGIFSupport: return ( "GIF support not available" );
+  case IInvalidImage:
+    return ( "Invalid image" );
+  case IInvalidGC:
+    return ( "Invalid GC" );
+  case IInvalidColor:
+    return ( "Invalid color" );
+  case INoTransparentColor:
+    return ( "No transparent color set" );
+  case IInvalidFont:
+    return ( "Invalid font" );
+  case IFunctionNotImplemented:
+    return ( "Function not implemented" );
+  case IInvalidFormat:
+    return ( "Invalid file format" );
+  case IFileInvalid:
+    return ( "Invalid file" );
+  case IErrorWriting:
+    return ( "Error writing file" );
+  case INoFontSet:
+    return ( "No font set" );
+  case INoSuchFont:
+    return ( "Font not found" );
+  case INoSuchFile:
+    return ( "No such file" );
+  case IFontError:
+    return ( "Font error" );
+  case IInvalidEscapeSequence:
+    return ( "Invalid escape sequence in text" );
+  case IInvalidArgument:
+    return ( "Invalid argument" );
+  case IInvalidColorName:
+    return ( "Invalid color name" );
+  case INoGIFSupport:
+    return ( "GIF support not available" );
 #ifdef HAVE_GIFLIB
-    /* giflib 5.x removed the global GifLastError(); errors are reported per
-       call/handle, which this generic routine does not have access to. */
-    case IGIFError: return ( "GIF error" );
+  /* giflib 5.x removed the global GifLastError(); errors are reported per
+     call/handle, which this generic routine does not have access to. */
+  case IGIFError:
+    return ( "GIF error" );
 #endif
-    case INoPNGSupport: return ( "PNG support not available" );
-    case IPNGError: return ( "Unknown PNG error" );
-    case IInvalidPolygon: return ( "Invalid polygon (only convex non-intersecting are supported)" );
-    case INoError: default: return ( "error" );
+  case INoPNGSupport:
+    return ( "PNG support not available" );
+  case IPNGError:
+    return ( "Unknown PNG error" );
+  case IInvalidPolygon:
+    return ( "Invalid polygon (only convex non-intersecting are supported)" );
+  case INoError:
+  default:
+    return ( "error" );
   }
 }
-
-

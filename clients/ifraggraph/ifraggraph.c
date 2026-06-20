@@ -11,10 +11,10 @@
 
 
   18-May-98	Craig Knudsen	cknudsen@radix.net
-		Better error handling of command line args
-		Don't crash if user not found in logs
+                Better error handling of command line args
+                Don't crash if user not found in logs
   23-May-97	Craig Knudsen	cknudsen@radix.net
-		Created
+                Created
 
 
 ***************************************************************************/
@@ -36,8 +36,8 @@
 
 
 #ifndef min
-#define min(a,b) ( (a) < (b) ? (a) : (b) )
-#define max(a,b) ( (a) > (b) ? (a) : (b) )
+#define min( a, b ) ( ( a ) < ( b ) ? ( a ) : ( b ) )
+#define max( a, b ) ( ( a ) > ( b ) ? ( a ) : ( b ) )
 #endif
 
 #ifndef TRUE
@@ -45,9 +45,9 @@
 #define FALSE 0
 #endif
 
-#define FRAG	1
-#define DEATH	2
-#define SUICIDE	3
+#define FRAG 1
+#define DEATH 2
+#define SUICIDE 3
 
 
 static void read_file (
@@ -68,19 +68,17 @@ static int calc_max (
 );
 
 
-
 /*
 ** Define start and stop times.  Use YYMMDDHHMMSS so that we can just
 ** use strcmp() to compare times.
 */
 static char *player = NULL;
 static int *stats = NULL;
-static int num_stats = 0;	/* total number of frags counted */
+static int num_stats = 0; /* total number of frags counted */
 
 
 static int display_header = TRUE;
-static int line_width = 2;	/* for line graphs (can use 1-3) */
-
+static int line_width = 2; /* for line graphs (can use 1-3) */
 
 
 /*
@@ -119,39 +117,37 @@ int main ( int argc, char *argv[] )
 }
 
 
-
-
-
 /****************************************************************************
-*
-* Read in the data file
-*
-****************************************************************************/
+ *
+ * Read in the data file
+ *
+ ****************************************************************************/
 static void read_file ( char *filename )
 {
   FILE *fp;
   char text[1024], *ptr;
 
   fp = fopen ( filename, "r" );
-  if ( ! fp ) {
+  if ( !fp ) {
     fprintf ( stderr, "Unable to open log file %s\n", filename );
     return;
   }
   while ( fgets ( text, sizeof ( text ), fp ) ) {
     ptr = strtok ( text, "\\" );
-    if ( ! ptr )
+    if ( !ptr )
       continue;
     if ( strcmp ( player, ptr ) == 0 ) {
       ptr = strtok ( NULL, "\\" );
-      if ( ! ptr )
+      if ( !ptr )
         continue;
       if ( strcmp ( player, ptr ) == 0 )
         add_stat ( SUICIDE );
       else
         add_stat ( FRAG );
-    } else {
+    }
+    else {
       ptr = strtok ( NULL, "\\" );
-      if ( ! ptr )
+      if ( !ptr )
         continue;
       if ( strcmp ( player, ptr ) == 0 )
         add_stat ( DEATH );
@@ -161,36 +157,32 @@ static void read_file ( char *filename )
 }
 
 
-
 static void add_stat ( int type )
 {
   num_stats++;
   stats = (int *) realloc ( stats, ( num_stats * sizeof ( int * ) ) );
-  stats[num_stats-1] = type;
+  stats[num_stats - 1] = type;
 }
 
 
-
-
-
 /****************************************************************************
-*
-* Generate the output image
-*
-****************************************************************************/
-#define LEFT_PAD	80
-#define TOP_PAD		50
-#define RIGHT_PAD	50
-#define BOTTOM_PAD	75
-#define DATA_WIDTH	20
-#define DATA_HEIGHT	200
+ *
+ * Generate the output image
+ *
+ ****************************************************************************/
+#define LEFT_PAD 80
+#define TOP_PAD 50
+#define RIGHT_PAD 50
+#define BOTTOM_PAD 75
+#define DATA_WIDTH 20
+#define DATA_HEIGHT 200
 static void generate_gif ( void )
 {
   int loop;
   char temp[200];
   int x, y, lastx = 0, lasty = 0;
   int r_x, r_y, r_lastx = 0, r_lasty = 0;
-  IImage im_out;	/* output image */
+  IImage im_out; /* output image */
   IFont helvB18, courR10;
   IColor red, green, blue, black, grey;
   IGC gc;
@@ -228,7 +220,7 @@ static void generate_gif ( void )
   sprintf ( temp, "Frag Efficiency Graph 1.0: %s", player );
   ILoadFontFromData ( "courR10", courR10_font, &courR10 );
   ILoadFontFromData ( "helvB18", helvB18_font, &helvB18 );
-  
+
   /* Draw title */
   ISetFont ( gc, helvB18 );
   ISetForeground ( gc, grey );
@@ -267,19 +259,20 @@ static void generate_gif ( void )
   column = 0;
   for ( loop = 0; loop <= num_stats; loop++ ) {
     switch ( stats[loop] ) {
-      case FRAG: frags++; r_frags++; break;
+    case FRAG:
+      frags++;
+      r_frags++;
+      break;
       /* DEATH and SUICIDE are counted only via the overall stat index
          (loop); they have no separate tally in this graph. */
     }
     if ( gib_step && loop % gib_step == 0 && loop ) {
       column++;
       r_x = x = LEFT_PAD + ( DATA_WIDTH * column );
-      eff = ( (double)frags / (double) loop );
-      y = TOP_PAD + (int)
-        ( (double)( 1.0 - eff ) * (double)DATA_HEIGHT );
-      eff = ( (double)r_frags / (double)gib_step );
-      r_y = TOP_PAD + (int)
-        ( (double)( 1.0 - eff ) * (double)DATA_HEIGHT );
+      eff = ( (double) frags / (double) loop );
+      y = TOP_PAD + (int) ( (double) ( 1.0 - eff ) * (double) DATA_HEIGHT );
+      eff = ( (double) r_frags / (double) gib_step );
+      r_y = TOP_PAD + (int) ( (double) ( 1.0 - eff ) * (double) DATA_HEIGHT );
       /* draw the line graph */
       if ( column > 1 ) {
         ISetForeground ( gc, red );
@@ -293,14 +286,14 @@ static void generate_gif ( void )
       }
       /* draw a tic mark */
       ISetForeground ( gc, blue );
-      IDrawLine ( im_out, gc, x, TOP_PAD + DATA_HEIGHT, x, 
+      IDrawLine ( im_out, gc, x, TOP_PAD + DATA_HEIGHT, x,
         TOP_PAD + DATA_HEIGHT + 3 );
       /* label the x axis */
       if ( column % 2 == 0 ) {
         ISetForeground ( gc, black );
         sprintf ( temp, "%d", loop );
         IDrawString ( im_out, gc, x - 5, TOP_PAD + DATA_HEIGHT + 11,
-           temp, strlen ( temp ) );
+          temp, strlen ( temp ) );
       }
       /* save x and y for the next point */
       lastx = x;
@@ -337,19 +330,12 @@ static void generate_gif ( void )
 }
 
 
-
-
-
-
-
-
-
 /****************************************************************************
-*
-* Calculate a nice round number to use as the maximum for the y axis.
-*
-****************************************************************************/
-static int calc_max ( int cur_max )	/* the current max value */
+ *
+ * Calculate a nice round number to use as the maximum for the y axis.
+ *
+ ****************************************************************************/
+static int calc_max ( int cur_max ) /* the current max value */
 {
   int ret_val;
   int next_round, tens, div_val;
@@ -358,40 +344,37 @@ static int calc_max ( int cur_max )	/* the current max value */
     return ( 1 );
 
   tens = (int) log10 ( (double) cur_max );
-  next_round = (int) pow ( (double) 10.0, (double) (tens+1) );
+  next_round = (int) pow ( (double) 10.0, (double) ( tens + 1 ) );
   if ( next_round % 10 == 9 )
     next_round++; // strange behavior under Linux
   div_val = (int) ( next_round / (int) cur_max );
   switch ( div_val ) {
-    case 10:
-    case 9:
-    case 8:
-    case 7:
-    case 6:
-    case 5:
+  case 10:
+  case 9:
+  case 8:
+  case 7:
+  case 6:
+  case 5:
     next_round /= 5;
-      break;
-    case 4:
-      next_round /= 4;
-      break;
-    case 3:
-      next_round = (int) ( 0.4 * (float) next_round );
-      break;
-    case 2:
-      next_round /= 2;
-      break;
-    case 1:
-    case 0:
-      break;
+    break;
+  case 4:
+    next_round /= 4;
+    break;
+  case 3:
+    next_round = (int) ( 0.4 * (float) next_round );
+    break;
+  case 2:
+    next_round /= 2;
+    break;
+  case 1:
+  case 0:
+    break;
   }
 
   ret_val = (int) ( max ( 5.0, (float) next_round ) );
 
   if ( ret_val < cur_max )
-    ret_val = cur_max;	/* floating point round error */
+    ret_val = cur_max; /* floating point round error */
 
   return ( ret_val );
 }
-
-
-

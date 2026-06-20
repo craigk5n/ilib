@@ -23,11 +23,7 @@
 #include "IlibP.h"
 
 
-
 IError IFillCircle ( IImage image, IGC gc, int x, int y, int r )
 {
   return IFillArc ( image, gc, x, y, r, r, 0.0, 360.0 );
 }
-
-
-

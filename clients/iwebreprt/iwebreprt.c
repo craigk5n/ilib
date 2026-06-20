@@ -9,12 +9,12 @@
     Default action is to generate a day of the month usage graph to stdout.
 
     -tod		Display a time of day report indicating what
-			hours of the day get the most usage.
-			[THIS IS THE DEFAULT]
+                        hours of the day get the most usage.
+                        [THIS IS THE DEFAULT]
     -dom		Display a day of month report indicating what
-			days of the month get the most usage.
+                        days of the month get the most usage.
     -dow		Display a day of week report indicating what
-			days of the week get the most usage.
+                        days of the week get the most usage.
     -moy		Displays month report indicating usage by month
 
     options		what it does
@@ -31,10 +31,10 @@
     -nohdr		Do not display title and summary at bottom
 
   21-Sep-94	Craig Knudsen	cknudsen@radix.net
-		Created
+                Created
   29-May-96	Craig Knudsen	cknudsen@radix.net
   29-May-96	Craig Knudsen	cknudsen@radix.net
-		Converted from gd library to Ilib.
+                Converted from gd library to Ilib.
 
 
 ***************************************************************************/
@@ -56,8 +56,8 @@
 
 
 #ifndef min
-#define min(a,b) ( (a) < (b) ? (a) : (b) )
-#define max(a,b) ( (a) > (b) ? (a) : (b) )
+#define min( a, b ) ( ( a ) < ( b ) ? ( a ) : ( b ) )
+#define max( a, b ) ( ( a ) > ( b ) ? ( a ) : ( b ) )
 #endif
 
 #ifndef TRUE
@@ -95,40 +95,48 @@ static int calc_max (
 );
 
 
-
 /*
 ** Define start and stop times.  Use YYMMDDHHMMSS so that we can just
 ** use strcmp() to compare times.
 */
-static char start_time[64];	/* in YYMMDDHHMMSS format */
-static char stop_time[64];	/* in YYMMDDHHMMSS format */
-static char pretty_start[64];	/* in human readable format */
-static char pretty_stop[64];	/* in human readable format */
+static char start_time[64];   /* in YYMMDDHHMMSS format */
+static char stop_time[64];    /* in YYMMDDHHMMSS format */
+static char pretty_start[64]; /* in human readable format */
+static char pretty_stop[64];  /* in human readable format */
 static char *months[] = {
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 };
 static char *wdays[] = {
-  "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
-};
+  "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
 static int days_in_month[] =
   { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 static int days_in_lmonth[] =
   { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-static int tod[24];	/* count by time of day */
-static int dow[7];	/* couny by day of week */
-static int dom[31];	/* count by day of month */
-static int moy[12];	/* count by month */
+static int tod[24]; /* count by time of day */
+static int dow[7];  /* couny by day of week */
+static int dom[31]; /* count by day of month */
+static int moy[12]; /* count by month */
 
-#define SUNDAY		0
-#define MONDAY		1
-#define TUESDAY		2
-#define WEDNESDAY	3
-#define THURSDAY	4
-#define FRIDAY		5
-#define SATURDAY	6
+#define SUNDAY 0
+#define MONDAY 1
+#define TUESDAY 2
+#define WEDNESDAY 3
+#define THURSDAY 4
+#define FRIDAY 5
+#define SATURDAY 6
 
-static int total = 0;	/* total number of requests counted */
+static int total = 0; /* total number of requests counted */
 
 typedef enum {
   DAY_OF_MONTH,
@@ -145,11 +153,10 @@ typedef enum {
 static OutputType output_type = DAY_OF_MONTH;
 static GraphType graph_type = LINE;
 static int display_header = TRUE;
-static int line_width = 2;	/* for line graphs (can use 1-3) */
+static int line_width = 2; /* for line graphs (can use 1-3) */
 
 /* String to use in place of "Retrievals" */
 static char *retrievals = "Retrievals";
-
 
 
 /*
@@ -198,7 +205,7 @@ int main ( int argc, char *argv[] )
     else if ( strcmp ( argv[loop], "-lastmonth" ) == 0 )
       set_times_last_month ();
     else if ( strcmp ( argv[loop], "-noheader" ) == 0 ||
-      strcmp ( argv[loop], "-nohdr" ) == 0 )
+              strcmp ( argv[loop], "-nohdr" ) == 0 )
       display_header = FALSE;
     else if ( strcmp ( argv[loop], "-rstring" ) == 0 ) {
       if ( argv[++loop] == NULL ) {
@@ -227,10 +234,10 @@ int main ( int argc, char *argv[] )
 
 
 /****************************************************************************
-*
-* Set the time range variables so that we look at data from today only.
-*
-****************************************************************************/
+ *
+ * Set the time range variables so that we look at data from today only.
+ *
+ ****************************************************************************/
 static void set_times_today ( void )
 {
   time_t now;
@@ -253,13 +260,11 @@ static void set_times_today ( void )
 }
 
 
-
-
 /****************************************************************************
-*
-* Set the time range variables so that we look at data from yesterday only.
-*
-****************************************************************************/
+ *
+ * Set the time range variables so that we look at data from yesterday only.
+ *
+ ****************************************************************************/
 static void set_times_yesterday ( void )
 {
   time_t now, yest;
@@ -282,14 +287,12 @@ static void set_times_yesterday ( void )
 }
 
 
-
-
 /****************************************************************************
-*
-* Set the time range variables so that we look at data from last week
-* where the week starts on Monday and finishes on Sunday.
-*
-****************************************************************************/
+ *
+ * Set the time range variables so that we look at data from last week
+ * where the week starts on Monday and finishes on Sunday.
+ *
+ ****************************************************************************/
 static void set_times_last_week ( void )
 {
   time_t now, lastweek, lastweekstop;
@@ -298,20 +301,27 @@ static void set_times_last_week ( void )
   time ( &now );
   tm = localtime ( &now );
   switch ( tm->tm_wday ) {
-    case MONDAY:
-      lastweek = now - ( 7 * ( 24 * 3600 ) ); break;
-    case TUESDAY:
-      lastweek = now - ( 8 * ( 24 * 3600 ) ); break;
-    case WEDNESDAY:
-      lastweek = now - ( 9 * ( 24 * 3600 ) ); break;
-    case THURSDAY:
-      lastweek = now - ( 10 * ( 24 * 3600 ) ); break;
-    case FRIDAY:
-      lastweek = now - ( 11 * ( 24 * 3600 ) ); break;
-    case SATURDAY:
-      lastweek = now - ( 12 * ( 24 * 3600 ) ); break;
-    case SUNDAY:
-      lastweek = now - ( 13 * ( 24 * 3600 ) ); break;
+  case MONDAY:
+    lastweek = now - ( 7 * ( 24 * 3600 ) );
+    break;
+  case TUESDAY:
+    lastweek = now - ( 8 * ( 24 * 3600 ) );
+    break;
+  case WEDNESDAY:
+    lastweek = now - ( 9 * ( 24 * 3600 ) );
+    break;
+  case THURSDAY:
+    lastweek = now - ( 10 * ( 24 * 3600 ) );
+    break;
+  case FRIDAY:
+    lastweek = now - ( 11 * ( 24 * 3600 ) );
+    break;
+  case SATURDAY:
+    lastweek = now - ( 12 * ( 24 * 3600 ) );
+    break;
+  case SUNDAY:
+    lastweek = now - ( 13 * ( 24 * 3600 ) );
+    break;
   }
 
   tm = localtime ( &lastweek );
@@ -331,14 +341,12 @@ static void set_times_last_week ( void )
 }
 
 
-
-
 /****************************************************************************
-*
-* Set the time range variables so that we look at data from this week
-* where the week starts on Monday and finishes on Sunday.
-*
-****************************************************************************/
+ *
+ * Set the time range variables so that we look at data from this week
+ * where the week starts on Monday and finishes on Sunday.
+ *
+ ****************************************************************************/
 static void set_times_this_week ( void )
 {
   time_t now, thisweek, thisweekstop;
@@ -347,20 +355,27 @@ static void set_times_this_week ( void )
   time ( &now );
   tm = localtime ( &now );
   switch ( tm->tm_wday ) {
-    case MONDAY:
-      thisweek = now - ( 0 * ( 24 * 3600 ) ); break;
-    case TUESDAY:
-      thisweek = now - ( 1 * ( 24 * 3600 ) ); break;
-    case WEDNESDAY:
-      thisweek = now - ( 2 * ( 24 * 3600 ) ); break;
-    case THURSDAY:
-      thisweek = now - ( 3 * ( 24 * 3600 ) ); break;
-    case FRIDAY:
-      thisweek = now - ( 4 * ( 24 * 3600 ) ); break;
-    case SATURDAY:
-      thisweek = now - ( 5 * ( 24 * 3600 ) ); break;
-    case SUNDAY:
-      thisweek = now - ( 6 * ( 24 * 3600 ) ); break;
+  case MONDAY:
+    thisweek = now - ( 0 * ( 24 * 3600 ) );
+    break;
+  case TUESDAY:
+    thisweek = now - ( 1 * ( 24 * 3600 ) );
+    break;
+  case WEDNESDAY:
+    thisweek = now - ( 2 * ( 24 * 3600 ) );
+    break;
+  case THURSDAY:
+    thisweek = now - ( 3 * ( 24 * 3600 ) );
+    break;
+  case FRIDAY:
+    thisweek = now - ( 4 * ( 24 * 3600 ) );
+    break;
+  case SATURDAY:
+    thisweek = now - ( 5 * ( 24 * 3600 ) );
+    break;
+  case SUNDAY:
+    thisweek = now - ( 6 * ( 24 * 3600 ) );
+    break;
   }
 
   tm = localtime ( &thisweek );
@@ -380,14 +395,11 @@ static void set_times_this_week ( void )
 }
 
 
-
-
-
 /****************************************************************************
-*
-* Set the time range variables so that we look at data from this month only.
-*
-****************************************************************************/
+ *
+ * Set the time range variables so that we look at data from this month only.
+ *
+ ****************************************************************************/
 static void set_times_this_month ( void )
 {
   time_t now, first, last;
@@ -423,14 +435,12 @@ static void set_times_this_month ( void )
 }
 
 
-
-
 /****************************************************************************
-*
-* Set the time range variables so that we look at data from the month
-* prior to the current month.
-*
-****************************************************************************/
+ *
+ * Set the time range variables so that we look at data from the month
+ * prior to the current month.
+ *
+ ****************************************************************************/
 static void set_times_last_month ( void )
 {
   time_t now, first, last;
@@ -479,22 +489,18 @@ static void set_times_last_month ( void )
 }
 
 
-
-
-
-
 /****************************************************************************
-*
-* Read in the data file
-*
-****************************************************************************/
+ *
+ * Read in the data file
+ *
+ ****************************************************************************/
 static void read_file ( char *filename )
 {
   FILE *fp;
   char text[10240];
 
   fp = fopen ( filename, "r" );
-  if ( ! fp ) {
+  if ( !fp ) {
     fprintf ( stderr, "Unable to open log file %s\n", filename );
     return;
   }
@@ -507,7 +513,6 @@ static void read_file ( char *filename )
   }
   fclose ( fp );
 }
-
 
 
 /*
@@ -525,7 +530,7 @@ static void add_time ( char *text )
   /* first get the day of month */
   ptr = strstr ( text, "[" );
   day = -1;
-  if ( ! ptr ) {
+  if ( !ptr ) {
     /* very unexpected.  (but expect the unexpected, right?) */
     return;
   }
@@ -533,7 +538,7 @@ static void add_time ( char *text )
   if ( isdigit ( temp[0] ) && isdigit ( temp[1] ) ) {
     int1 = atoi ( temp );
     if ( int1 >= 1 && int1 <= 31 )
-      day = int1 -1;
+      day = int1 - 1;
   }
   if ( day < 0 )
     return;
@@ -556,7 +561,7 @@ static void add_time ( char *text )
   year = -1;
   strncpy ( temp, ptr + 8, 4 );
   if ( isdigit ( temp[0] ) && isdigit ( temp[1] ) &&
-    isdigit ( temp[2] ) && isdigit ( temp[3] ) ) {
+       isdigit ( temp[2] ) && isdigit ( temp[3] ) ) {
     int1 = atoi ( temp );
     if ( int1 >= 1900 && int1 <= 9999 )
       year = int1;
@@ -581,12 +586,12 @@ static void add_time ( char *text )
   d = day + 1;
   if ( m < 3 )
     y--;
-  weekday = ( y + ( y/4 ) - ( y/100 ) + ( y/400 ) + dlook[m-1] + d ) % 7;
+  weekday = ( y + ( y / 4 ) - ( y / 100 ) + ( y / 400 ) + dlook[m - 1] + d ) % 7;
 
-/*
-  fprintf ( stderr, "%sdow=%s\tmonth=%s\tdom=%d\ttod=%d\n",
-    text, wdays[weekday], months[month], day + 1, hour );
-*/
+  /*
+    fprintf ( stderr, "%sdow=%s\tmonth=%s\tdom=%d\ttod=%d\n",
+      text, wdays[weekday], months[month], day + 1, hour );
+  */
   dow[weekday]++;
   tod[hour]++;
   moy[month]++;
@@ -594,20 +599,17 @@ static void add_time ( char *text )
 }
 
 
-
-
-
 /****************************************************************************
-*
-* Generate the output image
-*
-****************************************************************************/
-#define LEFT_PAD	80
-#define TOP_PAD		50
-#define RIGHT_PAD	50
-#define BOTTOM_PAD	55
-#define DATA_WIDTH	15
-#define DATA_HEIGHT	200
+ *
+ * Generate the output image
+ *
+ ****************************************************************************/
+#define LEFT_PAD 80
+#define TOP_PAD 50
+#define RIGHT_PAD 50
+#define BOTTOM_PAD 55
+#define DATA_WIDTH 15
+#define DATA_HEIGHT 200
 static void generate_gif ( void )
 {
   int loop;
@@ -615,7 +617,7 @@ static void generate_gif ( void )
   int maxval = 0;
   int lastday = 0;
   int x, y, lastx, lasty;
-  IImage im_out;	/* output image */
+  IImage im_out; /* output image */
   IFont helvB18, courR10;
   IColor red, blue, black, grey;
   IGC gc;
@@ -691,7 +693,7 @@ static void generate_gif ( void )
   }
   ILoadFontFromData ( "courR10", courR10_font, &courR10 );
   ILoadFontFromData ( "helvB18", helvB18_font, &helvB18 );
-  
+
   /* Draw title */
   ISetFont ( gc, helvB18 );
   ISetForeground ( gc, grey );
@@ -739,9 +741,7 @@ static void generate_gif ( void )
       "Day of the Month", strlen ( "Day of the Month" ) );
     /* now draw a line for each point */
     lastx = LEFT_PAD + DATA_WIDTH;
-    lasty = TOP_PAD + (int)
-      ( ( (double)(maxval - dom[0]) / (double)maxval )
-       * (double)DATA_HEIGHT );
+    lasty = TOP_PAD + (int) ( ( (double) ( maxval - dom[0] ) / (double) maxval ) * (double) DATA_HEIGHT );
     if ( graph_type == BAR ) {
       ISetForeground ( gc, red );
       IFillRectangle ( im_out, gc, lastx - ( DATA_WIDTH / 2 ) + 1, lasty,
@@ -749,16 +749,14 @@ static void generate_gif ( void )
     }
     /* draw a tic mark */
     ISetForeground ( gc, blue );
-    IDrawLine ( im_out, gc, lastx, TOP_PAD + DATA_HEIGHT, lastx, 
+    IDrawLine ( im_out, gc, lastx, TOP_PAD + DATA_HEIGHT, lastx,
       TOP_PAD + DATA_HEIGHT + 3 );
     ISetForeground ( gc, black );
     IDrawString ( im_out, gc, lastx - 2, TOP_PAD + DATA_HEIGHT + 11,
       "1", 1 );
     for ( loop = 1; loop <= lastday; loop++ ) {
       x = LEFT_PAD + ( ( loop + 1 ) * DATA_WIDTH );
-      y = TOP_PAD + (int)
-        ( ( (double)(maxval - dom[loop]) / (double)maxval )
-         * (double)DATA_HEIGHT );
+      y = TOP_PAD + (int) ( ( (double) ( maxval - dom[loop] ) / (double) maxval ) * (double) DATA_HEIGHT );
       /* draw the line graph */
       ISetForeground ( gc, red );
       if ( graph_type == LINE ) {
@@ -771,7 +769,7 @@ static void generate_gif ( void )
           DATA_WIDTH - 2, ( TOP_PAD + DATA_HEIGHT ) - y );
       /* draw a tic mark */
       ISetForeground ( gc, blue );
-      IDrawLine ( im_out, gc, x, TOP_PAD + DATA_HEIGHT, x, 
+      IDrawLine ( im_out, gc, x, TOP_PAD + DATA_HEIGHT, x,
         TOP_PAD + DATA_HEIGHT + 3 );
       /* label the x axis */
       ISetForeground ( gc, black );
@@ -795,9 +793,7 @@ static void generate_gif ( void )
       "Hour of the Day", strlen ( "Hour of the Day" ) );
     /* now draw a line for each point */
     lastx = LEFT_PAD + DATA_WIDTH;
-    lasty = TOP_PAD + (int)
-      ( ( (double)(maxval - tod[0]) / (double)maxval )
-       * (double)DATA_HEIGHT );
+    lasty = TOP_PAD + (int) ( ( (double) ( maxval - tod[0] ) / (double) maxval ) * (double) DATA_HEIGHT );
     if ( graph_type == BAR ) {
       ISetForeground ( gc, red );
       IFillRectangle ( im_out, gc, lastx - ( DATA_WIDTH / 2 ) + 1, lasty,
@@ -805,16 +801,14 @@ static void generate_gif ( void )
     }
     /* draw a tic mark */
     ISetForeground ( gc, blue );
-    IDrawLine ( im_out, gc, lastx, TOP_PAD + DATA_HEIGHT, lastx, 
+    IDrawLine ( im_out, gc, lastx, TOP_PAD + DATA_HEIGHT, lastx,
       TOP_PAD + DATA_HEIGHT + 3 );
     ISetForeground ( gc, black );
     IDrawString ( im_out, gc, lastx - 2, TOP_PAD + DATA_HEIGHT + 11,
       "1", 1 );
     for ( loop = 1; loop < 24; loop++ ) {
       x = LEFT_PAD + ( ( loop + 1 ) * DATA_WIDTH );
-      y = TOP_PAD + (int)
-        ( ( (double)(maxval - tod[loop]) / (double)maxval )
-         * (double)DATA_HEIGHT );
+      y = TOP_PAD + (int) ( ( (double) ( maxval - tod[loop] ) / (double) maxval ) * (double) DATA_HEIGHT );
       /* draw the line graph */
       ISetForeground ( gc, red );
       if ( graph_type == LINE ) {
@@ -827,7 +821,7 @@ static void generate_gif ( void )
           DATA_WIDTH - 2, ( TOP_PAD + DATA_HEIGHT ) - y );
       /* draw a tic mark */
       ISetForeground ( gc, blue );
-      IDrawLine ( im_out, gc, x, TOP_PAD + DATA_HEIGHT, x, 
+      IDrawLine ( im_out, gc, x, TOP_PAD + DATA_HEIGHT, x,
         TOP_PAD + DATA_HEIGHT + 3 );
       /* label the x axis */
       sprintf ( temp, "%d", loop + 1 );
@@ -851,9 +845,7 @@ static void generate_gif ( void )
       "Day of Week", strlen ( "Day of Week" ) );
     /* now draw a line for each point */
     lastx = LEFT_PAD + DATA_WIDTH * 3;
-    lasty = TOP_PAD + (int)
-      ( ( (double)(maxval - tod[0]) / (double)maxval )
-       * (double)DATA_HEIGHT );
+    lasty = TOP_PAD + (int) ( ( (double) ( maxval - tod[0] ) / (double) maxval ) * (double) DATA_HEIGHT );
     if ( graph_type == BAR ) {
       ISetForeground ( gc, red );
       IFillRectangle ( im_out, gc, lastx - ( DATA_WIDTH / 2 ) + 1, lasty,
@@ -861,16 +853,14 @@ static void generate_gif ( void )
     }
     /* draw a tic mark */
     ISetForeground ( gc, blue );
-    IDrawLine ( im_out, gc, lastx, TOP_PAD + DATA_HEIGHT, lastx, 
+    IDrawLine ( im_out, gc, lastx, TOP_PAD + DATA_HEIGHT, lastx,
       TOP_PAD + DATA_HEIGHT + 3 );
     ISetForeground ( gc, black );
     IDrawString ( im_out, gc, lastx - 2, TOP_PAD + DATA_HEIGHT + 11,
       "Sun", 3 );
     for ( loop = 1; loop < 7; loop++ ) {
-      x = LEFT_PAD + ( ( loop + 1 ) * DATA_WIDTH  * 3 );
-      y = TOP_PAD + (int)
-        ( ( (double)(maxval - dow[loop]) / (double)maxval )
-         * (double)DATA_HEIGHT );
+      x = LEFT_PAD + ( ( loop + 1 ) * DATA_WIDTH * 3 );
+      y = TOP_PAD + (int) ( ( (double) ( maxval - dow[loop] ) / (double) maxval ) * (double) DATA_HEIGHT );
       /* draw the line graph */
       ISetForeground ( gc, red );
       if ( graph_type == LINE ) {
@@ -883,7 +873,7 @@ static void generate_gif ( void )
           DATA_WIDTH - 2, ( TOP_PAD + DATA_HEIGHT ) - y );
       /* draw a tic mark */
       ISetForeground ( gc, blue );
-      IDrawLine ( im_out, gc, x, TOP_PAD + DATA_HEIGHT, x, 
+      IDrawLine ( im_out, gc, x, TOP_PAD + DATA_HEIGHT, x,
         TOP_PAD + DATA_HEIGHT + 3 );
       /* label the x axis */
       sprintf ( temp, "%s", wdays[loop] );
@@ -907,26 +897,22 @@ static void generate_gif ( void )
       "Month of Year", strlen ( "Month of Year" ) );
     /* now draw a line for each point */
     lastx = LEFT_PAD + DATA_WIDTH * 2;
-    lasty = TOP_PAD + (int)
-      ( ( (double)(maxval - moy[0]) / (double)maxval )
-       * (double)DATA_HEIGHT );
+    lasty = TOP_PAD + (int) ( ( (double) ( maxval - moy[0] ) / (double) maxval ) * (double) DATA_HEIGHT );
     if ( graph_type == BAR ) {
       ISetForeground ( gc, red );
       IFillRectangle ( im_out, gc, lastx - ( DATA_WIDTH / 2 ) + 1, lasty,
         DATA_WIDTH - 2, ( TOP_PAD + DATA_HEIGHT ) - lasty );
     }
-      /* draw a tic mark */
+    /* draw a tic mark */
     ISetForeground ( gc, blue );
-    IDrawLine ( im_out, gc, lastx, TOP_PAD + DATA_HEIGHT, lastx, 
+    IDrawLine ( im_out, gc, lastx, TOP_PAD + DATA_HEIGHT, lastx,
       TOP_PAD + DATA_HEIGHT + 3 );
     ISetForeground ( gc, black );
     IDrawString ( im_out, gc, lastx - 2, TOP_PAD + DATA_HEIGHT + 11,
       months[0], strlen ( months[0] ) );
     for ( loop = 1; loop < 12; loop++ ) {
-      x = LEFT_PAD + ( ( loop + 1 ) * DATA_WIDTH  * 2 );
-      y = TOP_PAD + (int)
-        ( ( (double)(maxval - moy[loop]) / (double)maxval )
-         * (double)DATA_HEIGHT );
+      x = LEFT_PAD + ( ( loop + 1 ) * DATA_WIDTH * 2 );
+      y = TOP_PAD + (int) ( ( (double) ( maxval - moy[loop] ) / (double) maxval ) * (double) DATA_HEIGHT );
       /* draw the line graph */
       ISetForeground ( gc, red );
       if ( graph_type == LINE ) {
@@ -939,7 +925,7 @@ static void generate_gif ( void )
           DATA_WIDTH - 2, ( TOP_PAD + DATA_HEIGHT ) - y );
       /* draw a tic mark */
       ISetForeground ( gc, blue );
-      IDrawLine ( im_out, gc, x, TOP_PAD + DATA_HEIGHT, x, 
+      IDrawLine ( im_out, gc, x, TOP_PAD + DATA_HEIGHT, x,
         TOP_PAD + DATA_HEIGHT + 3 );
       /* label the x axis */
       sprintf ( temp, "%s", months[loop] );
@@ -961,13 +947,13 @@ static void generate_gif ( void )
     ISetForeground ( gc, black );
     IDrawString ( im_out, gc, 5, height - 13, temp, strlen ( temp ) );
 
-    if ( strlen ( start_time ) && ! strlen ( stop_time ) )
+    if ( strlen ( start_time ) && !strlen ( stop_time ) )
       sprintf ( temp, "Time range: after %s", pretty_start );
-    else if ( strlen ( stop_time ) && ! strlen ( start_time ) )
+    else if ( strlen ( stop_time ) && !strlen ( start_time ) )
       printf ( temp, "Time range: prior to %s", pretty_stop );
     else if ( strlen ( start_time ) && strlen ( stop_time ) )
       sprintf ( temp, "Time range: %s through %s",
-      pretty_start, pretty_stop );
+        pretty_start, pretty_stop );
     else
       sprintf ( temp, "Time range: all" );
     IDrawString ( im_out, gc, 5, height - 23, temp, strlen ( temp ) );
@@ -985,19 +971,12 @@ static void generate_gif ( void )
 }
 
 
-
-
-
-
-
-
-
 /****************************************************************************
-*
-* Calculate a nice round number to use as the maximum for the y axis.
-*
-****************************************************************************/
-static int calc_max ( int cur_max )	/* the current max value */
+ *
+ * Calculate a nice round number to use as the maximum for the y axis.
+ *
+ ****************************************************************************/
+static int calc_max ( int cur_max ) /* the current max value */
 {
   int ret_val;
   int next_round, tens, div_val;
@@ -1006,45 +985,45 @@ static int calc_max ( int cur_max )	/* the current max value */
     return ( 1 );
 
   tens = (int) log10 ( (double) cur_max );
-  next_round = (int) pow ( (double) 10.0, (double) (tens+1) );
+  next_round = (int) pow ( (double) 10.0, (double) ( tens + 1 ) );
   div_val = (int) ( next_round / (int) cur_max );
   switch ( div_val ) {
-    case 10:
-    case 9:
-    case 8:
-    case 7:
-    case 6:
-    case 5:
+  case 10:
+  case 9:
+  case 8:
+  case 7:
+  case 6:
+  case 5:
     next_round /= 5;
-      break;
-    case 4:
-      next_round /= 4;
-      break;
-    case 3:
-      next_round = (int) ( 0.4 * (float) next_round );
-      break;
-    case 2:
-      next_round /= 2;
-      break;
-    case 1:
-    case 0:
-      break;
+    break;
+  case 4:
+    next_round /= 4;
+    break;
+  case 3:
+    next_round = (int) ( 0.4 * (float) next_round );
+    break;
+  case 2:
+    next_round /= 2;
+    break;
+  case 1:
+  case 0:
+    break;
   }
 
   ret_val = (int) ( max ( 5.0, (float) next_round ) );
 
   if ( ret_val < cur_max )
-    ret_val = cur_max;	/* floating point round error */
+    ret_val = cur_max; /* floating point round error */
 
   return ( ret_val );
 }
 
 
 /****************************************************************************
-*
-* Check to see if the entry is within our time window
-*
-****************************************************************************/
+ *
+ * Check to see if the entry is within our time window
+ *
+ ****************************************************************************/
 static int is_in_time_range ( char *entry )
 {
   char *ptr;
@@ -1053,9 +1032,9 @@ static int is_in_time_range ( char *entry )
   char entry_time[30];
 
   ptr = strstr ( entry, "[" );
-  if ( ! ptr )
+  if ( !ptr )
     return ( FALSE );
-  
+
   ptr++;
 
   /* Get year */
@@ -1083,15 +1062,15 @@ static int is_in_time_range ( char *entry )
 
   /* terminate string */
   entry_time[12] = '\0';
-  
-  if ( ! strlen ( start_time ) ) {
+
+  if ( !strlen ( start_time ) ) {
     is_after_start = TRUE;
   }
   else {
     is_after_start = ( strcmp ( entry_time, start_time ) > 0 );
   }
-  
-  if ( ! strlen ( stop_time ) ) {
+
+  if ( !strlen ( stop_time ) ) {
     is_before_stop = TRUE;
   }
   else {
@@ -1103,8 +1082,4 @@ static int is_in_time_range ( char *entry )
   }
   else
     return ( FALSE );
-  
 }
-
-
-

@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Build an image that contains an index of a bunch of images.
- * 
+ *
  *
  * Usage:
  *    index [-wN] [-hN] [-f] [-s] [-h] outimage inimage1 ...
@@ -48,10 +48,9 @@
 #include "helvR08.h"
 
 
-#define TOP_SHADOW		232
-#define BOTTOM_SHADOW		112
-#define BACKGROUND		192
-
+#define TOP_SHADOW 232
+#define BOTTOM_SHADOW 112
+#define BACKGROUND 192
 
 
 static char *get_basename ( char *infile )
@@ -59,7 +58,7 @@ static char *get_basename ( char *infile )
   char *ptr;
 
   for ( ptr = infile + strlen ( infile ) - 1;
-    *ptr != '/' && *ptr != '\\' && ptr != infile; ptr-- )
+        *ptr != '/' && *ptr != '\\' && ptr != infile; ptr-- )
     ;
 
   if ( *ptr == '/' || *ptr == '\\' )
@@ -115,8 +114,8 @@ int main ( int argc, char *argv[] )
 
   for ( loop = 1; loop < argc; loop++ ) {
     if ( strcmp ( argv[loop], "-h" ) == 0 ||
-      strcmp ( argv[loop], "-help" ) == 0 ||
-      strcmp ( argv[loop], "--help" ) == 0 ) {
+         strcmp ( argv[loop], "-help" ) == 0 ||
+         strcmp ( argv[loop], "--help" ) == 0 ) {
       print_usage ();
     }
     else if ( strcmp ( argv[loop], "-html" ) == 0 ) {
@@ -127,7 +126,7 @@ int main ( int argc, char *argv[] )
       }
     }
     else if ( strncmp ( argv[loop], "-w", 2 ) == 0 &&
-      strlen ( argv[loop] ) > 2 ) {
+              strlen ( argv[loop] ) > 2 ) {
       iconW = atoi ( argv[loop] + 2 );
       if ( iconW <= 0 ) {
         fprintf ( stderr, "Invalid width setting \"%s\"\n", argv[loop] );
@@ -135,7 +134,7 @@ int main ( int argc, char *argv[] )
       }
     }
     else if ( strncmp ( argv[loop], "-h", 2 ) == 0 &&
-      strlen ( argv[loop] ) > 2 ) {
+              strlen ( argv[loop] ) > 2 ) {
       iconH = atoi ( argv[loop] + 2 );
       if ( iconH <= 0 ) {
         fprintf ( stderr, "Invalid height setting \"%s\"\n", argv[loop] );
@@ -150,8 +149,9 @@ int main ( int argc, char *argv[] )
       outfile = argv[loop];
       if ( strcmp ( outfile, "-" ) == 0 ) {
         fp = stdin;
-      } else {
-        if ( stat ( outfile, &buf ) == 0 && ! force ) {
+      }
+      else {
+        if ( stat ( outfile, &buf ) == 0 && !force ) {
           fprintf ( stderr, "Error: output file %s already exists.\n",
             outfile );
           fprintf ( stderr, "Delete it or use the -f option.\n" );
@@ -196,9 +196,9 @@ int main ( int argc, char *argv[] )
 
   gc = ICreateGC ();
   black = IAllocColor ( 0, 0, 0 );
-  bg = IAllocColor (  BACKGROUND, BACKGROUND, BACKGROUND );
-  ts = IAllocColor (  TOP_SHADOW, TOP_SHADOW, TOP_SHADOW );
-  bs = IAllocColor (  BOTTOM_SHADOW, BOTTOM_SHADOW, BOTTOM_SHADOW );
+  bg = IAllocColor ( BACKGROUND, BACKGROUND, BACKGROUND );
+  ts = IAllocColor ( TOP_SHADOW, TOP_SHADOW, TOP_SHADOW );
+  bs = IAllocColor ( BOTTOM_SHADOW, BOTTOM_SHADOW, BOTTOM_SHADOW );
   ISetForeground ( gc, bg );
   IFillRectangle ( image, gc, 0, 0, w, h );
 
@@ -224,7 +224,7 @@ int main ( int argc, char *argv[] )
       fprintf ( stderr, "Error opening file %s\n", infiles[loop] );
       continue;
     }
-    if ( ! silent )
+    if ( !silent )
       printf ( "Reading %s.\n", infiles[loop] );
     if ( ( ret = IReadImageFile ( in_fp, format, IOPTION_NONE, &in_image ) ) ) {
       fprintf ( stderr, "Error reading image %s: %s\n", infiles[loop],
@@ -290,11 +290,11 @@ int main ( int argc, char *argv[] )
   else
     ret = IFileType ( outfile, &format );
   fp = fopen ( outfile, "wb" );
-  if ( ! fp ) {
+  if ( !fp ) {
     fprintf ( stderr, "Error writing %s.\n", outfile );
     exit ( 1 );
   }
-  if ( ! silent )
+  if ( !silent )
     printf ( "Writing %s.\n", outfile );
   IWriteImageFile ( fp, image, format, IOPTION_NONE );
 
@@ -304,5 +304,3 @@ int main ( int argc, char *argv[] )
   /* exit */
   return ( 0 );
 }
-
-

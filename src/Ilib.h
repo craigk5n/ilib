@@ -99,25 +99,25 @@
  * build and usage instructions.
  */
 
-#include <stdio.h>		/* for FILE * in the read/write prototypes */
+#include <stdio.h> /* for FILE * in the read/write prototypes */
 
-#define ILIB_MAJOR_VERSION	1
-#define ILIB_MINOR_VERSION	1
-#define ILIB_MICRO_VERSION	10
+#define ILIB_MAJOR_VERSION 1
+#define ILIB_MINOR_VERSION 1
+#define ILIB_MICRO_VERSION 10
 
-#define ILIB_VERSION		"1.1.10"
-#define ILIB_VERSION_DATE	"25 Oct 2004"
-#define ILIB_URL		"https://www.k5n.us/Ilib.php"
+#define ILIB_VERSION "1.1.10"
+#define ILIB_VERSION_DATE "25 Oct 2004"
+#define ILIB_URL "https://www.k5n.us/Ilib.php"
 
 
 /**
  * Structures
  */
-typedef void * IImage;		/* image */
-typedef void * IFont;		/* font */
-typedef void * IGC;		/* graphics context */
-typedef unsigned int IColor;	/* color */
-typedef unsigned int IOptions;	/* options */
+typedef void *IImage;          /* image */
+typedef void *IFont;           /* font */
+typedef void *IGC;             /* graphics context */
+typedef unsigned int IColor;   /* color */
+typedef unsigned int IOptions; /* options */
 
 typedef enum {
   IFORMAT_GIF = 0,
@@ -130,16 +130,16 @@ typedef enum {
   IFORMAT_JPEG = 7,
   IFORMAT_BMP = 8
 } IFileFormat;
-#define INUM_FORMATS	9
+#define INUM_FORMATS 9
 
 /**
  * Line drawing styles.
  * Applies to: IDrawLine, IDrawRectangle
  */
 typedef enum {
-  ILINE_SOLID,			/* default */
-  ILINE_ON_OFF_DASH,		/* dashes (every 3 pixels) */
-  ILINE_DOUBLE_DASH		/* not yet implemented */
+  ILINE_SOLID,       /* default */
+  ILINE_ON_OFF_DASH, /* dashes (every 3 pixels) */
+  ILINE_DOUBLE_DASH  /* not yet implemented */
 } ILineStyle;
 
 /**
@@ -147,10 +147,10 @@ typedef enum {
  * Applies to: nothing yet (not implemented)
  */
 typedef enum {
-  IFILL_SOLID,			/* default */
-  IFILL_TILED,			/* not yet implemented */
-  IFILL_STIPPLED,		/* not yet implemented */
-  IFILL_OPAQUE_STIPPLED		/* not yet implemented */
+  IFILL_SOLID,          /* default */
+  IFILL_TILED,          /* not yet implemented */
+  IFILL_STIPPLED,       /* not yet implemented */
+  IFILL_OPAQUE_STIPPLED /* not yet implemented */
 } IFillStyle;
 
 /**
@@ -158,10 +158,10 @@ typedef enum {
  * Applies to: IDrawString, IDrawStringRotated
  */
 typedef enum {
-  ITEXT_NORMAL,			/* default */
-  ITEXT_ETCHED_IN,		/* text appears etched into background */
-  ITEXT_ETCHED_OUT,		/* text appears etched out of background */
-  ITEXT_SHADOWED		/* text has shadow that fades into background */
+  ITEXT_NORMAL,     /* default */
+  ITEXT_ETCHED_IN,  /* text appears etched into background */
+  ITEXT_ETCHED_OUT, /* text appears etched out of background */
+  ITEXT_SHADOWED    /* text has shadow that fades into background */
 } ITextStyle;
 
 /**
@@ -169,7 +169,7 @@ typedef enum {
  * Applies to: IDrawStringRotated()
  */
 typedef enum {
-  ITEXT_LEFT_TO_RIGHT,		/* default */
+  ITEXT_LEFT_TO_RIGHT, /* default */
   ITEXT_BOTTOM_TO_TOP,
   ITEXT_TOP_TO_BOTTOM
 } ITextDirection;
@@ -186,21 +186,21 @@ typedef struct {
 /**
  * Options
  */
-#define IOPTION_NONE		0x0000
+#define IOPTION_NONE 0x0000
 
 /* use the following with ICreateImage() */
-#define IOPTION_GREYSCALE	0x0001	/* greyscale image */
-#define IOPTION_GRAYSCALE	IOPTION_GREYSCALE
+#define IOPTION_GREYSCALE 0x0001 /* greyscale image */
+#define IOPTION_GRAYSCALE IOPTION_GREYSCALE
 
 /* use the following with IWriteImageFile() */
-#define IOPTION_ASCII		0x0001	/* ascii output for pbm/pgm/ppm */
-#define IOPTION_INTERLACED	0x0002	/* interlaced output (GIF) */
+#define IOPTION_ASCII 0x0001      /* ascii output for pbm/pgm/ppm */
+#define IOPTION_INTERLACED 0x0002 /* interlaced output (GIF) */
 
 /**
  * Default color values for black and white
  */
-#define IBLACK_PIXEL		0
-#define IWHITE_PIXEL		1
+#define IBLACK_PIXEL 0
+#define IWHITE_PIXEL 1
 
 
 /**
@@ -243,7 +243,7 @@ typedef enum {
  */
 char *IErrorString (
 #ifndef _NO_PROTO
-  IError err			/* error value */
+  IError err /* error value */
 #endif
 );
 
@@ -252,9 +252,9 @@ char *IErrorString (
  */
 IImage ICreateImage (
 #ifndef _NO_PROTO
-  unsigned int width,		/* image width */
-  unsigned int height,		/* image height */
-  unsigned int options		/* options flags (IOPTION_GREYSCALE, etc.) */
+  unsigned int width,  /* image width */
+  unsigned int height, /* image height */
+  unsigned int options /* options flags (IOPTION_GREYSCALE, etc.) */
 #endif
 );
 
@@ -263,8 +263,8 @@ IImage ICreateImage (
  */
 IError IDuplicateImage (
 #ifndef _NO_PROTO
-  IImage image,			/* image to duplicate */
-  IImage *image_return		/* out: pointer to new image */
+  IImage image,        /* image to duplicate */
+  IImage *image_return /* out: pointer to new image */
 #endif
 );
 
@@ -274,15 +274,15 @@ IError IDuplicateImage (
  */
 IError ICopyImage (
 #ifndef _NO_PROTO
-  IImage source,		/* source image */
-  IImage dest,			/* destination image */
-  IGC gc,			/* graphics context */
-  int src_x,			/* x from source image */
-  int src_y,			/* y from source image */
-  unsigned int width,		/* width to copy */
-  unsigned int height,		/* height to copy */
-  int dest_x,			/* x coordinate on the destination image */
-  int dest_y			/* y coordinate on the destination image */
+  IImage source,       /* source image */
+  IImage dest,         /* destination image */
+  IGC gc,              /* graphics context */
+  int src_x,           /* x from source image */
+  int src_y,           /* y from source image */
+  unsigned int width,  /* width to copy */
+  unsigned int height, /* height to copy */
+  int dest_x,          /* x coordinate on the destination image */
+  int dest_y           /* y coordinate on the destination image */
 #endif
 );
 
@@ -291,30 +291,31 @@ IError ICopyImage (
  */
 IError ICopyImageScaled (
 #ifndef _NO_PROTO
-  IImage source,		/* source image */
-  IImage dest,			/* destination image */
-  IGC gc,			/* graphics context */
-  int src_x,			/* x from source image */
-  int src_y,			/* y from source image */
-  unsigned int src_width,	/* width of source image to copy */
-  unsigned int src_height,	/* height of source image to copy */
-  int dest_x,			/* x coordinate on the destination image */
-  int dest_y,			/* y coordinate on the destination image */
-  unsigned int dest_width,	/* width to copy to */
-  unsigned int dest_height	/* height to copy to */
+  IImage source,           /* source image */
+  IImage dest,             /* destination image */
+  IGC gc,                  /* graphics context */
+  int src_x,               /* x from source image */
+  int src_y,               /* y from source image */
+  unsigned int src_width,  /* width of source image to copy */
+  unsigned int src_height, /* height of source image to copy */
+  int dest_x,              /* x coordinate on the destination image */
+  int dest_y,              /* y coordinate on the destination image */
+  unsigned int dest_width, /* width to copy to */
+  unsigned int dest_height /* height to copy to */
 #endif
 );
 
 
-#define IFreeImage(i) \
-	_IFreeImage(i); (i) = NULL;
+#define IFreeImage( i ) \
+  _IFreeImage ( i );    \
+  ( i ) = NULL;
 
 /**
  * Frees the memory associated with an image that will not be used again.
  */
 IError _IFreeImage (
 #ifndef _NO_PROTO
-  IImage image			/* pointer to image */
+  IImage image /* pointer to image */
 #endif
 );
 
@@ -323,7 +324,7 @@ IError _IFreeImage (
  */
 unsigned int IImageHeight (
 #ifndef _NO_PROTO
-  IImage image			/* pointer to image */
+  IImage image /* pointer to image */
 #endif
 );
 
@@ -332,7 +333,7 @@ unsigned int IImageHeight (
  */
 unsigned int IImageWidth (
 #ifndef _NO_PROTO
-  IImage image			/* pointer to image */
+  IImage image /* pointer to image */
 #endif
 );
 
@@ -341,8 +342,8 @@ unsigned int IImageWidth (
  */
 IError ISetComment (
 #ifndef _NO_PROTO
-  IImage image,			/* pointer to image */
-  char *comment			/* new comment */
+  IImage image, /* pointer to image */
+  char *comment /* new comment */
 #endif
 );
 
@@ -351,8 +352,8 @@ IError ISetComment (
  */
 IError IGetComment (
 #ifndef _NO_PROTO
-  IImage image,			/* pointer to image */
-  char **comment		/* address to comment */
+  IImage image,  /* pointer to image */
+  char **comment /* address to comment */
 #endif
 );
 
@@ -361,8 +362,8 @@ IError IGetComment (
  */
 IError IFileType (
 #ifndef _NO_PROTO
-  char *file,			/* filename */
-  IFileFormat *format_return	/* out: format of file */
+  char *file,                /* filename */
+  IFileFormat *format_return /* out: format of file */
 #endif
 );
 
@@ -379,10 +380,10 @@ IError IFileType (
  */
 IError IReadImageFile (
 #ifndef _NO_PROTO
-  FILE *fp,			/* file pointer */
-  IFileFormat format,		/* output format (e.g. IFORMAT_GIF) */
-  IOptions options,		/* options */
-  IImage *image_return		/* out: returned image on success */
+  FILE *fp,            /* file pointer */
+  IFileFormat format,  /* output format (e.g. IFORMAT_GIF) */
+  IOptions options,    /* options */
+  IImage *image_return /* out: returned image on success */
 #endif
 );
 
@@ -395,28 +396,28 @@ IError IReadImageFile (
  */
 IError IWriteImageFile (
 #ifndef _NO_PROTO
-  FILE *fp,			/* file pointer */
-  IImage image,			/* image */
-  IFileFormat format,		/* output format (e.g. IFORMAT_XPM) */
-  IOptions options		/* options (e.g. IOPTION_INTERLACED) */
+  FILE *fp,           /* file pointer */
+  IImage image,       /* image */
+  IFileFormat format, /* output format (e.g. IFORMAT_XPM) */
+  IOptions options    /* options (e.g. IOPTION_INTERLACED) */
 #endif
 );
 
 /**
  * Creates a graphic context for drawing on an image.
  */
-IGC ICreateGC (
-);
+IGC ICreateGC ();
 
-#define IFreeGC(g) \
-	_IFreeGC(g); (g) = NULL;
+#define IFreeGC( g ) \
+  _IFreeGC ( g );    \
+  ( g ) = NULL;
 
 /**
  * Frees a graphic context no longer in use.
  */
 IError _IFreeGC (
 #ifndef _NO_PROTO
-  IGC gc			/* graphics context */
+  IGC gc /* graphics context */
 #endif
 );
 
@@ -428,9 +429,9 @@ IError _IFreeGC (
  */
 IError ILoadFontFromFile (
 #ifndef _NO_PROTO
-  char *name,			/* name to use for reference (filename) */
-  char *path,			/* path to font file */
-  IFont *font_return		/* out: returned font */
+  char *name,        /* name to use for reference (filename) */
+  char *path,        /* path to font file */
+  IFont *font_return /* out: returned font */
 #endif
 );
 
@@ -443,23 +444,25 @@ IError ILoadFontFromFile (
  */
 IError ILoadFontFromData (
 #ifndef _NO_PROTO
-  char *name,			/* name to use for reference (filename) */
-  char **lines,			/* font data (identical to file contents) */
-				/* as an array of character strings */
-				/* (one text line per array element */
-				/* terminated with a NULL element */
-  IFont *font_return		/* out: pointer to returned font */
+  char *name,   /* name to use for reference (filename) */
+  char **lines, /* font data (identical to file contents) */
+  /* as an array of character strings */
+  /* (one text line per array element */
+  /* terminated with a NULL element */
+  IFont *font_return /* out: pointer to returned font */
 #endif
 );
 
-#define IFreeFont(f)		_IFreeFont(f); (f) = NULL;
+#define IFreeFont( f ) \
+  _IFreeFont ( f );    \
+  ( f ) = NULL;
 
 /**
  * Frees a font no longer in use.
  */
 IError _IFreeFont (
 #ifndef _NO_PROTO
-  IFont font			/* font to free */
+  IFont font /* font to free */
 #endif
 );
 
@@ -470,8 +473,8 @@ IError _IFreeFont (
  */
 IError IFontSize (
 #ifndef _NO_PROTO
-  IFont font,			/* font */
-  unsigned int *height_return	/* out: height in pixels of font */
+  IFont font,                 /* font */
+  unsigned int *height_return /* out: height in pixels of font */
 #endif
 );
 
@@ -481,11 +484,11 @@ IError IFontSize (
  */
 IError ITextWidth (
 #ifndef _NO_PROTO
-  IGC gc,			/* graphics context */
-  IFont font,			/* font */
-  char *text,			/* text */
-  unsigned int len,		/* length of text */
-  unsigned int *width_return	/* out: width in pixels of text */
+  IGC gc,                    /* graphics context */
+  IFont font,                /* font */
+  char *text,                /* text */
+  unsigned int len,          /* length of text */
+  unsigned int *width_return /* out: width in pixels of text */
 #endif
 );
 
@@ -496,11 +499,11 @@ IError ITextWidth (
  */
 IError ITextHeight (
 #ifndef _NO_PROTO
-  IGC gc,			/* graphics context */
-  IFont font,			/* font */
-  char *text,			/* text */
-  unsigned int len,		/* length of text */
-  unsigned int *height_return	/* out: height in pixels of text */
+  IGC gc,                     /* graphics context */
+  IFont font,                 /* font */
+  char *text,                 /* text */
+  unsigned int len,           /* length of text */
+  unsigned int *height_return /* out: height in pixels of text */
 #endif
 );
 
@@ -510,12 +513,12 @@ IError ITextHeight (
  */
 IError ITextDimensions (
 #ifndef _NO_PROTO
-  IGC gc,			/* graphics context */
-  IFont font,			/* font */
-  char *text,			/* text */
-  unsigned int len,		/* length of text */
-  unsigned int *width_return,	/* out: width in pixels of text */
-  unsigned int *height_return	/* out: height in pixels of text */
+  IGC gc,                     /* graphics context */
+  IFont font,                 /* font */
+  char *text,                 /* text */
+  unsigned int len,           /* length of text */
+  unsigned int *width_return, /* out: width in pixels of text */
+  unsigned int *height_return /* out: height in pixels of text */
 #endif
 );
 
@@ -527,19 +530,19 @@ IError ITextDimensions (
  */
 IError IArcProperties (
 #ifndef _NO_PROTO
-  IGC gc,			/* graphics context */
-  int x,			/* arc center x coordinate */
-  int y,			/* arc center y coordinate */
-  int r1,			/* angle 1 radius */
-  int r2,			/* angle 2 radius */
-  double a1,			/* first angle (in degrees) */
-  double a2,			/* second angle (in degrees) */
-  int *a1_x,			/* out: x coordinate of edge of angle 1 */
-  int *a1_y,			/* out: y coordinate of edge of angle 1 */
-  int *a2_x,			/* out: x coordinate of edge of angle 2 */
-  int *a2_y,			/* out: y coordinate of edge of angle 2 */
-  int *middle_x,		/* out: x coordinate of edge center */
-  int *middle_y			/* out: y coordinate of edge center */
+  IGC gc,        /* graphics context */
+  int x,         /* arc center x coordinate */
+  int y,         /* arc center y coordinate */
+  int r1,        /* angle 1 radius */
+  int r2,        /* angle 2 radius */
+  double a1,     /* first angle (in degrees) */
+  double a2,     /* second angle (in degrees) */
+  int *a1_x,     /* out: x coordinate of edge of angle 1 */
+  int *a1_y,     /* out: y coordinate of edge of angle 1 */
+  int *a2_x,     /* out: x coordinate of edge of angle 2 */
+  int *a2_y,     /* out: y coordinate of edge of angle 2 */
+  int *middle_x, /* out: x coordinate of edge center */
+  int *middle_y  /* out: y coordinate of edge center */
 #endif
 );
 
@@ -550,9 +553,9 @@ IError IArcProperties (
  */
 IColor IAllocColor (
 #ifndef _NO_PROTO
-  unsigned int red,		/* red value (0-255) */
-  unsigned int green,		/* green value (0-255) */
-  unsigned int blue		/* blue value (0-255) */
+  unsigned int red,   /* red value (0-255) */
+  unsigned int green, /* green value (0-255) */
+  unsigned int blue   /* blue value (0-255) */
 #endif
 );
 
@@ -562,19 +565,21 @@ IColor IAllocColor (
  */
 IError IAllocNamedColor (
 #ifndef _NO_PROTO
-  char *colorname,		/* color name ("red, "orange", etc.) */
-  IColor *color_ret		/* resulting color */
+  char *colorname,  /* color name ("red, "orange", etc.) */
+  IColor *color_ret /* resulting color */
 #endif
 );
 
-#define IFreeColor(c)		_IFreeColor(c); (c) = 0;
+#define IFreeColor( c ) \
+  _IFreeColor ( c );    \
+  ( c ) = 0;
 
 /**
  * Frees a color no longer in use.
  */
 IError _IFreeColor (
 #ifndef _NO_PROTO
-  IColor color			/* color */
+  IColor color /* color */
 #endif
 );
 
@@ -585,8 +590,8 @@ IError _IFreeColor (
  */
 IError ISetTransparent (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IColor color			/* color */
+  IImage image, /* image */
+  IColor color  /* color */
 #endif
 );
 
@@ -597,8 +602,8 @@ IError ISetTransparent (
  */
 IError IGetTransparent (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IColor *color			/* returned color */
+  IImage image, /* image */
+  IColor *color /* returned color */
 #endif
 );
 
@@ -611,8 +616,8 @@ IError IGetTransparent (
  */
 IError ISetForeground (
 #ifndef _NO_PROTO
-  IGC gc,			/* graphics context */
-  IColor color			/* color */
+  IGC gc,      /* graphics context */
+  IColor color /* color */
 #endif
 );
 
@@ -622,8 +627,8 @@ IError ISetForeground (
  */
 IError ISetBackground (
 #ifndef _NO_PROTO
-  IGC gc,			/* graphics context */
-  IColor color			/* color */
+  IGC gc,      /* graphics context */
+  IColor color /* color */
 #endif
 );
 
@@ -634,8 +639,8 @@ IError ISetBackground (
  */
 IError ISetFont (
 #ifndef _NO_PROTO
-  IGC gc,			/* graphics context */
-  IFont font			/* font */
+  IGC gc,    /* graphics context */
+  IFont font /* font */
 #endif
 );
 
@@ -646,8 +651,8 @@ IError ISetFont (
  */
 IError ISetLineWidth (
 #ifndef _NO_PROTO
-  IGC gc,			/* graphics context */
-  unsigned int line_width	/* line width */
+  IGC gc,                 /* graphics context */
+  unsigned int line_width /* line width */
 #endif
 );
 
@@ -660,8 +665,8 @@ IError ISetLineWidth (
  */
 IError ISetLineStyle (
 #ifndef _NO_PROTO
-  IGC gc,			/* graphics context */
-  ILineStyle line_style		/* line style */
+  IGC gc,               /* graphics context */
+  ILineStyle line_style /* line style */
 #endif
 );
 
@@ -682,8 +687,8 @@ IError ISetLineStyle (
  */
 IError ISetTextStyle (
 #ifndef _NO_PROTO
-  IGC gc,			/* graphics context */
-  ITextStyle text_style		/* text style */
+  IGC gc,               /* graphics context */
+  ITextStyle text_style /* text style */
 #endif
 );
 
@@ -696,12 +701,12 @@ IError ISetTextStyle (
  */
 IError IDrawString (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  int x,			/* x coordinate (lower left of text) */
-  int y,			/* y coordinate (lower left of text) */
-  char *text,			/* pointer to text */
-  unsigned int len		/* length of text */
+  IImage image,    /* image */
+  IGC gc,          /* graphics context */
+  int x,           /* x coordinate (lower left of text) */
+  int y,           /* y coordinate (lower left of text) */
+  char *text,      /* pointer to text */
+  unsigned int len /* length of text */
 #endif
 );
 
@@ -719,13 +724,13 @@ IError IDrawString (
  */
 IError IDrawStringRotated (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  int x,			/* x coordinate */
-  int y,			/* y coordinate */
-  char *text,			/* pointer to text */
-  unsigned int len,		/* length of text */
-  ITextDirection direction	/* direction to draw text */
+  IImage image,            /* image */
+  IGC gc,                  /* graphics context */
+  int x,                   /* x coordinate */
+  int y,                   /* y coordinate */
+  char *text,              /* pointer to text */
+  unsigned int len,        /* length of text */
+  ITextDirection direction /* direction to draw text */
 #endif
 );
 
@@ -743,13 +748,13 @@ IError IDrawStringRotated (
  */
 IError IDrawStringRotatedAngle (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  int x,			/* x coordinate */
-  int y,			/* y coordinate */
-  char *text,			/* pointer to text */
-  unsigned int len,		/* length of text */
-  double angle			/* angle to rotate text */
+  IImage image,     /* image */
+  IGC gc,           /* graphics context */
+  int x,            /* x coordinate */
+  int y,            /* y coordinate */
+  char *text,       /* pointer to text */
+  unsigned int len, /* length of text */
+  double angle      /* angle to rotate text */
 #endif
 );
 
@@ -759,10 +764,10 @@ IError IDrawStringRotatedAngle (
  */
 IError IDrawPoint (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  int x,			/* x coordinate */
-  int y				/* y coordinate */
+  IImage image, /* image */
+  IGC gc,       /* graphics context */
+  int x,        /* x coordinate */
+  int y         /* y coordinate */
 #endif
 );
 
@@ -773,12 +778,12 @@ IError IDrawPoint (
  */
 IError IDrawLine (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  int x1,			/* 1st coordinate */
-  int y1,			/* 1st coordinate */
-  int x2,			/* 2nd coordinate */
-  int y2			/* 2nd coordinate */
+  IImage image, /* image */
+  IGC gc,       /* graphics context */
+  int x1,       /* 1st coordinate */
+  int y1,       /* 1st coordinate */
+  int x2,       /* 2nd coordinate */
+  int y2        /* 2nd coordinate */
 #endif
 );
 
@@ -789,10 +794,10 @@ IError IDrawLine (
  */
 IError IDrawPolygon (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  IPoint *points,		/* array of points */
-  int npoints			/* size of above array */
+  IImage image,   /* image */
+  IGC gc,         /* graphics context */
+  IPoint *points, /* array of points */
+  int npoints     /* size of above array */
 #endif
 );
 
@@ -803,12 +808,12 @@ IError IDrawPolygon (
  */
 IError IDrawRectangle (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  int x,			/* x coordinate */
-  int y,			/* y coordinate */
-  unsigned int width,		/* width */
-  unsigned int height		/* height */
+  IImage image,       /* image */
+  IGC gc,             /* graphics context */
+  int x,              /* x coordinate */
+  int y,              /* y coordinate */
+  unsigned int width, /* width */
+  unsigned int height /* height */
 #endif
 );
 
@@ -819,11 +824,11 @@ IError IDrawRectangle (
  */
 IError IDrawCircle (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  int x,			/* center x coordinate */
-  int y,			/* center y coordinate */
-  int r				/* angle radius */
+  IImage image, /* image */
+  IGC gc,       /* graphics context */
+  int x,        /* center x coordinate */
+  int y,        /* center y coordinate */
+  int r         /* angle radius */
 #endif
 );
 
@@ -836,14 +841,14 @@ IError IDrawCircle (
  */
 IError IDrawArc (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  int x,			/* arc center x coordinate */
-  int y,			/* arc center y coordinate */
-  int r1,			/* angle 1 radius */
-  int r2,			/* angle 2 radius */
-  double a1,			/* first angle (in degrees) */
-  double a2			/* second angle (in degrees) */
+  IImage image, /* image */
+  IGC gc,       /* graphics context */
+  int x,        /* arc center x coordinate */
+  int y,        /* arc center y coordinate */
+  int r1,       /* angle 1 radius */
+  int r2,       /* angle 2 radius */
+  double a1,    /* first angle (in degrees) */
+  double a2     /* second angle (in degrees) */
 #endif
 );
 
@@ -858,14 +863,14 @@ IError IDrawArc (
  */
 IError IDrawEnclosedArc (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  int x,			/* arc center x coordinate */
-  int y,			/* arc center y coordinate */
-  int r1,			/* angle 1 radius */
-  int r2,			/* angle 2 radius */
-  double a1,			/* first angle (in degrees) */
-  double a2			/* second angle (in degrees) */
+  IImage image, /* image */
+  IGC gc,       /* graphics context */
+  int x,        /* arc center x coordinate */
+  int y,        /* arc center y coordinate */
+  int r1,       /* angle 1 radius */
+  int r2,       /* angle 2 radius */
+  double a1,    /* first angle (in degrees) */
+  double a2     /* second angle (in degrees) */
 #endif
 );
 
@@ -876,12 +881,12 @@ IError IDrawEnclosedArc (
  */
 IError IDrawEllipse (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  int x,			/* ellipse center x coordinate */
-  int y,			/* ellipse center y coordinate */
-  int r1,			/* x radius */
-  int r2			/* y radius */
+  IImage image, /* image */
+  IGC gc,       /* graphics context */
+  int x,        /* ellipse center x coordinate */
+  int y,        /* ellipse center y coordinate */
+  int r1,       /* x radius */
+  int r2        /* y radius */
 #endif
 );
 
@@ -892,11 +897,11 @@ IError IDrawEllipse (
  */
 IError IDrawCircle (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  int x,			/* circle center x coordinate */
-  int y,			/* circle center y coordinate */
-  int r				/* circle radius */
+  IImage image, /* image */
+  IGC gc,       /* graphics context */
+  int x,        /* circle center x coordinate */
+  int y,        /* circle center y coordinate */
+  int r         /* circle radius */
 #endif
 );
 
@@ -907,12 +912,12 @@ IError IDrawCircle (
  */
 IError IFillRectangle (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  int x,			/* x coordinate */
-  int y,			/* y coordinate */
-  unsigned int width,		/* width */
-  unsigned int height		/* height */
+  IImage image,       /* image */
+  IGC gc,             /* graphics context */
+  int x,              /* x coordinate */
+  int y,              /* y coordinate */
+  unsigned int width, /* width */
+  unsigned int height /* height */
 #endif
 );
 
@@ -922,10 +927,10 @@ IError IFillRectangle (
  */
 IError IFillPolygon (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  IPoint *points,		/* array of points */
-  int npoints			/* size of above array */
+  IImage image,   /* image */
+  IGC gc,         /* graphics context */
+  IPoint *points, /* array of points */
+  int npoints     /* size of above array */
 #endif
 );
 
@@ -936,14 +941,14 @@ IError IFillPolygon (
  */
 IError IFillArc (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  int x,			/* arc center x coordinate */
-  int y,			/* arc center y coordinate */
-  int r1,			/* angle 1 radius */
-  int r2,			/* angle 2 radius */
-  double a1,			/* first angle (in degrees) */
-  double a2			/* second angle (in degrees) */
+  IImage image, /* image */
+  IGC gc,       /* graphics context */
+  int x,        /* arc center x coordinate */
+  int y,        /* arc center y coordinate */
+  int r1,       /* angle 1 radius */
+  int r2,       /* angle 2 radius */
+  double a1,    /* first angle (in degrees) */
+  double a2     /* second angle (in degrees) */
 #endif
 );
 
@@ -952,12 +957,12 @@ IError IFillArc (
  */
 IError IFillEllipse (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  int x,			/* arc center x coordinate */
-  int y,			/* arc center y coordinate */
-  int r1,			/* angle 1 radius */
-  int r2			/* angle 2 radius */
+  IImage image, /* image */
+  IGC gc,       /* graphics context */
+  int x,        /* arc center x coordinate */
+  int y,        /* arc center y coordinate */
+  int r1,       /* angle 1 radius */
+  int r2        /* angle 2 radius */
 #endif
 );
 
@@ -966,11 +971,11 @@ IError IFillEllipse (
  */
 IError IFillCircle (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  int x,			/* arc center x coordinate */
-  int y,			/* arc center y coordinate */
-  int r				/* radius */
+  IImage image, /* image */
+  IGC gc,       /* graphics context */
+  int x,        /* arc center x coordinate */
+  int y,        /* arc center y coordinate */
+  int r         /* radius */
 #endif
 );
 
@@ -979,13 +984,12 @@ IError IFillCircle (
  */
 IError IFloodFill (
 #ifndef _NO_PROTO
-  IImage image,			/* image */
-  IGC gc,			/* graphics context */
-  int x,			/* x coordinate starting point */
-  int y				/* y coordinate starting point */
+  IImage image, /* image */
+  IGC gc,       /* graphics context */
+  int x,        /* x coordinate starting point */
+  int y         /* y coordinate starting point */
 #endif
 );
 
 
 #endif /* _ilib_h */
-

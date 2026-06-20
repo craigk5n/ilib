@@ -18,7 +18,6 @@
 #include <string.h>
 
 
-
 int main ( int argc, char *argv[] )
 {
   FILE *fp;
@@ -32,7 +31,7 @@ int main ( int argc, char *argv[] )
   }
 
   fp = fopen ( argv[1], "r" );
-  if ( ! fp ) {
+  if ( !fp ) {
     fprintf ( stderr, "Error opening file: %s\n", argv[1] );
     exit ( 1 );
   }
@@ -55,7 +54,8 @@ int main ( int argc, char *argv[] )
     if ( strncmp ( text, "COMMENT", 7 ) == 0 )
       continue;
     for ( ptr = text, ptr2 = text2; *ptr != '\012' && *ptr != '\015' &&
-      *ptr != '\0'; ptr++, ptr2++ ) {
+                                    *ptr != '\0';
+          ptr++, ptr2++ ) {
       if ( *ptr == '"' ) {
         *ptr2 = '\\';
         ptr2++;

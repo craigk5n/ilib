@@ -72,19 +72,16 @@ IError ICopyImage ( IImage source, IImage dest, IGC gc, int src_x, int src_y, un
     for ( col = src_x, x = dest_x; col < src_x + (int) width; col++, x++ ) {
       if ( i1->greyscale ) {
         ptr = i1->data + ( row * i1->width ) + col;
-        colorp->red = colorp->green = colorp->blue = *(ptr);
+        colorp->red = colorp->green = colorp->blue = *( ptr );
         _ISetPoint ( i2, gcp, x, y );
       }
       else {
         ptr = i1->data + ( row * i1->width * 3 ) + ( col * 3 );
         /* check for transparent color */
-        if ( i1->transparent == NULL 
-          || i1->transparent->red != *(ptr)
-          || i1->transparent->green != *(ptr + 1)
-          || i1->transparent->blue != (*ptr + 2) ) {
-          colorp->red = *(ptr);
-          colorp->green = *(ptr + 1);
-          colorp->blue = *(ptr + 2);
+        if ( i1->transparent == NULL || i1->transparent->red != *( ptr ) || i1->transparent->green != *( ptr + 1 ) || i1->transparent->blue != ( *ptr + 2 ) ) {
+          colorp->red = *( ptr );
+          colorp->green = *( ptr + 1 );
+          colorp->blue = *( ptr + 2 );
           _ISetPoint ( i2, gcp, x, y );
         }
       }
@@ -97,8 +94,6 @@ IError ICopyImage ( IImage source, IImage dest, IGC gc, int src_x, int src_y, un
 
   return ( INoError );
 }
-
-
 
 
 /*
@@ -165,19 +160,16 @@ IError ICopyImageScaled ( IImage source, IImage dest, IGC gc,
       y2 = (int) tempy;
       if ( i1->greyscale ) {
         ptr = i1->data + ( y2 * i1->width ) + x2;
-        colorp->red = colorp->green = colorp->blue = *(ptr);
+        colorp->red = colorp->green = colorp->blue = *( ptr );
         _ISetPoint ( i2, gcp, x, y );
       }
       else {
         ptr = i1->data + ( y2 * i1->width * 3 ) + ( x2 * 3 );
         /* check for transparent color */
-        if ( i1->transparent == NULL 
-          || i1->transparent->red != *(ptr)
-          || i1->transparent->green != *(ptr + 1)
-          || i1->transparent->blue != *(ptr + 2) ) {
-          colorp->red = *(ptr);
-          colorp->green = *(ptr + 1);
-          colorp->blue = *(ptr + 2);
+        if ( i1->transparent == NULL || i1->transparent->red != *( ptr ) || i1->transparent->green != *( ptr + 1 ) || i1->transparent->blue != *( ptr + 2 ) ) {
+          colorp->red = *( ptr );
+          colorp->green = *( ptr + 1 );
+          colorp->blue = *( ptr + 2 );
           _ISetPoint ( i2, gcp, x, y );
         }
       }
@@ -190,5 +182,3 @@ IError ICopyImageScaled ( IImage source, IImage dest, IGC gc,
 
   return ( INoError );
 }
-
-

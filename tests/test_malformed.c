@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>   /* lseek, ftruncate via fileno */
+#include <unistd.h> /* lseek, ftruncate via fileno */
 
 #include <Ilib.h>
 #include "greatest.h"
@@ -19,7 +19,7 @@ static IError feed ( const unsigned char *data, size_t len, IFileFormat fmt )
   IImage im = NULL;
   IError r;
   FILE *fp = tmpfile ();
-  if ( ! fp )
+  if ( !fp )
     return ( IErrorWriting );
   if ( len )
     fwrite ( data, 1, len, fp );
@@ -40,21 +40,27 @@ static void roundtrip_truncated ( IImage im, IFileFormat fmt )
   long sz;
   int fd;
   FILE *fp = tmpfile ();
-  if ( ! fp )
+  if ( !fp )
     return;
   if ( IWriteImageFile ( fp, im, fmt, IOPTION_NONE ) != INoError ) {
-    fclose ( fp );   /* codec not built */
+    fclose ( fp ); /* codec not built */
     return;
   }
   fflush ( fp );
   fd = fileno ( fp );
-  sz = (long) lseek ( fd, 0, SEEK_END );     /* real size (GIF writes via fd) */
-  if ( sz < 20 ) { fclose ( fp ); return; }
+  sz = (long) lseek ( fd, 0, SEEK_END ); /* real size (GIF writes via fd) */
+  if ( sz < 20 ) {
+    fclose ( fp );
+    return;
+  }
   buf = (unsigned char *) malloc ( sz );
-  if ( ! buf ) { fclose ( fp ); return; }
+  if ( !buf ) {
+    fclose ( fp );
+    return;
+  }
   lseek ( fd, 0, SEEK_SET );
   if ( read ( fd, buf, sz ) == sz )
-    (void) feed ( buf, (size_t) ( sz / 2 ), fmt );   /* truncated -> error */
+    (void) feed ( buf, (size_t) ( sz / 2 ), fmt ); /* truncated -> error */
   free ( buf );
   fclose ( fp );
 }
@@ -82,13 +88,36 @@ static void bmp_case ( int w, int h, int depth, int comp, int extra, IFileFormat
   unsigned char b[256];
   int n = 0, i;
   (void) unused;
-#define P16(v) do { b[n++]=(v)&0xff; b[n++]=((v)>>8)&0xff; } while (0)
-#define P32(v) do { b[n++]=(v)&0xff; b[n++]=((v)>>8)&0xff; \
-                    b[n++]=((v)>>16)&0xff; b[n++]=((v)>>24)&0xff; } while (0)
-  P16 ( 'B' + ( 'M' << 8 ) ); P32 ( 0 ); P16 ( 0 ); P16 ( 0 ); P32 ( 54 );
-  P32 ( 40 ); P32 ( w ); P32 ( h ); P16 ( 1 ); P16 ( depth );
-  P32 ( comp ); P32 ( 0 ); P32 ( 0 ); P32 ( 0 ); P32 ( 0 ); P32 ( 0 );
-  for ( i = 0; i < extra; i++ ) b[n++] = 0x11;
+#define P16( v )                    \
+  do {                              \
+    b[n++] = (v) &0xff;             \
+    b[n++] = ( ( v ) >> 8 ) & 0xff; \
+  } while ( 0 )
+#define P32( v )                     \
+  do {                               \
+    b[n++] = (v) &0xff;              \
+    b[n++] = ( ( v ) >> 8 ) & 0xff;  \
+    b[n++] = ( ( v ) >> 16 ) & 0xff; \
+    b[n++] = ( ( v ) >> 24 ) & 0xff; \
+  } while ( 0 )
+  P16 ( 'B' + ( 'M' << 8 ) );
+  P32 ( 0 );
+  P16 ( 0 );
+  P16 ( 0 );
+  P32 ( 54 );
+  P32 ( 40 );
+  P32 ( w );
+  P32 ( h );
+  P16 ( 1 );
+  P16 ( depth );
+  P32 ( comp );
+  P32 ( 0 );
+  P32 ( 0 );
+  P32 ( 0 );
+  P32 ( 0 );
+  P32 ( 0 );
+  for ( i = 0; i < extra; i++ )
+    b[n++] = 0x11;
 #undef P16
 #undef P32
   (void) feed ( b, n, IFORMAT_BMP );
@@ -96,12 +125,12 @@ static void bmp_case ( int w, int h, int depth, int comp, int extra, IFileFormat
 
 TEST bmp_malformed ( void )
 {
-  bmp_case ( 4, 4, 8, 0, 2, 0 );    /* colortable truncated */
-  bmp_case ( 4, 4, 8, 0, 40, 0 );   /* pixel data truncated */
-  bmp_case ( 4, 4, 24, 0, 5, 0 );   /* 24-bit truncated */
-  bmp_case ( 4, 4, 8, 1, 30, 0 );   /* RLE truncated */
-  bmp_case ( 4, 4, 16, 3, 8, 0 );   /* bitfields truncated */
-  bmp_case ( 100000, 100000, 24, 0, 0, 0 );  /* oversize -> rejected */
+  bmp_case ( 4, 4, 8, 0, 2, 0 );            /* colortable truncated */
+  bmp_case ( 4, 4, 8, 0, 40, 0 );           /* pixel data truncated */
+  bmp_case ( 4, 4, 24, 0, 5, 0 );           /* 24-bit truncated */
+  bmp_case ( 4, 4, 8, 1, 30, 0 );           /* RLE truncated */
+  bmp_case ( 4, 4, 16, 3, 8, 0 );           /* bitfields truncated */
+  bmp_case ( 100000, 100000, 24, 0, 0, 0 ); /* oversize -> rejected */
   PASS ();
 }
 
@@ -121,7 +150,7 @@ TEST codec_truncated_decode ( void )
   IFreeColor ( c );
   IFreeGC ( gc );
   IFreeImage ( im );
-  PASS ();   /* success == no crash / no leak under the sanitizers job */
+  PASS (); /* success == no crash / no leak under the sanitizers job */
 }
 
 SUITE ( malformed )

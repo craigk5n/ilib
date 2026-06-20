@@ -29,7 +29,7 @@ IError ILoadFontFromFile ( char *name, char *path, IFont *font_return )
   IError ret;
 
   ret = IFontBDFReadFile ( name, path );
-  if ( ! ret ) {
+  if ( !ret ) {
     font = (IFontP *) malloc ( sizeof ( IFontP ) );
     memset ( font, '\0', sizeof ( IFontP ) );
     font->magic = IMAGIC_FONT;
@@ -37,7 +37,8 @@ IError ILoadFontFromFile ( char *name, char *path, IFont *font_return )
     strcpy ( font->name, name );
     *font_return = (IFont) font;
     return ( INoError );
-  } else {
+  }
+  else {
     return ( IFileInvalid );
   }
 }
@@ -49,7 +50,7 @@ IError ILoadFontFromData ( char *name, char **lines, IFont *font_return )
   IError ret;
 
   ret = IFontBDFReadData ( name, lines );
-  if ( ! ret ) {
+  if ( !ret ) {
     font = (IFontP *) malloc ( sizeof ( IFontP ) );
     memset ( font, '\0', sizeof ( IFontP ) );
     font->magic = IMAGIC_FONT;
@@ -57,16 +58,16 @@ IError ILoadFontFromData ( char *name, char **lines, IFont *font_return )
     strcpy ( font->name, name );
     *font_return = (IFont) font;
     return ( INoError );
-  } else {
+  }
+  else {
     return ( IFileInvalid );
   }
 }
 
 
-
 IError _IFreeFont ( IFont font )
 {
-  IFontP *fontp = (IFontP *)font;
+  IFontP *fontp = (IFontP *) font;
 
   if ( fontp ) {
     if ( fontp->magic != IMAGIC_FONT )
@@ -82,18 +83,12 @@ IError _IFreeFont ( IFont font )
 
 IError IFontSize ( IFont font, unsigned int *height_return )
 {
-  IFontP *fontp = (IFontP *)font;
+  IFontP *fontp = (IFontP *) font;
 
-  if ( ! fontp )
+  if ( !fontp )
     return ( IInvalidFont );
   if ( fontp->magic != IMAGIC_FONT )
     return ( IInvalidFont );
 
   return ( _IFontBDFGetSize ( fontp->name, height_return ) );
 }
-
-
-
-
-
-

@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include "Ilib.h"
-#define IIncludeFileFormats	/* add some static defines */
+#define IIncludeFileFormats /* add some static defines */
 #include "IlibP.h"
 
 
@@ -38,13 +38,13 @@ IImage ICreateImage ( unsigned width, unsigned height, unsigned options )
 
   if ( width == 0 || height == 0 )
     return ( NULL );
-  npixels = (size_t) width * (size_t) height;     /* size_t: no overflow */
+  npixels = (size_t) width * (size_t) height; /* size_t: no overflow */
   if ( npixels > ILIB_MAX_PIXELS )
     return ( NULL );
   nbytes = npixels * channels;
 
   image = (IImageP *) malloc ( sizeof ( IImageP ) );
-  if ( ! image )
+  if ( !image )
     return ( NULL );
   memset ( image, '\0', sizeof ( IImageP ) );
   image->width = width;
@@ -53,7 +53,7 @@ IImage ICreateImage ( unsigned width, unsigned height, unsigned options )
     image->greyscale = 1;
 
   image->data = (unsigned char *) malloc ( nbytes );
-  if ( ! image->data ) {
+  if ( !image->data ) {
     free ( image );
     return ( NULL );
   }
@@ -61,7 +61,7 @@ IImage ICreateImage ( unsigned width, unsigned height, unsigned options )
 
   image->magic = IMAGIC_IMAGE;
 
-  return ( (IImage)image );
+  return ( (IImage) image );
 }
 
 
@@ -81,7 +81,7 @@ IError IDuplicateImage ( IImage image, IImage *image_return )
     *image_return = ICreateImage ( i->width, i->height, IOPTION_GREYSCALE );
   else
     *image_return = ICreateImage ( i->width, i->height, IOPTION_NONE );
-  ret = (IImageP *)*image_return;
+  ret = (IImageP *) *image_return;
 
   if ( i->greyscale )
     memcpy ( ret->data, i->data, i->width * i->height );
@@ -145,7 +145,7 @@ IError _IFreeImage ( IImage image )
 IError IWriteImageFile ( FILE *fp, IImage image, IFileFormat format, IOptions options )
 {
   IError ret;
-  IImageP *imagep = (IImageP *)image;
+  IImageP *imagep = (IImageP *) image;
 
   if ( imagep ) {
     if ( imagep->magic != IMAGIC_IMAGE )
@@ -166,7 +166,6 @@ IError IWriteImageFile ( FILE *fp, IImage image, IFileFormat format, IOptions op
 }
 
 
-
 IError IReadImageFile ( FILE *fp, IFileFormat format, IOptions options, IImage *image_return )
 {
   IError ret = INoError;
@@ -177,7 +176,7 @@ IError IReadImageFile ( FILE *fp, IFileFormat format, IOptions options, IImage *
   }
   else {
     if ( IFileFormats[format].read_func )
-      ret = IFileFormats[format].read_func ( fp, options, (IImageP **)image_return );
+      ret = IFileFormats[format].read_func ( fp, options, (IImageP **) image_return );
     else {
       fprintf ( stderr, "IReadImageFile: %s format write not implemented.\n",
         IFileFormats[format].name );
@@ -191,7 +190,7 @@ IError IReadImageFile ( FILE *fp, IFileFormat format, IOptions options, IImage *
 
 IError ISetComment ( IImage image, char *comments )
 {
-  IImageP *imagep = (IImageP *)image;
+  IImageP *imagep = (IImageP *) image;
 
   if ( imagep ) {
     if ( imagep->magic != IMAGIC_IMAGE )
@@ -213,7 +212,7 @@ IError ISetComment ( IImage image, char *comments )
 
 IError IGetComment ( IImage image, char **comments )
 {
-  IImageP *imagep = (IImageP *)image;
+  IImageP *imagep = (IImageP *) image;
 
   if ( imagep ) {
     if ( imagep->magic != IMAGIC_IMAGE )
@@ -227,10 +226,9 @@ IError IGetComment ( IImage image, char **comments )
 }
 
 
-
 IError ISetTransparent ( IImage image, IColor color )
 {
-  IImageP *imagep = (IImageP *)image;
+  IImageP *imagep = (IImageP *) image;
   IColorP *colorp;
 
   if ( imagep ) {
@@ -254,10 +252,9 @@ IError ISetTransparent ( IImage image, IColor color )
 }
 
 
-
 IError IGetTransparent ( IImage image, IColor *color )
 {
-  IImageP *imagep = (IImageP *)image;
+  IImageP *imagep = (IImageP *) image;
 
   if ( imagep ) {
     if ( imagep->magic != IMAGIC_IMAGE )
@@ -269,9 +266,8 @@ IError IGetTransparent ( IImage image, IColor *color )
   if ( imagep->transparent && imagep->transparent->magic == IMAGIC_COLOR ) {
     *color = imagep->transparent->value;
     return ( INoError );
-  } else {
+  }
+  else {
     return ( INoTransparentColor );
   }
 }
-
-

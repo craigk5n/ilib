@@ -28,14 +28,14 @@ IGC ICreateGC ( void )
   IGCP *gc;
 
   gc = (IGCP *) malloc ( sizeof ( IGCP ) );
-  if ( ! gc )
+  if ( !gc )
     return ( (IGC) NULL );
   memset ( gc, '\0', sizeof ( IGCP ) );
 
   gc->magic = IMAGIC_GC;
   gc->foreground = _IGetColor ( IBLACK_PIXEL );
   gc->background = _IGetColor ( IWHITE_PIXEL );
-  if ( ! gc->foreground || ! gc->background ) {
+  if ( !gc->foreground || !gc->background ) {
     free ( gc );
     return ( (IGC) NULL );
   }
@@ -49,7 +49,7 @@ IGC ICreateGC ( void )
 
 IError _IFreeGC ( IGC gc )
 {
-  IGCP *gcp = (IGCP *)gc;
+  IGCP *gcp = (IGCP *) gc;
 
   if ( gcp ) {
     if ( gcp->magic != IMAGIC_GC )
@@ -64,21 +64,21 @@ IError _IFreeGC ( IGC gc )
 
 IError ISetFont ( IGC gc, IFont font )
 {
-  IFontP *fontp = (IFontP *)font;
-  IGCP *gcp = (IGCP *)gc;
+  IFontP *fontp = (IFontP *) font;
+  IGCP *gcp = (IGCP *) gc;
 
   if ( gcp ) {
     if ( gcp->magic != IMAGIC_GC )
       return ( IInvalidGC );
   }
-  else 
+  else
     return ( IInvalidGC );
 
   if ( fontp ) {
     if ( fontp->magic != IMAGIC_FONT )
       return ( IInvalidFont );
   }
-  else 
+  else
     return ( IInvalidFont );
 
   gcp->font = fontp;
@@ -88,7 +88,6 @@ IError ISetFont ( IGC gc, IFont font )
 }
 
 
-
 /*
 ** NOTE: this is just experimental code.
 ** It produces some pretty ugly text.  Need to look at gimp and
@@ -96,21 +95,21 @@ IError ISetFont ( IGC gc, IFont font )
 */
 IError ISetAntiAliasedFont ( IGC gc, IFont font )
 {
-  IFontP *fontp = (IFontP *)font;
-  IGCP *gcp = (IGCP *)gc;
+  IFontP *fontp = (IFontP *) font;
+  IGCP *gcp = (IGCP *) gc;
 
   if ( gcp ) {
     if ( gcp->magic != IMAGIC_GC )
       return ( IInvalidGC );
   }
-  else 
+  else
     return ( IInvalidGC );
 
   if ( fontp ) {
     if ( fontp->magic != IMAGIC_FONT )
       return ( IInvalidFont );
   }
-  else 
+  else
     return ( IInvalidFont );
 
   gcp->font = fontp;
@@ -122,18 +121,18 @@ IError ISetAntiAliasedFont ( IGC gc, IFont font )
 
 IError ISetForeground ( IGC gc, IColor color )
 {
-  IGCP *gcp = (IGCP *)gc;
+  IGCP *gcp = (IGCP *) gc;
   IColorP *colorp;
 
   if ( gcp ) {
     if ( gcp->magic != IMAGIC_GC )
       return ( IInvalidGC );
   }
-  else 
+  else
     return ( IInvalidGC );
 
   colorp = _IGetColor ( color );
-  if ( ! colorp )
+  if ( !colorp )
     return ( IInvalidColor );
 
   gcp->foreground = colorp;
@@ -142,21 +141,20 @@ IError ISetForeground ( IGC gc, IColor color )
 }
 
 
-
 IError ISetBackground ( IGC gc, IColor color )
 {
-  IGCP *gcp = (IGCP *)gc;
+  IGCP *gcp = (IGCP *) gc;
   IColorP *colorp;
 
   if ( gcp ) {
     if ( gcp->magic != IMAGIC_GC )
       return ( IInvalidGC );
   }
-  else 
+  else
     return ( IInvalidGC );
 
   colorp = _IGetColor ( color );
-  if ( ! colorp )
+  if ( !colorp )
     return ( IInvalidColor );
 
   gcp->background = colorp;
@@ -167,7 +165,7 @@ IError ISetBackground ( IGC gc, IColor color )
 
 IError ISetLineWidth ( IGC gc, unsigned int line_width )
 {
-  IGCP *gcp = (IGCP *)gc;
+  IGCP *gcp = (IGCP *) gc;
 
   if ( gcp ) {
     if ( gcp->magic != IMAGIC_GC )
@@ -182,10 +180,9 @@ IError ISetLineWidth ( IGC gc, unsigned int line_width )
 }
 
 
-
 IError ISetLineStyle ( IGC gc, ILineStyle line_style )
 {
-  IGCP *gcp = (IGCP *)gc;
+  IGCP *gcp = (IGCP *) gc;
 
   if ( gcp ) {
     if ( gcp->magic != IMAGIC_GC )
@@ -200,11 +197,9 @@ IError ISetLineStyle ( IGC gc, ILineStyle line_style )
 }
 
 
-
-
 IError ISetTextStyle ( IGC gc, ITextStyle text_style )
 {
-  IGCP *gcp = (IGCP *)gc;
+  IGCP *gcp = (IGCP *) gc;
 
   if ( gcp ) {
     if ( gcp->magic != IMAGIC_GC )
@@ -217,4 +212,3 @@ IError ISetTextStyle ( IGC gc, ITextStyle text_style )
 
   return ( INoError );
 }
-

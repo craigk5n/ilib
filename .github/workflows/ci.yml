@@ -61,6 +61,25 @@ jobs:
       - name: Test
         run: ctest --test-dir build --output-on-failure
 
+  clang-format:
+    name: clang-format
+    runs-on: ubuntu-latest
+    # Pinned to clang-format-14 so CI matches the version the tree was
+    # formatted with; newer versions can differ. The whole tree is kept
+    # clang-format-clean, so this checks every source file.
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format-14
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format-14
+      - name: Check formatting
+        run: |
+          files=$(git ls-files 'src/*.c' 'src/*.h' 'clients/*/*.c' \
+            'examples/*/*.c' 'tests/*.c' 'tests/*.h' \
+            | grep -vE 'src/rgb.h|tests/greatest.h')
+          clang-format-14 --dry-run --Werror $files
+
   clang-tidy:
     name: clang-tidy (static analysis)
     runs-on: ubuntu-latest

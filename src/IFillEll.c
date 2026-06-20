@@ -23,7 +23,6 @@
 #include "IlibP.h"
 
 
-
 IError IFillEllipse ( IImage image, IGC gc, int x, int y, int r1, int r2 )
 {
   IError ret;
@@ -33,6 +32,3 @@ IError IFillEllipse ( IImage image, IGC gc, int x, int y, int r1, int r2 )
     return ret;
   return ( IFillArc ( image, gc, x, y, r1, r2, 90.0, 360.0 ) );
 }
-
-
-

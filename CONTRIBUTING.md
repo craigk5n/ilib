@@ -47,6 +47,9 @@ coverage, a libFuzzer smoke test, and clang-tidy. They must be green to merge.
   and register it in `src/CMakeLists.txt`.
 - **Untrusted input:** decoders parse untrusted files. Validate dimensions and
   allocation sizes, check every allocation, and free everything on error paths.
+- **Formatting:** the tree is kept `clang-format`-clean (see `.clang-format`).
+  Run `clang-format-14 -i <files>` before committing; CI enforces it with
+  clang-format 14 (newer versions may format differently).
 - **License header:** start new source files with
   `/* SPDX-License-Identifier: GPL-2.0-only */`.
 

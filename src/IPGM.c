@@ -58,7 +58,8 @@ IError _IWritePGM ( FILE *fp, IImageP *image, IOptions options )
     if ( image->greyscale ) {
       if ( fwrite ( image->data, 1, image->width * image->height, fp ) <= 0 )
         return ( IErrorWriting );
-    } else {
+    }
+    else {
       for ( r = 0; r < image->height; r++ ) {
         for ( c = 0; c < image->width; c++ ) {
           ptr = image->data + ( r * image->width * 3 ) + ( c * 3 );
@@ -77,10 +78,6 @@ IError _IWritePGM ( FILE *fp, IImageP *image, IOptions options )
 }
 
 
-
-
 /* NOTE: There is no _IReadPGM().  We use _ReadPPM() instead since it
  *       can handle both PPM and PGM.
  */
-
-

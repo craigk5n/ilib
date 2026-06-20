@@ -50,7 +50,7 @@
 #include <ctype.h>
 #include <string.h>
 
-#define PROGRAM_NAME	"Ilib"
+#define PROGRAM_NAME "Ilib"
 
 #include <gif_lib.h>
 
@@ -65,27 +65,27 @@
 ** The code below is written against the modern (5.x) API; these shims keep it
 ** building against older giflib releases.
 */
-#if !defined(GIFLIB_MAJOR) || GIFLIB_MAJOR < 5
-#define GifMakeMapObject  MakeMapObject
-#define GifFreeMapObject  FreeMapObject
-#define ILIB_GIF_OPEN_HAS_ERR  0
+#if !defined( GIFLIB_MAJOR ) || GIFLIB_MAJOR < 5
+#define GifMakeMapObject MakeMapObject
+#define GifFreeMapObject FreeMapObject
+#define ILIB_GIF_OPEN_HAS_ERR 0
 #define ILIB_GIF_CLOSE_HAS_ERR 0
 #else
-#define ILIB_GIF_OPEN_HAS_ERR  1
-#if GIFLIB_MAJOR > 5 || (GIFLIB_MAJOR == 5 && GIFLIB_MINOR >= 1)
+#define ILIB_GIF_OPEN_HAS_ERR 1
+#if GIFLIB_MAJOR > 5 || ( GIFLIB_MAJOR == 5 && GIFLIB_MINOR >= 1 )
 #define ILIB_GIF_CLOSE_HAS_ERR 1
 #else
 #define ILIB_GIF_CLOSE_HAS_ERR 0
 #endif
 #endif
 
-#define colors_match(color,r,g,b) \
- ((color)->red == (r) && (color)->green == (g) && (color)->blue == (b) )
+#define colors_match( color, r, g, b ) \
+  ( ( color )->red == ( r ) && ( color )->green == ( g ) && ( color )->blue == ( b ) )
 
-#define MAX_COLORMAP_SIZE       (256)
+#define MAX_COLORMAP_SIZE ( 256 )
 
 
-#define ABS(a)	((a) < 0 ? (0-(a)) : (a) )
+#define ABS( a ) ( ( a ) < 0 ? ( 0 - ( a ) ) : ( a ) )
 
 static int InterlacedOffset[] = { 0, 4, 2, 1 };
 static int InterlacedJumps[] = { 8, 8, 4, 2 };
@@ -95,12 +95,12 @@ static int color_compare ( unsigned int r, unsigned int g, unsigned int b, IColo
 {
   int diff1, diff2;
 
-  diff1 = ABS ( (int)r - (int)test1->red ) +
-    ABS ( (int)g - (int)test1->green ) +
-    ABS ( (int)b - (int)test1->blue );
-  diff2 = ABS ( (int)r - (int)test2->red ) +
-    ABS ( (int)g - (int)test2->green ) +
-    ABS ( (int)b - (int)test2->blue );
+  diff1 = ABS ( (int) r - (int) test1->red ) +
+          ABS ( (int) g - (int) test1->green ) +
+          ABS ( (int) b - (int) test1->blue );
+  diff2 = ABS ( (int) r - (int) test2->red ) +
+          ABS ( (int) g - (int) test2->green ) +
+          ABS ( (int) b - (int) test2->blue );
   return ( diff1 > diff2 );
 }
 
@@ -126,7 +126,7 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
   /* first make an 8-bit version of the image (calloc zero-fills) */
   data = (unsigned char *) calloc ( image->width * image->height,
     sizeof ( unsigned char ) );
-  if ( ! data )
+  if ( !data )
     return ( IGIFError );
 
   /* Reduce to 256 colors
@@ -157,7 +157,7 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
           break;
         }
       }
-      if ( ! color_found ) {
+      if ( !color_found ) {
         if ( num_colors < MAX_COLORMAP_SIZE ) {
           colormap[num_colors] = (IColorP *) malloc ( sizeof ( IColorP ) );
           memset ( colormap[num_colors], '\0', sizeof ( IColorP ) );
@@ -167,12 +167,13 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
           colormap[num_colors]->blue = blue;
           data[offset] = num_colors;
           num_colors++;
-        } else {
+        }
+        else {
           // find closest!
           closest = 0;
           for ( loop = 0; loop < num_colors; loop++ ) {
             if ( color_compare ( red, green, blue, colormap[closest],
-              colormap[loop] ) < 0 )
+                   colormap[loop] ) < 0 )
               closest = loop;
           }
         }
@@ -182,12 +183,13 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
 
   /* how many cells in colormap (eg. 28->32, 55->64, etc.) */
   for ( bits_per_pixel = 1, color_ceil = 2; color_ceil < num_colors;
-    color_ceil *= 2, bits_per_pixel++ ) ;
+        color_ceil *= 2, bits_per_pixel++ )
+    ;
 
   fd = fileno ( fp );
 
   GIFcolormap = GifMakeMapObject ( color_ceil, NULL );
-  if ( ! GIFcolormap ) {
+  if ( !GIFcolormap ) {
     ret = IGIFError;
     goto cleanup;
   }
@@ -196,7 +198,8 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
       GIFcolormap->Colors[loop].Red = colormap[loop]->red;
       GIFcolormap->Colors[loop].Green = colormap[loop]->green;
       GIFcolormap->Colors[loop].Blue = colormap[loop]->blue;
-    } else {
+    }
+    else {
       GIFcolormap->Colors[loop].Red = GIFcolormap->Colors[loop].Green =
         GIFcolormap->Colors[loop].Blue = 0;
     }
@@ -221,7 +224,7 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
   if ( image->transparent ) {
     for ( loop = 0; loop < num_colors; loop++ ) {
       if ( colors_match ( colormap[loop], image->transparent->red,
-        image->transparent->green, image->transparent->blue ) ) {
+             image->transparent->green, image->transparent->blue ) ) {
         transparent = loop;
         break;
       }
@@ -231,7 +234,7 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
     transparent = -1;
 
   if ( EGifPutScreenDesc ( gft, image->width, image->height,
-    bits_per_pixel, 0, GIFcolormap ) == GIF_ERROR ) {
+         bits_per_pixel, 0, GIFcolormap ) == GIF_ERROR ) {
     ret = IGIFError;
     goto cleanup;
   }
@@ -248,7 +251,7 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
   }
 
   if ( EGifPutImageDesc ( gft, 0, 0, image->width, image->height,
-    interlaced, NULL ) == GIF_ERROR ) {
+         interlaced, NULL ) == GIF_ERROR ) {
     ret = IGIFError;
     goto cleanup;
   }
@@ -257,15 +260,15 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
   if ( interlaced ) {
     for ( loop = 0; loop < 4; loop++ ) {
       for ( loop2 = InterlacedOffset[loop]; loop2 < image->height;
-        loop2 += InterlacedJumps[loop] ) {
-        if ( EGifPutLine ( gft, data + ( loop2 * image->width ), image->width )
-          == GIF_ERROR ) {
-         ret = IGIFError;
-         goto cleanup;
+            loop2 += InterlacedJumps[loop] ) {
+        if ( EGifPutLine ( gft, data + ( loop2 * image->width ), image->width ) == GIF_ERROR ) {
+          ret = IGIFError;
+          goto cleanup;
         }
       }
     }
-  } else {
+  }
+  else {
     /* Write the data all at once */
     if ( EGifPutLine ( gft, data, image->width * image->height ) == GIF_ERROR ) {
       ret = IGIFError;
@@ -292,9 +295,6 @@ cleanup:
 
   return ( ret );
 }
-
-
-
 
 
 IError _IReadGIF ( FILE *fp, IOptions options, IImageP **image_return )
@@ -335,28 +335,28 @@ IError _IReadGIF ( FILE *fp, IOptions options, IImageP **image_return )
         goto fail;
       image = (IImageP *) ICreateImage ( gft->Image.Width,
         gft->Image.Height, IOPTION_NONE );
-      if ( ! image )
+      if ( !image )
         goto fail;
-      gifdata = (GifPixelType *) malloc ( image->width  * image->height );
-      if ( ! gifdata )
+      gifdata = (GifPixelType *) malloc ( image->width * image->height );
+      if ( !gifdata )
         goto fail;
       /* we read the lines out of order for interlaced images (yuck) */
       if ( gft->Image.Interlace ) {
         for ( loop = 0; loop < 4; loop++ ) {
           for ( loop2 = InterlacedOffset[loop]; loop2 < image->height;
-            loop2 += InterlacedJumps[loop] ) {
+                loop2 += InterlacedJumps[loop] ) {
             if ( DGifGetLine ( gft, gifdata + ( loop2 * image->width ),
-              image->width ) == GIF_ERROR )
+                   image->width ) == GIF_ERROR )
               goto fail;
           }
         }
-      } else {
-        if ( DGifGetLine ( gft, gifdata, image->width * image->height )
-          == GIF_ERROR )
+      }
+      else {
+        if ( DGifGetLine ( gft, gifdata, image->width * image->height ) == GIF_ERROR )
           goto fail;
       }
       /* convert to a 24-bit image ONLY if its got a valid colormap -- GLM 2000*/
-      if (gft -> SColorMap)  {
+      if ( gft->SColorMap ) {
         for ( loop = 0; loop < image->height; loop++ ) {
           for ( col = 0; col < image->width; col++ ) {
             ptr = gifdata + ( loop * image->width ) + col;
@@ -374,22 +374,25 @@ IError _IReadGIF ( FILE *fp, IOptions options, IImageP **image_return )
           }
         }
       }
-    } else if ( rt == EXTENSION_RECORD_TYPE ) {
+    }
+    else if ( rt == EXTENSION_RECORD_TYPE ) {
       /* ignore all extensions except comments */
       DGifGetExtension ( gft, &extcode, &extension );
       while ( extension != NULL ) {
         if ( extcode == COMMENT_EXT_FUNC_CODE ) {
           if ( comments != NULL )
             free ( comments );
-          comments = (char *) malloc ( strlen ( (char *)( extension + 1 ) ) + 1 );
-          strcpy ( comments, (char *)( extension + 1 ) );
-        } else if ( extcode == GRAPHICS_EXT_FUNC_CODE ) {
+          comments = (char *) malloc ( strlen ( (char *) ( extension + 1 ) ) + 1 );
+          strcpy ( comments, (char *) ( extension + 1 ) );
+        }
+        else if ( extcode == GRAPHICS_EXT_FUNC_CODE ) {
           /* this is used to set transparent color index */
           if ( extension[1] & 0x01 ) {
             trans_set = 1;
             transparent_ind = extension[4];
           }
-        } else {
+        }
+        else {
           /*
           fprintf ( stderr, "Ignoring unknown extension: %d\n",
             extension[0] );
@@ -397,7 +400,8 @@ IError _IReadGIF ( FILE *fp, IOptions options, IImageP **image_return )
         }
         DGifGetExtensionNext ( gft, &extension );
       }
-    } else {
+    }
+    else {
       /* TERMINATE_RECORD_TYPE (end of GIF, no image) or an undefined record:
          no image will ever appear, so stop instead of looping forever. */
       goto fail;
@@ -414,7 +418,7 @@ IError _IReadGIF ( FILE *fp, IOptions options, IImageP **image_return )
   }
 
   image->comments = comments;
-  comments = NULL;   /* ownership transferred to image */
+  comments = NULL; /* ownership transferred to image */
 
   if ( gifdata )
     free ( gifdata );
@@ -446,4 +450,3 @@ fail:
 
 
 #endif /* HAVE_GIFLIB */
-
