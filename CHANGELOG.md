@@ -10,6 +10,12 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Python bindings (`python/`) via cffi in ABI mode: load an installed
+  `libilib` at runtime (no C compiler needed to install the package) and expose
+  a Pythonic `Image` / `GC` / `Font` API covering the full drawing and image
+  I/O surface (shapes, curves, anti-aliasing, RGBA/alpha, BDF + TrueType text,
+  PPM/PGM/XPM/BMP/GIF/PNG/JPEG read/write). Includes a `unittest` suite and a
+  CI job that builds the C library and runs the binding tests against it.
 - Smooth curves: `IDrawBezier()` (chained cubic Bezier paths) and
   `IDrawSpline()` (Catmull-Rom spline through a set of points, for line/area
   charts). Both honor the GC line style and anti-aliasing.
