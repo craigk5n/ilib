@@ -147,6 +147,119 @@ TEST truncated_ppm_rejected ( void )
   PASS ();
 }
 
+/* Count distinct RGB colors in an image, returning at most cap+1 (cap+1 means
+   "more than cap"). Linear scan -- fine for the small test images here. */
+static int count_colors ( IImage im, int cap )
+{
+  IImageP *p = (IImageP *) im;
+  int n = p->width * p->height, i, j, ndistinct = 0;
+  int *seen = malloc ( (size_t) ( cap + 1 ) * sizeof ( int ) );
+  if ( !seen )
+    return -1;
+  for ( i = 0; i < n; i++ ) {
+    int key = ( p->data[i * 3] << 16 ) | ( p->data[i * 3 + 1] << 8 ) |
+              p->data[i * 3 + 2];
+    int found = 0;
+    for ( j = 0; j < ndistinct; j++ ) {
+      if ( seen[j] == key ) {
+        found = 1;
+        break;
+      }
+    }
+    if ( !found ) {
+      if ( ndistinct > cap ) {
+        ndistinct = cap + 1;
+        break;
+      }
+      seen[ndistinct++] = key;
+    }
+  }
+  free ( seen );
+  return ndistinct;
+}
+
+/* A w*h RGB image whose pixels are all distinct: pixel i gets color
+   (i & 0xff, (i >> 8) & 0xff, 0), so an image with > 256 pixels has > 256
+   colors. */
+static IImage make_rainbow ( int w, int h )
+{
+  IImage im = ICreateImage ( w, h, IOPTION_NONE );
+  IImageP *p = (IImageP *) im;
+  int i, n = w * h;
+  for ( i = 0; i < n; i++ ) {
+    p->data[i * 3] = i & 0xff;
+    p->data[i * 3 + 1] = ( i >> 8 ) & 0xff;
+    p->data[i * 3 + 2] = 0;
+  }
+  return im;
+}
+
+/* IReduceColors must bring a >256-color image down to a GIF-sized palette
+   while leaving the dimensions intact. */
+TEST reduce_colors_caps_palette ( void )
+{
+  IImage im = make_rainbow ( 24, 24 ); /* 576 distinct colors */
+  ASSERT ( count_colors ( im, 256 ) > 256 );
+  ASSERT_EQ ( INoError, IReduceColors ( im, 256 ) );
+  ASSERT ( count_colors ( im, 256 ) <= 256 );
+  ASSERT_EQ ( 24, px_width ( im ) );
+  ASSERT_EQ ( 24, px_height ( im ) );
+  IFreeImage ( im );
+  PASS ();
+}
+
+/* When an image already fits, reduction is lossless: exact colors survive. */
+TEST reduce_colors_preserves_few ( void )
+{
+  IImage im = ICreateImage ( 4, 1, IOPTION_NONE );
+  IImageP *p = (IImageP *) im;
+  /* four deliberately close-but-distinct colors */
+  unsigned char want[4][3] = {
+    { 10, 20, 30 }, { 11, 20, 30 }, { 200, 100, 50 }, { 201, 100, 50 } };
+  int i;
+  for ( i = 0; i < 4; i++ ) {
+    p->data[i * 3] = want[i][0];
+    p->data[i * 3 + 1] = want[i][1];
+    p->data[i * 3 + 2] = want[i][2];
+  }
+  ASSERT_EQ ( INoError, IReduceColors ( im, 256 ) );
+  for ( i = 0; i < 4; i++ ) {
+    ASSERT_EQ ( want[i][0], px_r ( im, i, 0 ) );
+    ASSERT_EQ ( want[i][1], px_g ( im, i, 0 ) );
+    ASSERT_EQ ( want[i][2], px_b ( im, i, 0 ) );
+  }
+  IFreeImage ( im );
+  PASS ();
+}
+
+/* A NULL/bogus handle is rejected. */
+TEST reduce_colors_rejects_bad_handle ( void )
+{
+  unsigned int not_an_image = 0;
+  ASSERT_EQ ( IInvalidImage, IReduceColors ( NULL, 256 ) );
+  ASSERT_EQ ( IInvalidImage, IReduceColors ( (IImage) &not_an_image, 256 ) );
+  PASS ();
+}
+
+/* The GIF writer auto-quantizes a >256-color image down to a 256-color
+   palette: writing one must succeed cleanly (when giflib is compiled in) or
+   fail cleanly otherwise -- never crash or report a palette overflow. Palette
+   correctness itself is covered by reduce_colors_caps_palette; we don't read
+   the GIF back here because giflib closes the file descriptor on write, which
+   makes reusing the same stream unreliable. */
+TEST gif_write_quantizes ( void )
+{
+  IImage im = make_rainbow ( 24, 24 ); /* 576 colors -> must be quantized */
+  FILE *fp = tmpfile ();
+  IError wr;
+  ASSERT ( fp != NULL );
+  wr = IWriteImageFile ( fp, im, IFORMAT_GIF, IOPTION_NONE );
+  ASSERT ( wr == INoError || wr == IFunctionNotImplemented );
+  fclose ( fp );
+  IFreeImage ( im );
+  PASS ();
+}
+
 /* Writing an optional codec must either succeed (when compiled in) or fail
    cleanly (when not) -- never crash. When it round-trips, the image must come
    back intact. */
@@ -176,6 +289,10 @@ SUITE ( formats )
   RUN_TEST ( bmp_roundtrip );
   RUN_TEST ( garbage_ppm_rejected );
   RUN_TEST ( truncated_ppm_rejected );
+  RUN_TEST ( reduce_colors_caps_palette );
+  RUN_TEST ( reduce_colors_preserves_few );
+  RUN_TEST ( reduce_colors_rejects_bad_handle );
+  RUN_TEST ( gif_write_quantizes );
   RUN_TEST ( optional_codec_write_is_clean );
 }
 

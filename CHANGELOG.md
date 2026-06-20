@@ -10,6 +10,10 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- `IReduceColors()`: median-cut color quantization to fit an image into a
+  bounded palette. The GIF writer now calls it automatically, replacing the
+  previous first-256-colors hack (which collapsed all excess colors to one
+  palette entry) so >256-color images produce a proper 8-bit GIF.
 - BMP write support (`IFORMAT_BMP`): 24-bit uncompressed output; greyscale
   images are expanded to RGB. BMP was previously read-only.
 - CMake build system with optional codec detection, install rules, an exported

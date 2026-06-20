@@ -119,6 +119,8 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
   GifFileType *gft = NULL;
   GifByteType ext[4];
   unsigned char *data;
+  unsigned char *reduced = NULL;
+  unsigned char *src = image->data;
   IError ret = INoError;
 
   GIFcolormap = NULL;
@@ -128,6 +130,21 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
     sizeof ( unsigned char ) );
   if ( !data )
     return ( IGIFError );
+
+  /* GIF allows at most 256 colors. Reduce a color image to a 256-color palette
+     up front (a no-op when it already fits) so the palette-building loop below
+     captures every color exactly instead of dropping the overflow. */
+  if ( !image->greyscale ) {
+    reduced =
+      (unsigned char *) malloc ( (size_t) image->width * image->height * 3 );
+    if ( !reduced ) {
+      ret = IGIFError;
+      goto cleanup;
+    }
+    _IReduceColorsRGB ( image->data, image->width * image->height,
+      MAX_COLORMAP_SIZE, reduced );
+    src = reduced;
+  }
 
   /* Reduce to 256 colors
   ** This is a god-awful hack of an algorithm.  Should really use a
@@ -144,7 +161,7 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
         red = green = blue = (unsigned int) *ptr;
       }
       else {
-        ptr = image->data + ( r * image->width * 3 ) + ( c * 3 );
+        ptr = src + ( r * image->width * 3 ) + ( c * 3 );
         red = (unsigned int) *ptr;
         green = (unsigned int) *( ptr + 1 );
         blue = (unsigned int) *( ptr + 2 );
@@ -287,6 +304,7 @@ cleanup:
 
   /* free up allocated resources */
   free ( data );
+  free ( reduced );
   for ( loop = 0; loop < num_colors; loop++ ) {
     free ( colormap[loop] );
   }
