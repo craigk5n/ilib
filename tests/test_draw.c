@@ -190,6 +190,49 @@ TEST aa_fill_polygon_blends_edges ( void )
   PASS ();
 }
 
+/* An anti-aliased ellipse outline blends edge pixels, covers a point on the
+   curve, and leaves the interior (it is an outline) untouched. */
+TEST aa_ellipse_outline_blends_edges ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+  IColor black = IAllocColor ( 0, 0, 0 );
+
+  ISetForeground ( gc, black );
+  ASSERT_EQ ( INoError, ISetAntiAlias ( gc, 1 ) );
+  ASSERT_EQ ( INoError, IDrawEllipse ( im, gc, 5, 5, 4, 2 ) );
+
+  ASSERT ( px_r ( im, 9, 5 ) < 128 );   /* rightmost point on the curve */
+  ASSERT_EQ ( 255, px_r ( im, 5, 5 ) ); /* interior untouched (outline) */
+  ASSERT ( has_blended_pixel ( im ) );
+
+  IFreeColor ( black );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
+/* An anti-aliased filled ellipse has a solid interior and soft edges. */
+TEST aa_fill_ellipse_blends_edges ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+  IColor black = IAllocColor ( 0, 0, 0 );
+
+  ISetForeground ( gc, black );
+  ASSERT_EQ ( INoError, ISetAntiAlias ( gc, 1 ) );
+  ASSERT_EQ ( INoError, IFillEllipse ( im, gc, 5, 5, 4, 2 ) );
+
+  ASSERT_EQ ( 0, px_r ( im, 5, 5 ) );   /* interior filled */
+  ASSERT_EQ ( 255, px_r ( im, 0, 0 ) ); /* corner untouched */
+  ASSERT ( has_blended_pixel ( im ) );
+
+  IFreeColor ( black );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
 /* An anti-aliased circle covers its cardinal points and produces blended
    edge pixels. */
 TEST aa_circle_blends_edges ( void )
@@ -230,6 +273,8 @@ SUITE ( draw )
   RUN_TEST ( aa_circle_blends_edges );
   RUN_TEST ( aa_fill_circle_blends_edges );
   RUN_TEST ( aa_fill_polygon_blends_edges );
+  RUN_TEST ( aa_ellipse_outline_blends_edges );
+  RUN_TEST ( aa_fill_ellipse_blends_edges );
 }
 
 GREATEST_MAIN_DEFS ();
