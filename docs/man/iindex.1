@@ -1,0 +1,67 @@
+.TH IINDEX 1 "June 2026" "ilib @ILIB_VERSION@" "Ilib Manual"
+.SH NAME
+iindex \- build a thumbnail index (contact sheet) image
+.SH SYNOPSIS
+.B iindex
+.RI [ options ]
+.I outfile
+.I infile1
+.RI [ infile2 ...]
+.SH DESCRIPTION
+.B iindex
+reads one or more images and composes a single
+.I outfile
+image containing scaled-down thumbnails of each input arranged in a grid, with
+the source file name printed under each thumbnail. The output format is chosen
+from the
+.I outfile
+extension (see
+.BR iconvert (1)).
+.SH OPTIONS
+.TP
+.BI \-w N
+Use a thumbnail width of
+.I N
+pixels (default 80). Example:
+.BR \-w120 .
+.TP
+.BI \-H N
+Use a thumbnail height of
+.I N
+pixels (default 60). Example:
+.BR \-H120 .
+.TP
+.B \-f
+Overwrite
+.I outfile
+if it already exists (otherwise the tool refuses).
+.TP
+.B \-s
+Run silently (suppress progress output).
+.TP
+.BI \-html " file"
+Also write an HTML client-side image map to
+.I file
+so the index can be used as a clickable web image.
+.TP
+.B \-h
+Show usage information and exit.
+.SH EXAMPLES
+.RS
+.nf
+iindex -w120 -H120 -f index.png *.jpg
+.fi
+.RE
+.SH EXIT STATUS
+Returns 0 on success and non-zero on a usage error, an invalid size, or when
+.I outfile
+exists and
+.B \-f
+was not given.
+.SH SEE ALSO
+.BR iconvert (1),
+.BR iwebreprt (1)
+.PP
+Full API documentation: https://craigk5n.github.io/ilib/
+.SH AUTHOR
+Craig Knudsen <craigk5n@gmail.com>

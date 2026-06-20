@@ -1,0 +1,57 @@
+.TH IFONT2H 1 "June 2026" "ilib @ILIB_VERSION@" "Ilib Manual"
+.SH NAME
+ifont2h \- convert an X11 BDF font to a C header
+.SH SYNOPSIS
+.B ifont2h
+.I font.bdf
+.B >
+.I font.h
+.SH DESCRIPTION
+.B ifont2h
+reads an X11 BDF font file and writes a C header to standard output. The
+header defines a
+.B "char *<name>_font[]"
+array (where
+.I <name>
+is the base name of the input file with its extension removed) holding the
+font data, wrapped in an include guard.
+.PP
+Compiling that header into a program and passing the array to
+.B ILoadFontFromData()
+lets the program draw text with the font without needing the
+.B .bdf
+file at runtime. This is how the bundled
+.BR isample (1)
+and other clients embed their fonts.
+.PP
+.B COMMENT
+lines in the BDF file are skipped. Unlike the other Ilib tools,
+.B ifont2h
+does not link against the Ilib library.
+.SH EXAMPLES
+Embed the Helvetica 24 font shipped with Ilib:
+.PP
+.RS
+.nf
+ifont2h /usr/local/share/ilib/fonts/helvR24.bdf > helvR24.h
+.fi
+.RE
+.PP
+then in your program:
+.PP
+.RS
+.nf
+#include "helvR24.h"
+IFont font;
+ILoadFontFromData("helvR24", helvR24_font, &font);
+.fi
+.RE
+.SH EXIT STATUS
+Returns 0 on success, or 1 if no file was given or it could not be opened.
+.SH SEE ALSO
+.BR idisplayfont (1),
+.BR isample (1)
+.PP
+Full API documentation: https://craigk5n.github.io/ilib/
+.SH AUTHOR
+Craig Knudsen <craigk5n@gmail.com>

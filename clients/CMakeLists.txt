@@ -23,3 +23,13 @@ ilib_use_font_headers(idisplayfont courR10)
 ilib_use_font_headers(ifraggraph   courR10 helvB18)
 ilib_use_font_headers(iindex       helvR08)
 ilib_use_font_headers(iwebreprt    courR10 helvB18)
+
+# Man pages for the installed client tools (section 1). Configured to stamp in
+# the version, then installed to <prefix>/share/man/man1.
+foreach(_man ifont2h idisplayfont ifraggraph iindex iwebreprt)
+  configure_file(
+    "${CMAKE_SOURCE_DIR}/docs/man/${_man}.1"
+    "${CMAKE_CURRENT_BINARY_DIR}/${_man}.1" @ONLY)
+  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${_man}.1"
+    DESTINATION "${CMAKE_INSTALL_MANDIR}/man1")
+endforeach()
