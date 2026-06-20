@@ -69,6 +69,66 @@ static void fill_ellipse_aa ( IImageP *img, IGCP *gc, int cx, int cy, int rx,
   }
 }
 
+/* Is point (dx,dy) within the arc's angular range? lo<=hi are transformed-degree
+   bounds; the +/-360 tests handle the wrap at 0/360. */
+static int arc_angle_in_range ( double dx, double dy, double rx, double ry,
+  double lo, double hi )
+{
+  double deg = atan2 ( dy / ry, dx / rx ) * ( 180.0 / PI );
+  if ( deg < 0.0 )
+    deg += 360.0;
+  return ( ( deg >= lo && deg <= hi ) ||
+           ( deg + 360.0 >= lo && deg + 360.0 <= hi ) ||
+           ( deg - 360.0 >= lo && deg - 360.0 <= hi ) );
+}
+
+/* Anti-aliased filled pie wedge: supersampled coverage of the ellipse sector
+   between transformed-degree bounds lo..hi. Smooths both the arc edge and the
+   two radial edges. A tiny disk at the center keeps the apex connected. */
+static void fill_arc_aa ( IImageP *img, IGCP *gc, int cx, int cy, int rx,
+  int ry, double lo, double hi )
+{
+  int x, y, sx, sy, cnt, x0, y0, x1, y1;
+  double rx2, ry2;
+
+  if ( rx < 1 || ry < 1 )
+    return;
+  rx2 = (double) rx * rx;
+  ry2 = (double) ry * ry;
+
+  x0 = cx - rx;
+  y0 = cy - ry;
+  x1 = cx + rx;
+  y1 = cy + ry;
+  if ( x0 < 0 )
+    x0 = 0;
+  if ( y0 < 0 )
+    y0 = 0;
+  if ( x1 >= img->width )
+    x1 = img->width - 1;
+  if ( y1 >= img->height )
+    y1 = img->height - 1;
+
+  for ( y = y0; y <= y1; y++ ) {
+    for ( x = x0; x <= x1; x++ ) {
+      cnt = 0;
+      for ( sy = 0; sy < IFILLARC_AA_SS; sy++ ) {
+        for ( sx = 0; sx < IFILLARC_AA_SS; sx++ ) {
+          double dx = ( x + ( sx + 0.5 ) / IFILLARC_AA_SS ) - cx;
+          double dy = ( y + ( sy + 0.5 ) / IFILLARC_AA_SS ) - cy;
+          if ( dx * dx / rx2 + dy * dy / ry2 <= 1.0 &&
+               ( dx * dx + dy * dy < 1.0 ||
+                 arc_angle_in_range ( dx, dy, rx, ry, lo, hi ) ) )
+            cnt++;
+        }
+      }
+      if ( cnt )
+        _IBlendPoint ( img, gc, x, y,
+          (unsigned int) ( cnt * 255 / ( IFILLARC_AA_SS * IFILLARC_AA_SS ) ) );
+    }
+  }
+}
+
 
 IError IFillArc ( IImage image, IGC gc, int x, int y, int r1, int r2, double a1, double a2 )
 {
@@ -87,11 +147,18 @@ IError IFillArc ( IImage image, IGC gc, int x, int y, int r1, int r2, double a1,
   if ( imagep->magic != IMAGIC_IMAGE )
     return ( IInvalidImage );
 
-  /* Anti-aliased filled ellipse/circle (full sweep). Partial arcs (pie wedges)
-     fall through to the polygon fill, which is anti-aliased on its straight
-     edges when GC anti-aliasing is on. */
-  if ( gcp->aa && fabs ( a2 - a1 ) >= 359.9 ) {
-    fill_ellipse_aa ( imagep, gcp, x, y, r1, r2 );
+  /* Anti-aliased fills: a full ellipse/circle, or a partial arc as a smooth
+     pie wedge (sector clipped by angle). */
+  if ( gcp->aa ) {
+    if ( fabs ( a2 - a1 ) >= 359.9 ) {
+      fill_ellipse_aa ( imagep, gcp, x, y, r1, r2 );
+    }
+    else {
+      double ta1 = 360.0 - a1, ta2 = 360.0 - a2;
+      double lo = ta1 < ta2 ? ta1 : ta2;
+      double hi = ta1 < ta2 ? ta2 : ta1;
+      fill_arc_aa ( imagep, gcp, x, y, r1, r2, lo, hi );
+    }
     return ( INoError );
   }
 

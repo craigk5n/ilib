@@ -24,10 +24,10 @@ without breaking the public API.
   smooth thin solid lines (Xiaolin Wu), `IDrawCircle()` uses a Wu circle
   rasterizer, `IFillPolygon()` fills with supersampled edge coverage (also
   smoothing filled rectangles/triangles/area shapes), `IFillCircle()` /
-  `IFillEllipse()` fill smooth disks/ellipses, and `IDrawEllipse()` draws a
-  smooth outline (implicit-distance method). Thick/dashed lines and partial
-  arcs keep their existing rasterizers (still anti-aliased through their AA line
-  segments).
+  `IFillEllipse()` fill smooth disks/ellipses, `IDrawEllipse()` draws a smooth
+  outline (implicit-distance method), and `IDrawArc()`/`IFillArc()` render
+  smooth partial arcs and pie wedges (angle-clipped coverage). Thick and dashed
+  lines keep their aliased rasterizer.
 - Optional alpha channel (RGBA) and source-over compositing — Phase A of the
   alpha/anti-aliasing work (see `docs/design/alpha-aa.md`):
   `ICreateImage(IOPTION_ALPHA)`, `IAllocColorAlpha()`, `IGetPixelAlpha()` /

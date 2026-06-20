@@ -233,6 +233,49 @@ TEST aa_fill_ellipse_blends_edges ( void )
   PASS ();
 }
 
+/* An anti-aliased filled pie wedge (0..90) fills only its sector with soft
+   edges, leaving the rest of the disk empty. */
+TEST aa_fill_arc_wedge ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+  IColor black = IAllocColor ( 0, 0, 0 );
+
+  ISetForeground ( gc, black );
+  ASSERT_EQ ( INoError, ISetAntiAlias ( gc, 1 ) );
+  ASSERT_EQ ( INoError, IFillArc ( im, gc, 5, 5, 4, 4, 0.0, 90.0 ) );
+
+  ASSERT ( px_r ( im, 7, 3 ) < 128 );   /* inside the upper-right sector */
+  ASSERT_EQ ( 255, px_r ( im, 3, 7 ) ); /* opposite sector stays empty */
+  ASSERT ( has_blended_pixel ( im ) );
+
+  IFreeColor ( black );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
+/* An anti-aliased arc outline draws only its angular range with soft edges. */
+TEST aa_arc_outline_partial ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+  IColor black = IAllocColor ( 0, 0, 0 );
+
+  ISetForeground ( gc, black );
+  ASSERT_EQ ( INoError, ISetAntiAlias ( gc, 1 ) );
+  ASSERT_EQ ( INoError, IDrawArc ( im, gc, 5, 5, 4, 4, 0.0, 90.0 ) );
+
+  ASSERT_EQ ( 255, px_r ( im, 5, 5 ) ); /* interior untouched (outline) */
+  ASSERT_EQ ( 255, px_r ( im, 1, 8 ) ); /* outside the arc's range */
+  ASSERT ( has_blended_pixel ( im ) );
+
+  IFreeColor ( black );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
 /* An anti-aliased circle covers its cardinal points and produces blended
    edge pixels. */
 TEST aa_circle_blends_edges ( void )
@@ -275,6 +318,8 @@ SUITE ( draw )
   RUN_TEST ( aa_fill_polygon_blends_edges );
   RUN_TEST ( aa_ellipse_outline_blends_edges );
   RUN_TEST ( aa_fill_ellipse_blends_edges );
+  RUN_TEST ( aa_fill_arc_wedge );
+  RUN_TEST ( aa_arc_outline_partial );
 }
 
 GREATEST_MAIN_DEFS ();
