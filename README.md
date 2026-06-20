@@ -26,6 +26,9 @@ The drawing API is modeled on a subset of the X11 graphics functions:
 - **Text:** X11 BDF bitmap fonts (208 ship in the distribution), and — when
   built with FreeType — scalable, anti-aliased TrueType/OpenType fonts
   (`ILoadFontFromFileTTF`). Both support text styles and rotation.
+- **Filters:** whole-image point operations (ImageMagick-style): greyscale,
+  negate, brightness/contrast, gamma, and threshold (`IGreyscale`, `INegate`,
+  `IBrightnessContrast`, `IGamma`, `IThreshold`).
 
 Note: This code was originally developed in the late 1990s in "classic"
 (K&R) C. It has since been modernized to ISO C (ANSI-style prototypes) and

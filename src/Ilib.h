@@ -329,6 +329,71 @@ IError IReduceColors (
 );
 
 
+/**
+ * Image filters (whole-image point operations).
+ *
+ * Each operates in place on the image's pixels and leaves any alpha channel
+ * untouched. They are the first batch of ImageMagick-style transforms.
+ */
+
+/**
+ * Desaturate an image to greyscale (Rec.601 luma), writing the luma value to
+ * the red, green and blue channels. Images that are already single-channel
+ * greyscale are left unchanged.
+ */
+IError IGreyscale (
+#ifndef _NO_PROTO
+  IImage image /* image (modified in place) */
+#endif
+);
+#define IGrayscale IGreyscale /* American-spelling alias */
+
+/**
+ * Invert the colors of an image (each colour channel becomes 255 - value).
+ */
+IError INegate (
+#ifndef _NO_PROTO
+  IImage image /* image (modified in place) */
+#endif
+);
+
+/**
+ * Adjust brightness and contrast. Both are percentages in the range -100..100
+ * (0 = no change); values outside the range are clamped. Brightness is an
+ * additive shift; contrast scales values around mid-grey.
+ */
+IError IBrightnessContrast (
+#ifndef _NO_PROTO
+  IImage image,   /* image (modified in place) */
+  int brightness, /* -100..100 */
+  int contrast    /* -100..100 */
+#endif
+);
+
+/**
+ * Apply gamma correction: out = 255 * (in/255) ^ (1/gamma). gamma must be
+ * greater than 0 (values > 1 brighten midtones, < 1 darken them); otherwise
+ * IInvalidArgument is returned.
+ */
+IError IGamma (
+#ifndef _NO_PROTO
+  IImage image, /* image (modified in place) */
+  double gamma  /* gamma value (> 0) */
+#endif
+);
+
+/**
+ * Threshold each colour channel to black or white: values >= threshold become
+ * 255, the rest become 0. threshold is 0..255.
+ */
+IError IThreshold (
+#ifndef _NO_PROTO
+  IImage image,          /* image (modified in place) */
+  unsigned int threshold /* 0..255 */
+#endif
+);
+
+
 #define IFreeImage( i ) \
   _IFreeImage ( i );    \
   ( i ) = NULL;

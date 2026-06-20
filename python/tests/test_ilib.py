@@ -190,6 +190,55 @@ class Drawing(unittest.TestCase):
         self.assertGreater(r, g)  # still reddish
 
 
+class Filters(unittest.TestCase):
+    def test_greyscale(self):
+        with ilib.Image(4, 4) as img:
+            for y in range(4):
+                for x in range(4):
+                    img.set_pixel(x, y, 255, 0, 0)
+            img.greyscale()
+            r, g, b = img.get_pixel(1, 1)
+            self.assertEqual(r, g)
+            self.assertEqual(g, b)
+            self.assertTrue(70 < r < 82)
+
+    def test_negate(self):
+        with ilib.Image(4, 4) as img:
+            img.set_pixel(0, 0, 10, 20, 30)
+            img.negate()
+            self.assertEqual(img.get_pixel(0, 0), (245, 235, 225))
+
+    def test_brightness(self):
+        with ilib.Image(4, 4) as img:
+            img.set_pixel(0, 0, 100, 100, 100)
+            img.brightness_contrast(50, 0)
+            r, _, _ = img.get_pixel(0, 0)
+            self.assertGreater(r, 100)
+
+    def test_gamma_identity_and_reject(self):
+        with ilib.Image(4, 4) as img:
+            img.set_pixel(0, 0, 64, 64, 64)
+            img.gamma(1.0)
+            self.assertEqual(img.get_pixel(0, 0)[0], 64)
+            with self.assertRaises(ilib.IlibError) as ctx:
+                img.gamma(0.0)
+            self.assertEqual(ctx.exception.code, ilib.IError.InvalidArgument)
+
+    def test_threshold(self):
+        with ilib.Image(4, 4) as img:
+            img.set_pixel(0, 0, 50, 50, 50)
+            img.set_pixel(1, 0, 200, 200, 200)
+            img.threshold(128)
+            self.assertEqual(img.get_pixel(0, 0), (0, 0, 0))
+            self.assertEqual(img.get_pixel(1, 0), (255, 255, 255))
+
+    def test_chaining(self):
+        with ilib.Image(4, 4) as img:
+            img.set_pixel(0, 0, 100, 150, 200)
+            # methods return self, so they chain
+            self.assertIs(img.negate().greyscale(), img)
+
+
 class FileIO(unittest.TestCase):
     def test_ppm_roundtrip(self):
         with ilib.Image(8, 6) as img, ilib.GC() as gc:
