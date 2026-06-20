@@ -12,9 +12,12 @@ without breaking the public API.
 ### Added
 - Optional scalable (TrueType/OpenType) fonts via FreeType: `ILoadFontFromFileTTF()`
   loads a font at a pixel size and `IDrawString()` renders it **anti-aliased**.
+  Text styles (etched/shadowed), the `IDrawStringRotated()` directions, and
+  arbitrary-angle `IDrawStringRotatedAngle()` all apply to TTF text (rotation
+  via FreeType transforms; TTF uses the standard counterclockwise angle sense).
   Auto-detected like the image codecs (`HAVE_FREETYPE`); when FreeType is not
   available the loader returns `IFunctionNotImplemented` and BDF fonts are
-  unaffected. (Text styles and rotation are not yet applied to TTF text.)
+  unaffected.
 - The `IBLEND_OVER` blend mode now applies to every primitive — Phase B of the
   alpha/anti-aliasing work. The core point-write (`_ISetPoint`) composites
   source-over when the GC blend mode is `IBLEND_OVER`, so lines, rectangles,

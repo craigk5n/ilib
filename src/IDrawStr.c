@@ -53,6 +53,31 @@ static IError draw_string_rotated_90 (
 #endif
 );
 
+/* Render one string for a given text direction, dispatching to the scalable
+   (FreeType) backend when the GC font is a TTF font and to the BDF rasterizer
+   otherwise. Going through this wrapper means text styles (etched/shadowed),
+   which draw the string several times, apply to both font kinds. */
+static IError draw_glyphs ( IImage image, IGC gc, int x, int y, char *text,
+  unsigned int len, ITextDirection direction )
+{
+#ifdef HAVE_FREETYPE
+  IGCP *gcp = (IGCP *) gc;
+  if ( gcp && gcp->magic == IMAGIC_GC && gcp->font != NULL &&
+       ( (IFontP *) gcp->font )->type == IFONT_TTF ) {
+    IImageP *imagep = (IImageP *) image;
+    double angle = 0.0; /* LEFT_TO_RIGHT */
+    if ( direction == ITEXT_BOTTOM_TO_TOP )
+      angle = 90.0;
+    else if ( direction == ITEXT_TOP_TO_BOTTOM )
+      angle = 270.0;
+    if ( !imagep || imagep->magic != IMAGIC_IMAGE )
+      return ( IInvalidImage );
+    return ( _IFontTTFDrawString ( imagep, gcp, x, y, text, len, angle ) );
+  }
+#endif
+  return ( draw_string_rotated_90 ( image, gc, x, y, text, len, direction ) );
+}
+
 
 IError IDrawString ( IImage image, IGC gc, int x, int y, char *text, unsigned int len )
 {
@@ -115,24 +140,11 @@ IError IDrawStringRotated ( IImage image, IGC gc, int x, int y, char *text, unsi
   if ( !gcp )
     return ( IInvalidGC );
 
-#ifdef HAVE_FREETYPE
-  /* Scalable fonts render anti-aliased via FreeType. Text styles and rotation
-     are not (yet) applied to TTF text; it is drawn left-to-right. */
-  if ( gcp->magic == IMAGIC_GC && gcp->font != NULL &&
-       ( (IFontP *) gcp->font )->type == IFONT_TTF ) {
-    IImageP *imagep = (IImageP *) image;
-    if ( !imagep || imagep->magic != IMAGIC_IMAGE )
-      return ( IInvalidImage );
-    (void) direction;
-    return ( _IFontTTFDrawString ( imagep, gcp, x, y, text, len ) );
-  }
-#endif
-
   fgsave = gcp->foreground;
 
   switch ( gcp->text_style ) {
   case ITEXT_NORMAL:
-    ret = draw_string_rotated_90 ( image, gc, x, y, text, len, direction );
+    ret = draw_glyphs ( image, gc, x, y, text, len, direction );
     break;
   case ITEXT_ETCHED_IN:
   case ITEXT_ETCHED_OUT:
@@ -142,18 +154,15 @@ IError IDrawStringRotated ( IImage image, IGC gc, int x, int y, char *text, unsi
       else
         make_top_and_bottom_shadow ( gcp->background, &bottom, &top );
       ISetForeground ( gc, top );
-      ret = draw_string_rotated_90 ( image, gc, x - 1, y - 1,
-        text, len, direction );
+      ret = draw_glyphs ( image, gc, x - 1, y - 1, text, len, direction );
       if ( !ret ) {
         ISetForeground ( gc, bottom );
-        ret = draw_string_rotated_90 ( image, gc, x + 1, y + 1,
-          text, len, direction );
+        ret = draw_glyphs ( image, gc, x + 1, y + 1, text, len, direction );
       }
     }
     if ( !ret ) {
       gcp->foreground = gcp->background;
-      ret = draw_string_rotated_90 ( image, gc, x, y,
-        text, len, direction );
+      ret = draw_glyphs ( image, gc, x, y, text, len, direction );
     }
     break;
   case ITEXT_SHADOWED:
@@ -164,13 +173,12 @@ IError IDrawStringRotated ( IImage image, IGC gc, int x, int y, char *text, unsi
       gcp->foreground = fgsave;
       for ( loop = nshadows; loop > 0; loop-- ) {
         ISetForeground ( gc, shadows[loop - 1] );
-        ret = draw_string_rotated_90 ( image, gc, x + loop, y + loop,
-          text, len, direction );
+        ret = draw_glyphs ( image, gc, x + loop, y + loop, text, len, direction );
       }
       gcp->foreground = fgsave;
     }
     if ( !ret )
-      ret = draw_string_rotated_90 ( image, gc, x, y, text, len, direction );
+      ret = draw_glyphs ( image, gc, x, y, text, len, direction );
     break;
   }
 
@@ -353,6 +361,13 @@ IError IDrawStringRotatedAngle ( IImage image, IGC gc, int x, int y, char *text,
 
   if ( !gcp->foreground )
     return ( IInvalidGC );
+
+#ifdef HAVE_FREETYPE
+  /* TTF rotation uses the standard convention (positive angle = counter-
+     clockwise); the legacy BDF angle path rotates the opposite way. */
+  if ( ( (IFontP *) gcp->font )->type == IFONT_TTF )
+    return ( _IFontTTFDrawString ( imagep, gcp, x, y, text, len, angle ) );
+#endif
 
   charx = x;
   chary = y;
