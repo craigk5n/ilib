@@ -23,10 +23,11 @@ without breaking the public API.
   `ISetAntiAlias()` toggles per-GC anti-aliasing. When on, `IDrawLine()` renders
   smooth thin solid lines (Xiaolin Wu), `IDrawCircle()` uses a Wu circle
   rasterizer, `IFillPolygon()` fills with supersampled edge coverage (also
-  smoothing filled rectangles/triangles/area shapes), and `IFillCircle()` fills
-  a smooth disk. Thick/dashed lines, ellipses, and partial arcs keep their
-  existing rasterizers (still anti-aliased through their AA line segments where
-  applicable).
+  smoothing filled rectangles/triangles/area shapes), `IFillCircle()` /
+  `IFillEllipse()` fill smooth disks/ellipses, and `IDrawEllipse()` draws a
+  smooth outline (implicit-distance method). Thick/dashed lines and partial
+  arcs keep their existing rasterizers (still anti-aliased through their AA line
+  segments).
 - Optional alpha channel (RGBA) and source-over compositing — Phase A of the
   alpha/anti-aliasing work (see `docs/design/alpha-aa.md`):
   `ICreateImage(IOPTION_ALPHA)`, `IAllocColorAlpha()`, `IGetPixelAlpha()` /

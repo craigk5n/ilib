@@ -70,6 +70,55 @@ static void aa_circle ( IImageP *img, IGCP *gc, int cx, int cy, int r )
   }
 }
 
+/* Anti-aliased ellipse outline (radii rx,ry about (cx,cy)). Coverage is
+   estimated from the implicit ellipse function f = (dx/rx)^2 + (dy/ry)^2 - 1,
+   whose value divided by its gradient magnitude approximates the distance to
+   the curve in pixels; a 1px-wide line is 1 - that distance. */
+static void aa_ellipse_outline ( IImageP *img, IGCP *gc, int cx, int cy, int rx,
+  int ry )
+{
+  int x, y, x0, y0, x1, y1;
+  double rx2, ry2;
+
+  if ( rx < 1 || ry < 1 )
+    return;
+  rx2 = (double) rx * rx;
+  ry2 = (double) ry * ry;
+
+  x0 = cx - rx - 1;
+  y0 = cy - ry - 1;
+  x1 = cx + rx + 1;
+  y1 = cy + ry + 1;
+  if ( x0 < 0 )
+    x0 = 0;
+  if ( y0 < 0 )
+    y0 = 0;
+  if ( x1 >= img->width )
+    x1 = img->width - 1;
+  if ( y1 >= img->height )
+    y1 = img->height - 1;
+
+  for ( y = y0; y <= y1; y++ ) {
+    for ( x = x0; x <= x1; x++ ) {
+      double dx = x - cx;
+      double dy = y - cy;
+      double f = dx * dx / rx2 + dy * dy / ry2 - 1.0;
+      double gx = 2.0 * dx / rx2;
+      double gy = 2.0 * dy / ry2;
+      double grad = sqrt ( gx * gx + gy * gy );
+      double cov;
+      if ( grad < 1e-9 )
+        continue;
+      cov = 1.0 - fabs ( f ) / grad;
+      if ( cov <= 0.0 )
+        continue;
+      if ( cov > 1.0 )
+        cov = 1.0;
+      _IBlendPoint ( img, gc, x, y, (unsigned int) ( cov * 255.0 + 0.5 ) );
+    }
+  }
+}
+
 
 IError IDrawArc ( IImage image, IGC gc, int x, int y, int r1, int r2, double a1, double a2 )
 {
@@ -87,11 +136,15 @@ IError IDrawArc ( IImage image, IGC gc, int x, int y, int r1, int r2, double a1,
   if ( imagep->magic != IMAGIC_IMAGE )
     return ( IInvalidImage );
 
-  /* Anti-aliased full circle (r1==r2, full 360 sweep). Partial arcs and
-     ellipses fall through to the segment approximation, which is itself
-     anti-aliased when GC anti-aliasing is on (each segment is an AA line). */
-  if ( gcp->aa && r1 == r2 && fabs ( a2 - a1 ) >= 360.0 ) {
-    aa_circle ( imagep, gcp, x, y, r1 );
+  /* Anti-aliased full circle/ellipse (full 360 sweep). Partial arcs fall
+     through to the segment approximation, which is itself anti-aliased when GC
+     anti-aliasing is on (each segment is an AA line). The Wu circle is used for
+     r1==r2; ellipses use the implicit-distance outline. */
+  if ( gcp->aa && fabs ( a2 - a1 ) >= 360.0 ) {
+    if ( r1 == r2 )
+      aa_circle ( imagep, gcp, x, y, r1 );
+    else
+      aa_ellipse_outline ( imagep, gcp, x, y, r1, r2 );
     return ( INoError );
   }
 

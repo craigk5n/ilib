@@ -25,10 +25,7 @@
 
 IError IFillEllipse ( IImage image, IGC gc, int x, int y, int r1, int r2 )
 {
-  IError ret;
-
-  ret = IFillArc ( image, gc, x, y, r1, r2, 0.0, 90.0 );
-  if ( ret )
-    return ret;
-  return ( IFillArc ( image, gc, x, y, r1, r2, 90.0, 360.0 ) );
+  /* A single full sweep so anti-aliased filling uses the dedicated ellipse
+     fill (the result is the same full ellipse either way). */
+  return ( IFillArc ( image, gc, x, y, r1, r2, 0.0, 360.0 ) );
 }

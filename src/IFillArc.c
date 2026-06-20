@@ -23,19 +23,25 @@
 #include "IlibP.h"
 
 
-/* Anti-aliased filled disk via NxN supersampled coverage against the true
-   circle equation. Going through the integer-vertex polygon (IFillPolygon)
-   loses the sub-pixel edge, so a full circle is filled directly here. */
+/* Anti-aliased filled ellipse via NxN supersampled coverage against the true
+   ellipse equation. Going through the integer-vertex polygon (IFillPolygon)
+   loses the sub-pixel edge, so a full ellipse/circle is filled directly here. */
 #define IFILLARC_AA_SS 4
-static void fill_circle_aa ( IImageP *img, IGCP *gc, int cx, int cy, int r )
+static void fill_ellipse_aa ( IImageP *img, IGCP *gc, int cx, int cy, int rx,
+  int ry )
 {
   int x, y, sx, sy, cnt, x0, y0, x1, y1;
-  double r2 = (double) r * r;
+  double rx2, ry2;
 
-  x0 = cx - r;
-  y0 = cy - r;
-  x1 = cx + r;
-  y1 = cy + r;
+  if ( rx < 1 || ry < 1 )
+    return;
+  rx2 = (double) rx * rx;
+  ry2 = (double) ry * ry;
+
+  x0 = cx - rx;
+  y0 = cy - ry;
+  x1 = cx + rx;
+  y1 = cy + ry;
   if ( x0 < 0 )
     x0 = 0;
   if ( y0 < 0 )
@@ -52,7 +58,7 @@ static void fill_circle_aa ( IImageP *img, IGCP *gc, int cx, int cy, int r )
         for ( sx = 0; sx < IFILLARC_AA_SS; sx++ ) {
           double dx = ( x + ( sx + 0.5 ) / IFILLARC_AA_SS ) - cx;
           double dy = ( y + ( sy + 0.5 ) / IFILLARC_AA_SS ) - cy;
-          if ( dx * dx + dy * dy <= r2 )
+          if ( dx * dx / rx2 + dy * dy / ry2 <= 1.0 )
             cnt++;
         }
       }
@@ -81,11 +87,11 @@ IError IFillArc ( IImage image, IGC gc, int x, int y, int r1, int r2, double a1,
   if ( imagep->magic != IMAGIC_IMAGE )
     return ( IInvalidImage );
 
-  /* Anti-aliased filled circle (r1==r2, full sweep). Filled ellipses and
-     partial arcs fall through to the polygon fill, which is anti-aliased on
-     its straight edges when GC anti-aliasing is on. */
-  if ( gcp->aa && r1 == r2 && fabs ( a2 - a1 ) >= 359.9 ) {
-    fill_circle_aa ( imagep, gcp, x, y, r1 );
+  /* Anti-aliased filled ellipse/circle (full sweep). Partial arcs (pie wedges)
+     fall through to the polygon fill, which is anti-aliased on its straight
+     edges when GC anti-aliasing is on. */
+  if ( gcp->aa && fabs ( a2 - a1 ) >= 359.9 ) {
+    fill_ellipse_aa ( imagep, gcp, x, y, r1, r2 );
     return ( INoError );
   }
 
