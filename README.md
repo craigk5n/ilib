@@ -51,20 +51,6 @@ Note that the drawing API is modeled after a subset of the
 [X11 API drawing functions](https://www.x.org/releases/X11R7.6/doc/libX11/specs/libX11/libX11.html#graphics_functions).
 
 
-## Perl Module
-The Ilib perl module is now included with the distribution.  It is not
-compiled or installed by default.  This perl module builds like all other
-perl modules.  AFTER installing the rest of Ilib (see instructions below),
-do the following:
-```
-  cd perl
-  perl Makefile.PL
-  make
-  make install
-```
-(Normally, you will need to be root to install.)
-
-
 ## Building
 
 Ilib uses [CMake](https://cmake.org/) (3.16 or newer). It builds with no

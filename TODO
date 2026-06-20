@@ -2,7 +2,6 @@ Ilib TODO List
 Last Updated: 15 Aug 2001
 -----------------------------------------------------------------------
 
-- Complete the Perl module (it does not yet implement the full API)
 - PHP3/4 Module
 - Add a font path and search the font path for any requested font file
 - Add support for True Type fonts (scalable w/ anti-aliasing)
