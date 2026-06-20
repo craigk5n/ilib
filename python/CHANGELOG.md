@@ -12,10 +12,9 @@ This changelog tracks the **Python package** (`ilib-graphics`, imported as
 
 _Nothing yet._
 
-## [0.1.0] - unreleased
+## [0.1.0] - 2026-06-20
 
-First public release of the cffi bindings. (Reserved; fill in the date when
-tagging `python-v0.1.0`.)
+First public release of the cffi bindings.
 
 ### Added
 - cffi bindings (ABI mode) that load an installed `libilib` shared library at
