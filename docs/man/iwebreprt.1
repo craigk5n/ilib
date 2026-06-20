@@ -1,0 +1,72 @@
+.TH IWEBREPRT 1 "June 2026" "ilib @ILIB_VERSION@" "Ilib Manual"
+.SH NAME
+iwebreprt \- graph web server access-log usage
+.SH SYNOPSIS
+.B iwebreprt
+.RI [ options ]
+.RB [ \-tod | \-dom | \-dow | \-moy ]
+.I accesslog
+.RI [ accesslog ...]
+.SH DESCRIPTION
+.B iwebreprt
+parses one or more Common Log Format web server access logs and writes an
+image graph of request volume to standard output. By default it produces a
+time-of-day report as a line graph using all available data.
+.SH OPTIONS
+.SS Report type
+.TP
+.B \-tod
+Requests by hour of the day (default).
+.TP
+.B \-dom
+Requests by day of the month.
+.TP
+.B \-dow
+Requests by day of the week.
+.TP
+.B \-moy
+Requests by month of the year.
+.SS Date range
+.TP
+.B \-all
+Use all data (default).
+.TP
+.B \-today
+.TQ
+.B \-yesterday
+Restrict to today / yesterday.
+.TP
+.B \-thisweek
+.TQ
+.B \-lastweek
+Restrict to this / the previous Monday\(enSunday week.
+.TP
+.B \-thismonth
+.TQ
+.B \-lastmonth
+Restrict to this / the previous calendar month.
+.SS Presentation
+.TP
+.B \-line
+Draw a line graph (default).
+.TP
+.B \-bar
+Draw a bar graph instead.
+.TP
+.B \-nohdr
+Omit the title and summary footer.
+.TP
+.BI \-rstring " text"
+Set the label used for the retrievals being counted.
+.SH EXAMPLES
+.RS
+.nf
+iwebreprt -dom -bar -thismonth /var/log/apache2/access.log > usage.gif
+.fi
+.RE
+.SH SEE ALSO
+.BR iindex (1)
+.PP
+Full API documentation: https://craigk5n.github.io/ilib/
+.SH AUTHOR
+Craig Knudsen <craigk5n@gmail.com>

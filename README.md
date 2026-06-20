@@ -27,6 +27,9 @@ cmake -B build
 cmake --build build --target docs    # output in build/docs/html/
 ```
 
+For a hands-on introduction see the [tutorial](docs/tutorial.md). The installed
+client tools have man pages (`man iindex`, `man ifont2h`, …).
+
 Note that the drawing API is modeled after a subset of the
 [X11 API drawing functions](https://www.x.org/releases/X11R7.6/doc/libX11/specs/libX11/libX11.html#graphics_functions).
 

@@ -420,12 +420,10 @@ IError _IFreeGC (
 );
 
 /**
- * Load a font from file.  Currently, only BDF font files can be
- * used.  BDF font files can be found at:
- * <A HREF="ftp://ftp.x.org/pub/R6.1/xc/fonts/bdf/75dpi/">
- * ftp://ftp.x.org/pub/R6.1/xc/fonts/bdf/75dpi/</A>.
- * (BDF fonts are part of the X11 Window System developed at MIT
- * and used on almost all UNIX workstations.)
+ * Load a font from a file. Currently only X11 BDF font files are supported.
+ * A few sample fonts ship with Ilib (installed under
+ * `<prefix>/share/ilib/fonts`); any X11 BDF font will also work. BDF is part
+ * of the X11 Window System and the format is widely available.
  */
 IError ILoadFontFromFile (
 #ifndef _NO_PROTO
@@ -437,7 +435,7 @@ IError ILoadFontFromFile (
 
 /**
  * Loads a font from data passed in.  This is identical to
- * <A HREF="#ILoadFontFromFile">ILoadFontFromFile</A> except the
+ * ILoadFontFromFile() except the
  * font data is passed in as an argument rather than a file.
  * This allows the font to be embedded in the application rather
  * than distributed as a separate file.
@@ -466,7 +464,7 @@ IError _IFreeFont (
 
 /**
  * Gets the pixel height of the font.
- * (See <A HREF="#ITextHeight">ITextHeight</A> for calculating the
+ * (See ITextHeight() for calculating the
  * height of a multiline text.)
  */
 IError IFontSize (
@@ -547,7 +545,7 @@ IError IArcProperties (
 
 /**
  * Allocates a color to be used for drawing.
- * (See <A HREF="#ISetForeground">ISetForeground</A>).
+ * (See ISetForeground()).
  */
 IColor IAllocColor (
 #ifndef _NO_PROTO
@@ -559,7 +557,7 @@ IColor IAllocColor (
 
 /**
  * Allocates a color by name (i.e. "blue") to be used for drawing.
- * (See <A HREF="#ISetForeground">ISetForeground</A>).
+ * (See ISetForeground()).
  */
 IError IAllocNamedColor (
 #ifndef _NO_PROTO
@@ -607,8 +605,8 @@ IError IGetTransparent (
 /**
  * Set the foreground color of a graphics context.
  * This will set the drawing color for drawing functions
- * (<A HREF="#IDrawLine">IDrawLine</A>,
- * <A HREF="#IFillRectangle">IFillRectangle</A>, etc.)
+ * (IDrawLine(),
+ * IFillRectangle(), etc.)
  */
 IError ISetForeground (
 #ifndef _NO_PROTO
@@ -630,7 +628,7 @@ IError ISetBackground (
 
 /**
  * Sets the current drawing font for a graphics context.
- * Subsequent calls to <A HREF="#IDrawString">IDrawString</A>
+ * Subsequent calls to IDrawString()
  * will use the specified font.
  */
 IError ISetFont (
@@ -642,8 +640,8 @@ IError ISetFont (
 
 /**
  * Sets the line drawing with for a graphics context.
- * (This applies to <A HREF="#IDrawLine">IDrawLine</A> and
- * <A HREF="#IDrawRectangle">IDrawRectangle</A>.)
+ * (This applies to IDrawLine() and
+ * IDrawRectangle().)
  */
 IError ISetLineWidth (
 #ifndef _NO_PROTO
@@ -656,8 +654,8 @@ IError ISetLineWidth (
  * Sets the current line drawing style for a graphics context.
  * Currently support ILINE_SOLID (default)
  * and ILINE_ON_OFF_DASH.  (This applies to
- * <A HREF="#IDrawLine">IDrawLine</A> and
- * <A HREF="#IDrawRectangle">IDrawRectangle</A>.)
+ * IDrawLine() and
+ * IDrawRectangle().)
  */
 IError ISetLineStyle (
 #ifndef _NO_PROTO
@@ -678,8 +676,8 @@ IError ISetLineStyle (
  *      of the text.
  * </UL>
  * (This applies to
- * <A HREF="#IDrawString">IDrawString</A> and
- * <A HREF="#IDrawStringRotated">IDrawStringRotated</A>.)
+ * IDrawString() and
+ * IDrawStringRotated().)
  */
 IError ISetTextStyle (
 #ifndef _NO_PROTO
@@ -693,7 +691,7 @@ IError ISetTextStyle (
  * Draws text onto the image at the specified coordinate.
  * See the font definition file to determine which characters are supported.
  * <BR>Note: the font is set with
- * <A HREF="#ISetFont">ISetFont</A>.
+ * ISetFont().
  */
 IError IDrawString (
 #ifndef _NO_PROTO
@@ -712,7 +710,7 @@ IError IDrawString (
  * ITEXT_BOTTOM_TO_TOP.
  * See the font definition file to determine which characters are supported.
  * <BR>Note: the font is set with
- * <A HREF="#ISetFont">ISetFont</A>.
+ * ISetFont().
  * The x-y coordinates always specify the starting point to draw from
  * (the lower left spot of the first character).
  * For example, for ITEXT_TOP_TO_BOTTOM the x-y would represent the
@@ -733,12 +731,12 @@ IError IDrawStringRotated (
 /**
  * Draws text onto the image at the specified coordinate using one
  * the specified angle.  This is slightly slower than
- * <A HREF="#IDrawStringRotated">IDrawStringRotated</A>, so only
+ * IDrawStringRotated(), so only
  * use this function if you're drawing something other than
  * 90, 180, or 270 degrees.
  * See the font definition file to determine which characters are supported.
  * <BR>Note: the font is set with
- * <A HREF="#ISetFont">ISetFont</A>.
+ * ISetFont().
  * The x-y coordinates always specify the starting point to draw from
  * (the lower left spot of the first character).
  */
@@ -770,7 +768,7 @@ IError IDrawPoint (
 /**
  * Draws a line onto the image using the graphics context's
  * current line style (
- * see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
+ * see ISetLineStyle()).
  */
 IError IDrawLine (
 #ifndef _NO_PROTO
@@ -786,7 +784,7 @@ IError IDrawLine (
 /**
  * Draws a polygon onto the image using the graphics context's
  * current line style (
- * see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
+ * see ISetLineStyle()).
  */
 IError IDrawPolygon (
 #ifndef _NO_PROTO
@@ -800,7 +798,7 @@ IError IDrawPolygon (
 /**
  * Draws a rectangle onto the image of the specified width and
  * height using the graphic context's current line stlye (
- * see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
+ * see ISetLineStyle()).
  */
 IError IDrawRectangle (
 #ifndef _NO_PROTO
@@ -816,7 +814,7 @@ IError IDrawRectangle (
 /**
  * Draws a circle onto the image using the graphic context's
  * current line style (
- * see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
+ * see ISetLineStyle()).
  */
 IError IDrawCircle (
 #ifndef _NO_PROTO
@@ -831,7 +829,7 @@ IError IDrawCircle (
 /**
  * Draws an arc onto the image using the graphic context's
  * current line style (
- * see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
+ * see ISetLineStyle()).
  * In order to draw an arc that passes over 0 degrees, the first angle (a1)
  * should be negative and the second angle (a2) should be positive.
  */
@@ -852,7 +850,7 @@ IError IDrawArc (
  * Draws an arc and connects the arc to the center point
  * using the graphic context's
  * current line style (
- * see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
+ * see ISetLineStyle()).
  * This function is intended to be used drawing pie charts.
  * In order to draw an arc that passes over 0 degrees, the first angle (a1)
  * should be negative and the second angle (a2) should be positive.
@@ -873,7 +871,7 @@ IError IDrawEnclosedArc (
 /**
  * Draws an ellipse onto the image using the graphic context's
  * current line style (
- * see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
+ * see ISetLineStyle()).
  */
 IError IDrawEllipse (
 #ifndef _NO_PROTO
@@ -889,7 +887,7 @@ IError IDrawEllipse (
 /**
  * Draws a circle onto the image using the graphic context's
  * current line style (
- * see <A HREF="#ISetLineStyle">ISetLineStyle</A>).
+ * see ISetLineStyle()).
  */
 IError IDrawCircle (
 #ifndef _NO_PROTO
@@ -904,7 +902,7 @@ IError IDrawCircle (
 
 /**
  * Fills a rectangle on the image using the graphics context's
- * foreground color (see <A HREF="#ISetForeground">ISetForeground</A>).
+ * foreground color (see ISetForeground()).
  */
 IError IFillRectangle (
 #ifndef _NO_PROTO
