@@ -28,11 +28,12 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake libpng-dev libjpeg-dev libgif-dev
+          sudo apt-get install -y cmake libpng-dev libjpeg-dev libgif-dev \
+            libfreetype-dev fonts-dejavu-core
 
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
-        run: brew install giflib jpeg libpng
+        run: brew install giflib jpeg libpng freetype
 
       - name: Configure
         run: cmake -B build -DILIB_BUILD_TESTS=ON -DILIB_WERROR=ON
@@ -55,7 +56,7 @@ jobs:
       - name: Configure (no png/jpeg/gif)
         run: |
           cmake -B build -DILIB_BUILD_TESTS=ON -DILIB_WERROR=ON \
-            -DILIB_WITH_PNG=OFF -DILIB_WITH_JPEG=OFF -DILIB_WITH_GIF=OFF
+            -DILIB_WITH_PNG=OFF -DILIB_WITH_JPEG=OFF -DILIB_WITH_GIF=OFF -DILIB_WITH_FREETYPE=OFF
       - name: Build
         run: cmake --build build --parallel
       - name: Test
@@ -90,7 +91,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake clang clang-tidy libpng-dev libjpeg-dev libgif-dev
+          sudo apt-get install -y cmake clang clang-tidy libpng-dev libjpeg-dev libgif-dev libfreetype-dev
       - name: Configure (export compile_commands.json)
         run: cmake -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
       - name: Run clang-tidy on library sources
@@ -105,7 +106,8 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake libpng-dev libjpeg-dev libgif-dev
+          sudo apt-get install -y cmake libpng-dev libjpeg-dev libgif-dev \
+            libfreetype-dev fonts-dejavu-core
       - name: Configure
         run: cmake -B build -DILIB_BUILD_TESTS=ON -DILIB_SANITIZE=ON
       - name: Build
@@ -121,7 +123,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake libpng-dev libjpeg-dev libgif-dev lcov
+          sudo apt-get install -y cmake libpng-dev libjpeg-dev libgif-dev lcov libfreetype-dev fonts-dejavu-core
       - name: Configure
         run: cmake -B build -DILIB_BUILD_TESTS=ON -DILIB_COVERAGE=ON
       - name: Build

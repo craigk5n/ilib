@@ -132,6 +132,13 @@ static void free_font ( Font *font );
 static Font **fonts = NULL;
 static int num_fonts = 0;
 
+/* One-entry lookup cache for IFontBDFGetChar. File-scope (not function-local)
+   so IFontBDFFree can invalidate it -- otherwise a freed font's name pointer
+   could be reused by a later allocation, making the cache return the freed
+   (dangling) font. */
+static char *bdf_last_name = NULL;
+static Font *bdf_last_font = NULL;
+
 IError IFontBDFReadFile ( char *name, char *path )
 {
   struct stat buf;
@@ -438,11 +445,18 @@ IError IFontBDFFree ( char *name )
   if ( !font )
     return ( INoSuchFont );
 
-  /* Remove this font from the cache *before* freeing it, so a later
+  /* Remove this font from the registry *before* freeing it, so a later
      _IGetFont() does not walk a dangling pointer (use-after-free). */
   for ( loop = 0; loop < (unsigned int) num_fonts; loop++ ) {
     if ( fonts[loop] == font )
       fonts[loop] = NULL;
+  }
+
+  /* Invalidate the IFontBDFGetChar lookup cache if it points at this font;
+     otherwise a reused name pointer could resolve to this freed font. */
+  if ( bdf_last_font == font ) {
+    bdf_last_name = NULL;
+    bdf_last_font = NULL;
   }
 
   free_font ( font );
@@ -471,21 +485,19 @@ IError IFontBDFGetChar ( char *name, char *ch, unsigned int **bitdata,
   Font *font;
   Char *character = NULL;
   unsigned int loop;
-  static char *last_name = NULL;
-  static Font *last_font = NULL;
 
   if ( !ch || !strlen ( ch ) )
     return ( IInvalidArgument );
 
-  if ( last_name == name ) {
-    font = last_font;
+  if ( bdf_last_name == name && bdf_last_font != NULL ) {
+    font = bdf_last_font;
   }
   else {
     font = _IGetFont ( name );
     if ( !font )
       return ( INoSuchFont );
-    last_name = name;
-    last_font = font;
+    bdf_last_name = name;
+    bdf_last_font = font;
   }
 
   if ( !font )

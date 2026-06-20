@@ -524,6 +524,21 @@ IError ILoadFontFromFile (
 );
 
 /**
+ * Load a scalable TrueType/OpenType font at a given pixel size, using FreeType.
+ * Text drawn with this font (via ISetFont() + IDrawString()) is anti-aliased.
+ * Returns IFunctionNotImplemented if the library was built without FreeType.
+ * (Text styles and rotation are not yet applied to scalable-font text.)
+ */
+IError ILoadFontFromFileTTF (
+#ifndef _NO_PROTO
+  char *name,              /* name to use for reference */
+  char *path,              /* path to .ttf / .otf file */
+  unsigned int pixel_size, /* nominal glyph height in pixels */
+  IFont *font_return       /* out: returned font */
+#endif
+);
+
+/**
  * Loads a font from data passed in.  This is identical to
  * ILoadFontFromFile() except the
  * font data is passed in as an argument rather than a file.

@@ -44,6 +44,36 @@ IError ILoadFontFromFile ( char *name, char *path, IFont *font_return )
 }
 
 
+IError ILoadFontFromFileTTF ( char *name, char *path, unsigned int pixel_size,
+  IFont *font_return )
+{
+#ifdef HAVE_FREETYPE
+  IFontP *font = NULL;
+  IError ret;
+
+  ret = _IFontTTFLoad ( name, path, (int) pixel_size );
+  if ( ret )
+    return ( ret );
+  font = (IFontP *) malloc ( sizeof ( IFontP ) );
+  if ( !font )
+    return ( IFontError );
+  memset ( font, '\0', sizeof ( IFontP ) );
+  font->magic = IMAGIC_FONT;
+  font->type = IFONT_TTF;
+  font->name = (char *) malloc ( strlen ( name ) + 1 );
+  strcpy ( font->name, name );
+  *font_return = (IFont) font;
+  return ( INoError );
+#else
+  (void) name;
+  (void) path;
+  (void) pixel_size;
+  (void) font_return;
+  return ( IFunctionNotImplemented );
+#endif
+}
+
+
 IError ILoadFontFromData ( char *name, char **lines, IFont *font_return )
 {
   IFontP *font = NULL;
@@ -72,7 +102,12 @@ IError _IFreeFont ( IFont font )
   if ( fontp ) {
     if ( fontp->magic != IMAGIC_FONT )
       return ( IInvalidFont );
-    IFontBDFFree ( fontp->name );
+#ifdef HAVE_FREETYPE
+    if ( fontp->type == IFONT_TTF )
+      _IFontTTFFree ( fontp->name );
+    else
+#endif
+      IFontBDFFree ( fontp->name );
     free ( fontp->name );
     free ( fontp );
   }
@@ -90,5 +125,9 @@ IError IFontSize ( IFont font, unsigned int *height_return )
   if ( fontp->magic != IMAGIC_FONT )
     return ( IInvalidFont );
 
+#ifdef HAVE_FREETYPE
+  if ( fontp->type == IFONT_TTF )
+    return ( _IFontTTFGetSize ( fontp->name, height_return ) );
+#endif
   return ( _IFontBDFGetSize ( fontp->name, height_return ) );
 }

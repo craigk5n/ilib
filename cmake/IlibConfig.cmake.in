@@ -13,6 +13,9 @@ endif()
 if(@ILIB_GIF_ENABLED@)
   find_dependency(GIF)
 endif()
+if(@ILIB_FREETYPE_ENABLED@)
+  find_dependency(Freetype)
+endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/IlibTargets.cmake")
 

@@ -10,6 +10,11 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Optional scalable (TrueType/OpenType) fonts via FreeType: `ILoadFontFromFileTTF()`
+  loads a font at a pixel size and `IDrawString()` renders it **anti-aliased**.
+  Auto-detected like the image codecs (`HAVE_FREETYPE`); when FreeType is not
+  available the loader returns `IFunctionNotImplemented` and BDF fonts are
+  unaffected. (Text styles and rotation are not yet applied to TTF text.)
 - The `IBLEND_OVER` blend mode now applies to every primitive — Phase B of the
   alpha/anti-aliasing work. The core point-write (`_ISetPoint`) composites
   source-over when the GC blend mode is `IBLEND_OVER`, so lines, rectangles,
@@ -64,6 +69,10 @@ without breaking the public API.
 - Fixed the dead `ilib.sourceforge.net` URLs.
 
 ### Fixed
+- Use-after-free in the BDF font glyph cache: `IFontBDFGetChar` cached the font
+  by name pointer but `IFontBDFFree` never invalidated it, so a freed font whose
+  name address was later reused could resolve to the dangling font. The cache is
+  now cleared on free.
 - Numerous decoder bugs found via fuzzing and sanitizers: heap overflows,
   out-of-bounds reads, integer-overflow allocations, and leaks on error paths
   in the PPM/PGM/XPM/BMP/GIF/PNG/JPEG readers; a GIF reader infinite loop on

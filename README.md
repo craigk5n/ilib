@@ -59,11 +59,15 @@ the corresponding development libraries are found.
 
 ### Optional dependencies
 
-Install whichever of these you want format support for:
+Install whichever of these you want format support for. FreeType is optional
+too and adds scalable, anti-aliased TrueType/OpenType fonts (alongside the
+built-in X11 BDF fonts):
 
-- **Debian/Ubuntu:** `sudo apt install cmake libpng-dev libjpeg-dev libgif-dev`
-- **Fedora/RHEL:** `sudo dnf install cmake libpng-devel libjpeg-turbo-devel giflib-devel`
-- **macOS (Homebrew):** `brew install cmake giflib libjpeg libpng`
+- **Debian/Ubuntu:** `sudo apt install cmake libpng-dev libjpeg-dev libgif-dev libfreetype-dev`
+- **Fedora/RHEL:** `sudo dnf install cmake libpng-devel libjpeg-turbo-devel giflib-devel freetype-devel`
+- **macOS (Homebrew):** `brew install cmake giflib libjpeg libpng freetype`
+
+Each is auto-detected; a missing one is skipped gracefully.
 
 ### Build, test and install
 

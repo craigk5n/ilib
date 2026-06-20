@@ -115,6 +115,19 @@ IError IDrawStringRotated ( IImage image, IGC gc, int x, int y, char *text, unsi
   if ( !gcp )
     return ( IInvalidGC );
 
+#ifdef HAVE_FREETYPE
+  /* Scalable fonts render anti-aliased via FreeType. Text styles and rotation
+     are not (yet) applied to TTF text; it is drawn left-to-right. */
+  if ( gcp->magic == IMAGIC_GC && gcp->font != NULL &&
+       ( (IFontP *) gcp->font )->type == IFONT_TTF ) {
+    IImageP *imagep = (IImageP *) image;
+    if ( !imagep || imagep->magic != IMAGIC_IMAGE )
+      return ( IInvalidImage );
+    (void) direction;
+    return ( _IFontTTFDrawString ( imagep, gcp, x, y, text, len ) );
+  }
+#endif
+
   fgsave = gcp->foreground;
 
   switch ( gcp->text_style ) {
