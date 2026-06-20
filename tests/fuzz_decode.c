@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Fuzz harness for the image decoders: feed arbitrary bytes to
  * IReadImageFile() for every format and ensure no crash / overflow / UB.

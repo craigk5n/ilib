@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
 /* Malformed-input decoder tests. Each feeds truncated/garbage data to a
    decoder and requires a clean error (no crash, no leak). Run under the
    sanitizers CI job (ASan+UBSan, leak detection on), this is the regression

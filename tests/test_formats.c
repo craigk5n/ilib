@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
 /* Image format I/O: round-trips for the always-available raw formats,
    graceful handling of malformed input, and clean behaviour for the optional
    codecs whether or not they were compiled in. */

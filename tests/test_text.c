@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
 /* X11 BDF font loading and text measurement/drawing.
    ILIB_TEST_FONT_DIR is defined by CMake to the source fonts/ directory. */
 

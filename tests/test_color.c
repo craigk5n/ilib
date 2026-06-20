@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
 /* Color allocation and named-color lookup. */
 
 #include <Ilib.h>
