@@ -196,8 +196,9 @@ IError IWriteImageFile ( FILE *fp, IImage image, IFileFormat format, IOptions op
   else
     return ( IInvalidImage );
 
-  /* The format writers are alpha-unaware; flatten RGBA over white first. */
-  if ( imagep->has_alpha ) {
+  /* Most format writers are alpha-unaware; flatten RGBA over white unless the
+     target format can write alpha itself (e.g. PNG). */
+  if ( imagep->has_alpha && !IFileFormats[format].alpha_ok ) {
     flat = flatten_rgba ( imagep );
     if ( !flat )
       return ( IErrorWriting );

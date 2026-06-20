@@ -10,6 +10,10 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- PNG alpha I/O — Phase D of the alpha/anti-aliasing work: the PNG reader now
+  produces an RGBA image when the file has alpha (or a tRNS chunk; grey/palette
+  inputs are normalized to RGB/RGBA), and the writer emits `PNG_COLOR_TYPE_RGBA`
+  for alpha images. Formats that cannot store alpha still flatten over white.
 - Anti-aliased line and circle drawing — Phase C of the alpha/anti-aliasing
   work: `ISetAntiAlias()` toggles per-GC anti-aliasing; when on, `IDrawLine()`
   renders smooth thin solid lines via Xiaolin Wu's algorithm and `IDrawCircle()`
