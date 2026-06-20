@@ -26,6 +26,26 @@ sudo cmake --install build      # puts libilib on the system library path
 
 ## Install
 
+> **Prerequisite:** these bindings load the Ilib **C shared library** at
+> runtime. `pip install` only installs the Python code — you must also have
+> `libilib` installed (see above), or point `ILIB_LIBRARY` at it. Without it,
+> `import ilib` raises a clear "could not locate the Ilib shared library" error.
+
+From PyPI (once published):
+
+```bash
+pip install ilib
+```
+
+Straight from the repository, without cloning (pip understands the
+`subdirectory` fragment):
+
+```bash
+pip install "git+https://github.com/craigk5n/ilib.git#subdirectory=python"
+```
+
+From a local checkout:
+
 ```bash
 cd python
 pip install .
@@ -84,6 +104,31 @@ ILIB_LIBRARY=$PWD/../build/src/libilib.so \
 
 Tests that need optional features (TrueType text) skip themselves when the C
 library was built without them.
+
+## Releasing (maintainers)
+
+The package version is single-sourced in
+[`src/ilib/_version.py`](src/ilib/_version.py). Publishing is automated by
+`.github/workflows/python-publish.yml` using **PyPI Trusted Publishing** (OIDC),
+so no API tokens are stored.
+
+To cut a release:
+
+1. Bump `__version__` in `src/ilib/_version.py` and commit.
+2. Tag and push:
+   ```bash
+   git tag python-v0.1.0
+   git push origin python-v0.1.0
+   ```
+   The `python-v*` tag triggers a build (sdist + wheel) and publishes to PyPI.
+   (The C library uses `v*` tags, kept separate from `python-v*`.)
+
+For a dry run, trigger the workflow manually (`workflow_dispatch`) with the
+`testpypi` target to publish to TestPyPI first.
+
+One-time setup on the index side: create the project and register this repo's
+`python-publish.yml` workflow as a trusted publisher under the `pypi` (and
+`testpypi`) environments. See the comments at the top of the workflow file.
 
 ## License
 

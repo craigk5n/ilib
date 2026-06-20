@@ -1,0 +1,97 @@
+name: Publish Python package
+
+# Builds the cffi bindings (sdist + pure-Python wheel) and publishes them using
+# PyPI Trusted Publishing (OIDC) -- no stored API token.
+#
+# Triggers:
+#   * push a tag matching `python-vX.Y.Z`  -> build + publish to PyPI
+#       git tag python-v0.1.0 && git push origin python-v0.1.0
+#   * manual run (workflow_dispatch)        -> build, and optionally publish to
+#       TestPyPI (default) or PyPI
+#
+# The C-library release workflow uses `v*` tags; the `python-v*` prefix keeps
+# the two release streams independent.
+#
+# One-time maintainer setup (on the PyPI / TestPyPI side):
+#   1. Create the project (or reserve the name) on the index.
+#   2. Add a "trusted publisher" for this GitHub repo:
+#        Owner: craigk5n   Repo: ilib
+#        Workflow: python-publish.yml
+#        Environment: pypi        (for PyPI)
+#                     testpypi    (for TestPyPI)
+#   3. Create matching GitHub environments named `pypi` and `testpypi`.
+# No secrets are required once trusted publishing is configured.
+
+on:
+  push:
+    tags:
+      - 'python-v*'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Where to publish a manual run'
+        default: testpypi
+        type: choice
+        options:
+          - testpypi
+          - pypi
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build distributions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Build sdist and wheel
+        working-directory: python
+        run: |
+          python -m pip install --upgrade build twine
+          python -m build
+          python -m twine check dist/*
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: python-dist
+          path: python/dist/
+
+  publish-testpypi:
+    name: Publish to TestPyPI
+    needs: build
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi'
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write   # required for trusted publishing (OIDC)
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: python-dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: build
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi')
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write   # required for trusted publishing (OIDC)
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: python-dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

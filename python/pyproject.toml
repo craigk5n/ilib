@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ilib"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Python bindings (cffi) for the Ilib C raster-image library"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -26,6 +26,10 @@ Source = "https://github.com/craigk5n/ilib"
 
 [project.optional-dependencies]
 test = ["pytest>=7"]
+
+[tool.setuptools.dynamic]
+# Read statically from the import-free _version.py (no package import at build).
+version = { attr = "ilib._version.__version__" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
