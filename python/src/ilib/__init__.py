@@ -41,9 +41,8 @@ from .constants import (
 from .errors import IError, IlibError, error_string
 from .font import Font
 from .gc import GC, ArcPoints
+from ._version import __version__
 from .image import Image
-
-__version__ = "0.1.0"
 
 __all__ = [
     "Image",

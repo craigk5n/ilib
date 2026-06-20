@@ -73,12 +73,17 @@ img.free()
 ```
 
 ```bash
-cd python
-pip install .            # needs cffi; the Ilib C library must be installed
+pip install ilib                      # from PyPI (once published)
+# or, straight from the repo without cloning:
+pip install "git+https://github.com/craigk5n/ilib.git#subdirectory=python"
+# or, from a local checkout:
+cd python && pip install .
 ```
 
-See [`python/README.md`](python/README.md) for the full API, library
-discovery (the `ILIB_LIBRARY` environment variable), and how to run the tests.
+`pip` installs only the Python code; the Ilib **C shared library** must also be
+installed (or reachable via `ILIB_LIBRARY`) since it is loaded at runtime. See
+[`python/README.md`](python/README.md) for the full API, library discovery, how
+to run the tests, and the release/publishing process.
 
 ## Building
 
