@@ -25,6 +25,104 @@
 
 #define ON_OFF_PIXELS 3.0
 
+static double fpart ( double x )
+{
+  return ( x - floor ( x ) );
+}
+static double rfpart ( double x )
+{
+  return ( 1.0 - fpart ( x ) );
+}
+
+/* Composite the foreground at (px,py) with fractional coverage c (0..1). */
+static void aa_plot ( IImageP *img, IGCP *gc, int px, int py, double c )
+{
+  long cover;
+  if ( c <= 0.0 )
+    return;
+  cover = (long) ( c * 255.0 + 0.5 );
+  if ( cover <= 0 )
+    return;
+  if ( cover > 255 )
+    cover = 255;
+  _IBlendPoint ( img, gc, px, py, (unsigned int) cover );
+}
+
+/* Xiaolin Wu's anti-aliased line. Endpoints are integers here, but the
+   algorithm is written in floating point so the coverage at the line edges is
+   smooth. Used for width-1 solid lines when GC anti-aliasing is on. */
+static void draw_line_aa ( IImageP *img, IGCP *gc, int ix0, int iy0, int ix1,
+  int iy1 )
+{
+  double x0 = ix0, y0 = iy0, x1 = ix1, y1 = iy1;
+  int steep = fabs ( y1 - y0 ) > fabs ( x1 - x0 );
+  double dx, dy, gradient, xend, yend, xgap, intery, t;
+  int xpxl1, xpxl2, x;
+
+  if ( steep ) {
+    t = x0;
+    x0 = y0;
+    y0 = t;
+    t = x1;
+    x1 = y1;
+    y1 = t;
+  }
+  if ( x0 > x1 ) {
+    t = x0;
+    x0 = x1;
+    x1 = t;
+    t = y0;
+    y0 = y1;
+    y1 = t;
+  }
+
+  dx = x1 - x0;
+  dy = y1 - y0;
+  gradient = ( dx == 0.0 ) ? 1.0 : dy / dx;
+
+  /* first endpoint */
+  xend = floor ( x0 + 0.5 );
+  yend = y0 + gradient * ( xend - x0 );
+  xgap = rfpart ( x0 + 0.5 );
+  xpxl1 = (int) xend;
+  if ( steep ) {
+    aa_plot ( img, gc, (int) floor ( yend ), xpxl1, rfpart ( yend ) * xgap );
+    aa_plot ( img, gc, (int) floor ( yend ) + 1, xpxl1, fpart ( yend ) * xgap );
+  }
+  else {
+    aa_plot ( img, gc, xpxl1, (int) floor ( yend ), rfpart ( yend ) * xgap );
+    aa_plot ( img, gc, xpxl1, (int) floor ( yend ) + 1, fpart ( yend ) * xgap );
+  }
+  intery = yend + gradient;
+
+  /* second endpoint */
+  xend = floor ( x1 + 0.5 );
+  yend = y1 + gradient * ( xend - x1 );
+  xgap = fpart ( x1 + 0.5 );
+  xpxl2 = (int) xend;
+  if ( steep ) {
+    aa_plot ( img, gc, (int) floor ( yend ), xpxl2, rfpart ( yend ) * xgap );
+    aa_plot ( img, gc, (int) floor ( yend ) + 1, xpxl2, fpart ( yend ) * xgap );
+  }
+  else {
+    aa_plot ( img, gc, xpxl2, (int) floor ( yend ), rfpart ( yend ) * xgap );
+    aa_plot ( img, gc, xpxl2, (int) floor ( yend ) + 1, fpart ( yend ) * xgap );
+  }
+
+  /* main span */
+  for ( x = xpxl1 + 1; x < xpxl2; x++ ) {
+    if ( steep ) {
+      aa_plot ( img, gc, (int) floor ( intery ), x, rfpart ( intery ) );
+      aa_plot ( img, gc, (int) floor ( intery ) + 1, x, fpart ( intery ) );
+    }
+    else {
+      aa_plot ( img, gc, x, (int) floor ( intery ), rfpart ( intery ) );
+      aa_plot ( img, gc, x, (int) floor ( intery ) + 1, fpart ( intery ) );
+    }
+    intery += gradient;
+  }
+}
+
 IError IDrawLine ( IImage image, IGC gc, int x1, int y1, int x2, int y2 )
 {
   IGCP *gcp = (IGCP *) gc;
@@ -46,6 +144,13 @@ IError IDrawLine ( IImage image, IGC gc, int x1, int y1, int x2, int y2 )
     return ( IInvalidImage );
   if ( imagep->magic != IMAGIC_IMAGE )
     return ( IInvalidImage );
+
+  /* Anti-aliased path for thin solid lines (thick/dashed lines still use the
+     integer rasterizer below). */
+  if ( gcp->aa && gcp->line_width <= 1 && gcp->line_style == ILINE_SOLID ) {
+    draw_line_aa ( imagep, gcp, x1, y1, x2, y2 );
+    return ( INoError );
+  }
 
   /* x2 should always be greater than x1 */
   if ( x2 < x1 ) {

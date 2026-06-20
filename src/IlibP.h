@@ -86,7 +86,8 @@ typedef struct {
   IColorP *foreground;        /* foreground color */
   IColorP *background;        /* background color */
   IFontP *font;               /* font */
-  unsigned short antialiased; /* use anti-aliasing (size is halfed) */
+  unsigned short antialiased; /* use anti-aliased *fonts* (size is halved) */
+  unsigned short aa;          /* anti-alias drawing primitives (lines, ...) */
   unsigned int line_width;    /* line width */
   ILineStyle line_style;      /* line style */
   ITextStyle text_style;      /* line style */
