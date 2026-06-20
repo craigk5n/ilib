@@ -212,6 +212,41 @@ TEST rgba_flattens_on_write ( void )
   PASS ();
 }
 
+/* PNG round-trips the alpha channel (Phase D). Skipped cleanly when libpng is
+   not compiled in. A flattened (alpha-less) round-trip would change the color
+   and force alpha=255, so checking the exact RGBA proves true alpha I/O. */
+TEST png_rgba_roundtrips ( void )
+{
+  IImage im = ICreateImage ( 3, 2, IOPTION_ALPHA );
+  FILE *fp = tmpfile ();
+  IImage back = NULL;
+  unsigned int r, g, b, a;
+  IError wr;
+
+  ASSERT ( fp != NULL );
+  ASSERT_EQ ( INoError, ISetPixelAlpha ( im, 0, 0, 200, 100, 50, 128 ) );
+  ASSERT_EQ ( INoError, ISetPixelAlpha ( im, 1, 1, 0, 0, 0, 0 ) ); /* clear */
+
+  wr = IWriteImageFile ( fp, im, IFORMAT_PNG, IOPTION_NONE );
+  if ( wr == INoError ) {
+    rewind ( fp );
+    ASSERT_EQ ( INoError,
+      IReadImageFile ( fp, IFORMAT_PNG, IOPTION_NONE, &back ) );
+    ASSERT ( back != NULL );
+    ASSERT_EQ ( INoError, IGetPixelAlpha ( back, 0, 0, &r, &g, &b, &a ) );
+    ASSERT_EQ ( 200, r );
+    ASSERT_EQ ( 100, g );
+    ASSERT_EQ ( 50, b );
+    ASSERT_EQ ( 128, a );
+    ASSERT_EQ ( INoError, IGetPixelAlpha ( back, 1, 1, NULL, NULL, NULL, &a ) );
+    ASSERT_EQ ( 0, a );
+    IFreeImage ( back );
+  }
+  fclose ( fp );
+  IFreeImage ( im );
+  PASS ();
+}
+
 SUITE ( pixel )
 {
   RUN_TEST ( set_then_get_roundtrips );
@@ -226,6 +261,7 @@ SUITE ( pixel )
   RUN_TEST ( blend_over_rgb );
   RUN_TEST ( blend_over_rgba_stays_opaque );
   RUN_TEST ( rgba_flattens_on_write );
+  RUN_TEST ( png_rgba_roundtrips );
 }
 
 GREATEST_MAIN_DEFS ();

@@ -256,30 +256,31 @@ typedef struct {
   );
   int maxdepth; /* max depth (1=b/w, 8=256 colors) */
   int grey;     /* is grey? */
+  int alpha_ok; /* writer accepts an RGBA image directly (no flatten) */
 } IFormatDef;
 #ifdef IIncludeFileFormats
 static IFormatDef IFileFormats[] = {
 #ifdef HAVE_GIFLIB
-  { /* IFORMAT_GIF */ "GIF", _IReadGIF, _IWriteGIF, 8, 0 },
+  { /* IFORMAT_GIF */ "GIF", _IReadGIF, _IWriteGIF, 8, 0, 0 },
 #else
-  { /* IFORMAT_GIF */ "GIF", NULL, NULL, 8, 0 },
+  { /* IFORMAT_GIF */ "GIF", NULL, NULL, 8, 0, 0 },
 #endif
-  { /* IFORMAT_PPM */ "PPM", _IReadPPM, _IWritePPM, 24, 0 },
-  { /* IFORMAT_PGM */ "PGM", _IReadPPM, _IWritePGM, 8, 1 },
-  { /* IFORMAT_PBM */ "PBM", NULL, NULL, 1, 1 },
-  { /* IFORMAT_XPM */ "XPM", _IReadXPM, _IWriteXPM, 24, 0 },
-  { /* IFORMAT_XBM */ "XBM", NULL, NULL, 1, 1 },
+  { /* IFORMAT_PPM */ "PPM", _IReadPPM, _IWritePPM, 24, 0, 0 },
+  { /* IFORMAT_PGM */ "PGM", _IReadPPM, _IWritePGM, 8, 1, 0 },
+  { /* IFORMAT_PBM */ "PBM", NULL, NULL, 1, 1, 0 },
+  { /* IFORMAT_XPM */ "XPM", _IReadXPM, _IWriteXPM, 24, 0, 0 },
+  { /* IFORMAT_XBM */ "XBM", NULL, NULL, 1, 1, 0 },
 #ifdef HAVE_PNGLIB
-  { /* IFORMAT_PNG */ "PNG", _IReadPNG, _IWritePNG, 24, 0 },
+  { /* IFORMAT_PNG */ "PNG", _IReadPNG, _IWritePNG, 24, 0, 1 },
 #else
-  { /* IFORMAT_PNG */ "PNG", NULL, NULL, 24, 0 },
+  { /* IFORMAT_PNG */ "PNG", NULL, NULL, 24, 0, 0 },
 #endif
 #ifdef HAVE_JPEGLIB
-  { /* IFORMAT_JPEG */ "JPEG", _IReadJPEG, _IWriteJPEG, 24, 0 },
+  { /* IFORMAT_JPEG */ "JPEG", _IReadJPEG, _IWriteJPEG, 24, 0, 0 },
 #else
-  { /* IFORMAT_JPEG */ "JPEG", NULL, NULL, 24, 0 },
+  { /* IFORMAT_JPEG */ "JPEG", NULL, NULL, 24, 0, 0 },
 #endif
-  { /* IFORMAT_BMP */ "BMP", _IReadBMP, _IWriteBMP, 24, 0 },
+  { /* IFORMAT_BMP */ "BMP", _IReadBMP, _IWriteBMP, 24, 0, 0 },
 };
 #endif /* IIncludeFileFormats */
 

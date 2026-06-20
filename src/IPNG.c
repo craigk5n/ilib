@@ -13,7 +13,7 @@
  *	Still need to implement 8-bit colormap support. (Currently
  *	all images are written out as truecolor which makes them a little
  *	larger.)
- *	Transparency, Alpha channels and interlacing are not yet
+ *	RGBA (alpha) images are read and written; interlacing is not yet
  *	supported when writing files.
  *
  * History:
@@ -43,6 +43,8 @@ IError _IWritePNG ( FILE *fp, IImageP *image, IOptions options )
   png_infop info_ptr;
   png_text comment;
   int row;
+  int color_type = image->has_alpha ? PNG_COLOR_TYPE_RGBA : PNG_COLOR_TYPE_RGB;
+  int channels = image->has_alpha ? 4 : 3;
   (void) options;
 
   png_ptr = png_create_write_struct ( PNG_LIBPNG_VER_STRING,
@@ -62,7 +64,7 @@ IError _IWritePNG ( FILE *fp, IImageP *image, IOptions options )
 
   /* set header info -- the 8 means 8 bits per color, not 8 bits per pixel */
   png_set_IHDR ( png_ptr, info_ptr, image->width, image->height,
-    8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
+    8, color_type, PNG_INTERLACE_NONE,
     PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE );
 
   /* set comment */
@@ -83,7 +85,7 @@ IError _IWritePNG ( FILE *fp, IImageP *image, IOptions options )
   ** we have to convert to PNG's 16-bit format.
   */
   for ( row = 0; row < image->height; row++ ) {
-    png_write_row ( png_ptr, ( image->data + image->width * row * 3 ) );
+    png_write_row ( png_ptr, ( image->data + image->width * row * channels ) );
   }
   png_write_end ( png_ptr, info_ptr );
   fflush ( fp );
@@ -103,7 +105,7 @@ IError _IReadPNG ( FILE *fp, IOptions options, IImageP **image_return )
   png_structp png_ptr;
   png_infop info_ptr;
   png_uint_32 width, height;
-  int bit_depth, color_type, interlace_type, row;
+  int bit_depth, color_type, interlace_type, row, channels;
   png_bytep row_pointer = NULL;
   png_bytep volatile cleanup_row = NULL;
   (void) options;
@@ -138,30 +140,41 @@ IError _IReadPNG ( FILE *fp, IOptions options, IImageP **image_return )
   png_get_IHDR ( png_ptr, info_ptr, &width, &height, &bit_depth, &color_type,
     &interlace_type, NULL, NULL );
 
-  image = (IImageP *) ICreateImage ( width, height, IOPTION_NONE );
+  /* Normalize whatever PNG color type we got to 8-bit RGB or RGBA:
+  ** strip 16-bit, expand palette/low-bit grey, turn tRNS into a real alpha
+  ** channel, and promote grey(+alpha) to RGB(A).
+  */
+  if ( bit_depth == 16 )
+    png_set_strip_16 ( png_ptr );
+  if ( color_type == PNG_COLOR_TYPE_PALETTE )
+    png_set_palette_to_rgb ( png_ptr );
+  if ( color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8 )
+    png_set_expand_gray_1_2_4_to_8 ( png_ptr );
+  if ( png_get_valid ( png_ptr, info_ptr, PNG_INFO_tRNS ) )
+    png_set_tRNS_to_alpha ( png_ptr );
+  if ( color_type == PNG_COLOR_TYPE_GRAY ||
+       color_type == PNG_COLOR_TYPE_GRAY_ALPHA )
+    png_set_gray_to_rgb ( png_ptr );
+
+  png_read_update_info ( png_ptr, info_ptr );
+  channels = (int) png_get_channels ( png_ptr, info_ptr );
+
+  image = (IImageP *) ICreateImage ( width, height,
+    channels == 4 ? IOPTION_ALPHA : IOPTION_NONE );
   if ( !image )
     png_error ( png_ptr, "ICreateImage failed" ); /* longjmps to handler */
-
-  /* Expand paletted colors into true RGB triplets */
-  if ( color_type == PNG_COLOR_TYPE_PALETTE )
-    png_set_expand ( png_ptr );
-
-  /* Strip alpha bytes from the input data without combining with the
-  ** background (not recommended).
-  */
-  png_set_strip_alpha ( png_ptr );
 
   /* Read the image one line at a time.  That way we don't have to
   ** malloc two images.
   */
-  row_pointer = (png_bytep) malloc ( image->width * 3 );
+  row_pointer = (png_bytep) malloc ( (size_t) image->width * channels );
   if ( !row_pointer )
     png_error ( png_ptr, "out of memory" ); /* longjmps to handler */
   cleanup_row = row_pointer;
   for ( row = 0; (png_uint_32) row < height; row++ ) {
     png_read_rows ( png_ptr, &row_pointer, NULL, 1 );
-    memcpy ( image->data + ( row * image->width * 3 ),
-      row_pointer, ( image->width * 3 ) );
+    memcpy ( image->data + ( (size_t) row * image->width * channels ),
+      row_pointer, (size_t) image->width * channels );
   }
   free ( row_pointer );
   row_pointer = NULL;
