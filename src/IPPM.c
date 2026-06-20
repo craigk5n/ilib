@@ -63,21 +63,19 @@ IError _IWritePPM ( FILE *fp, IImageP *image, IOptions options )
       fprintf ( fp, "%d %d\n255\n", image->width, image->height );
       if ( fwrite ( image->data, 1, image->width * image->height, fp ) <= 0 )
         return ( IErrorWriting );
-    } else {
+    }
+    else {
       fprintf ( fp, "P6\n" );
       if ( image->comments )
         fprintf ( fp, "# %s\n", image->comments );
       fprintf ( fp, "%d %d\n255\n", image->width, image->height );
       if ( fwrite ( image->data, 3, image->width * image->height, fp ) <= 0 )
         return ( IErrorWriting );
-     }
+    }
   }
 
   return ( INoError );
 }
-
-
-
 
 
 IError _IReadPPM ( FILE *fp, IOptions options, IImageP **image_return )
@@ -98,14 +96,16 @@ IError _IReadPPM ( FILE *fp, IOptions options, IImageP **image_return )
   if ( strncmp ( data, "P5", 2 ) == 0 ) {
     greyscale = 1;
     options |= IOPTION_GREYSCALE;
-  } else if ( strncmp ( data, "P6", 2 ) != 0 )
+  }
+  else if ( strncmp ( data, "P6", 2 ) != 0 )
     goto fail;
 
   if ( fgets ( data, 1024, fp ) == NULL )
     goto fail;
   while ( data[0] == '#' ) {
     if ( comments == NULL ) {
-      for ( p = data + 1; *p != ' ' && *p != '\0'; p++) ;
+      for ( p = data + 1; *p != ' ' && *p != '\0'; p++ )
+        ;
       if ( strlen ( p ) ) {
         comments = (char *) malloc ( strlen ( p ) + 1 );
         strcpy ( comments, p );
@@ -135,11 +135,11 @@ IError _IReadPPM ( FILE *fp, IOptions options, IImageP **image_return )
     goto fail;
 
   image = (IImageP *) ICreateImage ( w, h, options );
-  if ( ! image )
+  if ( !image )
     goto fail;
   if ( comments ) {
     image->comments = comments;
-    comments = NULL;   /* ownership transferred to image */
+    comments = NULL; /* ownership transferred to image */
   }
   else {
     image->comments = (char *) malloc ( strlen ( IDEFAULT_COMMENT ) + 1 );
@@ -167,7 +167,7 @@ IError _IReadPPM ( FILE *fp, IOptions options, IImageP **image_return )
       *ptr = (unsigned char) temp;
     }
   }
-  
+
   *image_return = image;
 
   return ( INoError );
@@ -181,4 +181,3 @@ fail:
     _IFreeImage ( image );
   return ( IFileInvalid );
 }
-

@@ -26,7 +26,6 @@
 #include "IlibP.h"
 
 
-
 IError IFileType ( char *file, IFileFormat *format_return )
 {
   char *tmp, *ptr;
@@ -42,7 +41,8 @@ IError IFileType ( char *file, IFileFormat *format_return )
 
   /* find the last '.' */
   for ( ptr = tmp + strlen ( tmp ) - 1; ( ptr != tmp ) && ( *ptr != '.' );
-    ptr-- ) ;
+        ptr-- )
+    ;
   if ( *ptr == '.' ) {
     ptr++;
     if ( strcmp ( ptr, "gif" ) == 0 ) {
@@ -50,7 +50,8 @@ IError IFileType ( char *file, IFileFormat *format_return )
 #ifndef HAVE_GIFLIB
       ret = INoGIFSupport;
 #endif
-    } else if ( strcmp ( ptr, "ppm" ) == 0 )
+    }
+    else if ( strcmp ( ptr, "ppm" ) == 0 )
       *format_return = IFORMAT_PPM;
     else if ( strcmp ( ptr, "pgm" ) == 0 )
       *format_return = IFORMAT_PGM;
@@ -70,12 +71,11 @@ IError IFileType ( char *file, IFileFormat *format_return )
       *format_return = IFORMAT_BMP;
     else
       ret = IInvalidFormat;
-  } else
+  }
+  else
     ret = IInvalidFormat;
 
   free ( tmp );
 
   return ( ret );
 }
-
-

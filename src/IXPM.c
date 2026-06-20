@@ -31,10 +31,10 @@
 #include "Ilib.h"
 #include "IlibP.h"
 
-#define colors_match(color,r,g,b) \
- ((color)->red == red && (color)->green == green && (color)->blue == blue )
+#define colors_match( color, r, g, b ) \
+  ( ( color )->red == red && ( color )->green == green && ( color )->blue == blue )
 
-#define MAX_COLORMAP_SIZE	(256*256)
+#define MAX_COLORMAP_SIZE ( 256 * 256 )
 
 
 IError _IWriteXPM ( FILE *fp, IImageP *image, IOptions options )
@@ -49,11 +49,11 @@ IError _IWriteXPM ( FILE *fp, IImageP *image, IOptions options )
   (void) options;
   unsigned short *data;
   int color_found, chars_per_pixel;
-  static char *xpm_chars = \
+  static char *xpm_chars =
     ".#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   char colorstr[20];
 
-  data = (unsigned short *) calloc ( image->width * image->height, 
+  data = (unsigned short *) calloc ( image->width * image->height,
     sizeof ( unsigned short ) );
   memset ( data, '\0', image->width * image->height * sizeof ( short ) );
 
@@ -78,7 +78,7 @@ IError _IWriteXPM ( FILE *fp, IImageP *image, IOptions options )
           break;
         }
       }
-      if ( ! color_found ) {
+      if ( !color_found ) {
         if ( num_colors < MAX_COLORMAP_SIZE ) {
           colormap[num_colors] = (IColorP *) malloc ( sizeof ( IColorP ) );
           colormap[num_colors]->red = red;
@@ -106,22 +106,22 @@ IError _IWriteXPM ( FILE *fp, IImageP *image, IOptions options )
   fprintf ( fp, "/* colors */\n" );
   for ( loop = 0; loop < num_colors; loop++ ) {
     if ( image->transparent != NULL &&
-      ( image->transparent->red == colormap[loop]->red &&
-      image->transparent->green == colormap[loop]->green &&
-      image->transparent->blue == colormap[loop]->blue ) )
+         ( image->transparent->red == colormap[loop]->red &&
+           image->transparent->green == colormap[loop]->green &&
+           image->transparent->blue == colormap[loop]->blue ) )
       strcpy ( colorstr, "None" );
     else
       sprintf ( colorstr, "#%02X%02X%02X", colormap[loop]->red,
         colormap[loop]->green, colormap[loop]->blue );
     switch ( chars_per_pixel ) {
-      case 1:
-        fprintf ( fp, "\"%c c %s\",\n", xpm_chars[loop], colorstr );
-        break;
-      case 2:
-        fprintf ( fp, "\"%c%c c %s\",\n",
-          xpm_chars[loop/strlen(xpm_chars)],
-          xpm_chars[loop%strlen(xpm_chars)], colorstr );
-        break;
+    case 1:
+      fprintf ( fp, "\"%c c %s\",\n", xpm_chars[loop], colorstr );
+      break;
+    case 2:
+      fprintf ( fp, "\"%c%c c %s\",\n",
+        xpm_chars[loop / strlen ( xpm_chars )],
+        xpm_chars[loop % strlen ( xpm_chars )], colorstr );
+      break;
     }
   }
 
@@ -130,14 +130,14 @@ IError _IWriteXPM ( FILE *fp, IImageP *image, IOptions options )
     fprintf ( fp, "\"" );
     for ( loop2 = 0; loop2 < image->width; loop2++ ) {
       switch ( chars_per_pixel ) {
-        case 1:
-          fprintf ( fp, "%c", xpm_chars[data[loop*image->width+loop2]] );
-          break;
-        case 2:
-          fprintf ( fp, "%c%c",
-            xpm_chars[data[loop*image->width+loop2]/strlen(xpm_chars)],
-            xpm_chars[data[loop*image->width+loop2]%strlen(xpm_chars)] );
-          break;
+      case 1:
+        fprintf ( fp, "%c", xpm_chars[data[loop * image->width + loop2]] );
+        break;
+      case 2:
+        fprintf ( fp, "%c%c",
+          xpm_chars[data[loop * image->width + loop2] / strlen ( xpm_chars )],
+          xpm_chars[data[loop * image->width + loop2] % strlen ( xpm_chars )] );
+        break;
       }
     }
     fprintf ( fp, "\",\n" );
@@ -155,30 +155,44 @@ IError _IWriteXPM ( FILE *fp, IImageP *image, IOptions options )
 }
 
 
-
 static unsigned char hextochar ( char hex )
 {
   switch ( toupper ( hex ) ) {
-    case '0': return 0;
-    case '1': return 1;
-    case '2': return 2;
-    case '3': return 3;
-    case '4': return 4;
-    case '5': return 5;
-    case '6': return 6;
-    case '7': return 7;
-    case '8': return 8;
-    case '9': return 9;
-    case 'A': return 10;
-    case 'B': return 11;
-    case 'C': return 12;
-    case 'D': return 13;
-    case 'E': return 14;
-    case 'F': return 15;
+  case '0':
+    return 0;
+  case '1':
+    return 1;
+  case '2':
+    return 2;
+  case '3':
+    return 3;
+  case '4':
+    return 4;
+  case '5':
+    return 5;
+  case '6':
+    return 6;
+  case '7':
+    return 7;
+  case '8':
+    return 8;
+  case '9':
+    return 9;
+  case 'A':
+    return 10;
+  case 'B':
+    return 11;
+  case 'C':
+    return 12;
+  case 'D':
+    return 13;
+  case 'E':
+    return 14;
+  case 'F':
+    return 15;
   }
   return 0;
 }
-
 
 
 static int parse_color ( char *str, unsigned char *r, unsigned char *g, unsigned char *b, int *is_transparent )
@@ -200,17 +214,18 @@ static int parse_color ( char *str, unsigned char *r, unsigned char *g, unsigned
     ptr += w;
     *b = hextochar ( ptr[0] ) * 16 + hextochar ( ptr[1] );
     return 0;
-  } else if ( strcmp ( str, "none" ) == 0 ||
-    strcmp ( str, "transparent" ) == 0 ) {
+  }
+  else if ( strcmp ( str, "none" ) == 0 ||
+            strcmp ( str, "transparent" ) == 0 ) {
     *r = *g = *b = 254; /* don't make white since it might already exist */
     *is_transparent = 1;
     return 0;
-  } else {
+  }
+  else {
     /* name like "blue" */
     return 1;
   }
 }
-
 
 
 typedef struct {
@@ -220,7 +235,6 @@ typedef struct {
   unsigned char b;
   int transparent;
 } xpmcolor;
-
 
 
 IError _IReadXPM ( FILE *fp, IOptions options, IImageP **image_return )
@@ -243,19 +257,19 @@ IError _IReadXPM ( FILE *fp, IOptions options, IImageP **image_return )
     goto fail;
 
   ptr = strtok ( line + 1, " " );
-  if ( ! ptr )
+  if ( !ptr )
     goto fail;
   w = atoi ( ptr );
   ptr = strtok ( NULL, " " );
-  if ( ! ptr )
+  if ( !ptr )
     goto fail;
   h = atoi ( ptr );
   ptr = strtok ( NULL, " " );
-  if ( ! ptr )
+  if ( !ptr )
     goto fail;
   num_colors = atoi ( ptr );
   ptr = strtok ( NULL, " " );
-  if ( ! ptr )
+  if ( !ptr )
     goto fail;
   colorw = atoi ( ptr );
 
@@ -276,12 +290,12 @@ IError _IReadXPM ( FILE *fp, IOptions options, IImageP **image_return )
   /* calloc so every abbrev pointer starts NULL -> the cleanup can free them
      all unconditionally even on a mid-loop failure */
   colors = (xpmcolor *) calloc ( num_colors, sizeof ( xpmcolor ) );
-  if ( ! colors )
+  if ( !colors )
     goto fail;
 
   for ( loop = 0; loop < num_colors; loop++ ) {
     while ( 1 ) {
-      if ( ! fgets ( line, 1024, fp ) )
+      if ( !fgets ( line, 1024, fp ) )
         goto fail;
       if ( line[0] == '"' )
         break;
@@ -291,7 +305,8 @@ IError _IReadXPM ( FILE *fp, IOptions options, IImageP **image_return )
        then terminate; memcpy avoids -Wstringop-truncation from strncpy */
     memcpy ( colors[loop].abbrev, line + 1, colorw );
     colors[loop].abbrev[colorw] = '\0';
-    for ( ptr = line + 1 + colorw; *ptr != 'c' && *ptr != '\0'; ptr++ ) ;
+    for ( ptr = line + 1 + colorw; *ptr != 'c' && *ptr != '\0'; ptr++ )
+      ;
     if ( *ptr != 'c' )
       goto fail;
     do {
@@ -300,31 +315,31 @@ IError _IReadXPM ( FILE *fp, IOptions options, IImageP **image_return )
     strtok ( ptr, "\"" );
     /* parse color */
     if ( parse_color ( ptr, &colors[loop].r, &colors[loop].g, &colors[loop].b,
-      &colors[loop].transparent ) )
+           &colors[loop].transparent ) )
       goto fail;
   }
 
   image = (IImageP *) ICreateImage ( w, h, options );
-  if ( ! image )
+  if ( !image )
     goto fail;
 
   /* now read row by row of data */
   rowbuf = (char *) malloc ( colorw * w + 20 );
-  if ( ! rowbuf )
+  if ( !rowbuf )
     goto fail;
   for ( loop = 0; loop < h; loop++ ) {
-    if ( ! fgets ( rowbuf, colorw * w + 20, fp ) )
+    if ( !fgets ( rowbuf, colorw * w + 20, fp ) )
       goto fail;
     while ( rowbuf[0] != '"' ) {
-      if ( ! fgets ( rowbuf, colorw * w + 20, fp ) )
+      if ( !fgets ( rowbuf, colorw * w + 20, fp ) )
         goto fail;
     }
     for ( loop2 = 0; loop2 < w; loop2++ ) {
       cur = rowbuf + 1 + loop2 * colorw;
       /* find color in colormap */
-      for ( loop3 = 0, found = 0; loop3 < num_colors && ! found; loop3++ ) {
+      for ( loop3 = 0, found = 0; loop3 < num_colors && !found; loop3++ ) {
         if ( strncmp ( colors[loop3].abbrev, cur, colorw ) == 0 ) {
-          r = (char *)image->data + ( loop * w * 3 ) + ( loop2 * 3 );
+          r = (char *) image->data + ( loop * w * 3 ) + ( loop2 * 3 );
           g = r + 1;
           b = r + 2;
           *r = colors[loop3].r;
@@ -333,7 +348,7 @@ IError _IReadXPM ( FILE *fp, IOptions options, IImageP **image_return )
           found = 1;
         }
       }
-      if ( ! found )
+      if ( !found )
         goto fail;
     }
   }
@@ -358,11 +373,10 @@ cleanup:
      own data and is returned via *image_return) */
   if ( colors ) {
     for ( loop = 0; loop < num_colors; loop++ )
-      free ( colors[loop].abbrev );   /* NULL-safe: colors was calloc'd */
+      free ( colors[loop].abbrev ); /* NULL-safe: colors was calloc'd */
     free ( colors );
   }
   free ( rowbuf );
 
   return ( ret );
 }
-

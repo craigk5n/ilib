@@ -23,11 +23,7 @@
 #include "IlibP.h"
 
 
-
 IError IDrawCircle ( IImage image, IGC gc, int x, int y, int r )
 {
   return ( IDrawArc ( image, gc, x, y, r, r, 0.0, 360.0 ) );
 }
-
-
-

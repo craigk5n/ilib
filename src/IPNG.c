@@ -45,7 +45,7 @@ IError _IWritePNG ( FILE *fp, IImageP *image, IOptions options )
   int row;
   (void) options;
 
-  png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING,
+  png_ptr = png_create_write_struct ( PNG_LIBPNG_VER_STRING,
     (png_voidp) NULL, (png_error_ptr) NULL, (png_error_ptr) NULL );
   if ( png_ptr == NULL )
     return IPNGError;
@@ -83,7 +83,7 @@ IError _IWritePNG ( FILE *fp, IImageP *image, IOptions options )
   ** we have to convert to PNG's 16-bit format.
   */
   for ( row = 0; row < image->height; row++ ) {
-    png_write_row ( png_ptr, (image->data + image->width * row * 3));
+    png_write_row ( png_ptr, ( image->data + image->width * row * 3 ) );
   }
   png_write_end ( png_ptr, info_ptr );
   fflush ( fp );
@@ -93,16 +93,13 @@ IError _IWritePNG ( FILE *fp, IImageP *image, IOptions options )
 }
 
 
-
-
-
 IError _IReadPNG ( FILE *fp, IOptions options, IImageP **image_return )
 {
   /* volatile: these are read in the setjmp() handler after a libpng longjmp,
      so they must not be kept only in registers across the jump. row_pointer
      is passed to png_read_rows by address (can't be volatile), so a volatile
      mirror (cleanup_row) is used for the handler. */
-  IImageP * volatile image = NULL;
+  IImageP *volatile image = NULL;
   png_structp png_ptr;
   png_infop info_ptr;
   png_uint_32 width, height;
@@ -111,7 +108,7 @@ IError _IReadPNG ( FILE *fp, IOptions options, IImageP **image_return )
   png_bytep volatile cleanup_row = NULL;
   (void) options;
 
-  png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
+  png_ptr = png_create_read_struct ( PNG_LIBPNG_VER_STRING,
     (png_voidp) NULL, (png_error_ptr) NULL, (png_error_ptr) NULL );
   if ( png_ptr == NULL )
     return IPNGError;
@@ -119,10 +116,10 @@ IError _IReadPNG ( FILE *fp, IOptions options, IImageP **image_return )
   /* Allocate/initialize the memory for image information.  REQUIRED. */
   info_ptr = png_create_info_struct ( png_ptr );
   if ( info_ptr == NULL ) {
-    png_destroy_read_struct ( &png_ptr, (png_infopp)NULL, (png_infopp)NULL );
+    png_destroy_read_struct ( &png_ptr, (png_infopp) NULL, (png_infopp) NULL );
     return ( IPNGError );
   }
- 
+
   /* setup default error handling. Any libpng error (including the explicit
      png_error() calls below) longjmps here; free everything allocated so far. */
   if ( setjmp ( png_jmpbuf ( png_ptr ) ) ) {
@@ -130,7 +127,7 @@ IError _IReadPNG ( FILE *fp, IOptions options, IImageP **image_return )
       free ( (png_bytep) cleanup_row );
     if ( image )
       _IFreeImage ( (IImage) image );
-    png_destroy_read_struct ( &png_ptr, &info_ptr, (png_infopp)NULL );
+    png_destroy_read_struct ( &png_ptr, &info_ptr, (png_infopp) NULL );
     return ( IPNGError );
   }
 
@@ -142,8 +139,8 @@ IError _IReadPNG ( FILE *fp, IOptions options, IImageP **image_return )
     &interlace_type, NULL, NULL );
 
   image = (IImageP *) ICreateImage ( width, height, IOPTION_NONE );
-  if ( ! image )
-    png_error ( png_ptr, "ICreateImage failed" );   /* longjmps to handler */
+  if ( !image )
+    png_error ( png_ptr, "ICreateImage failed" ); /* longjmps to handler */
 
   /* Expand paletted colors into true RGB triplets */
   if ( color_type == PNG_COLOR_TYPE_PALETTE )
@@ -158,8 +155,8 @@ IError _IReadPNG ( FILE *fp, IOptions options, IImageP **image_return )
   ** malloc two images.
   */
   row_pointer = (png_bytep) malloc ( image->width * 3 );
-  if ( ! row_pointer )
-    png_error ( png_ptr, "out of memory" );          /* longjmps to handler */
+  if ( !row_pointer )
+    png_error ( png_ptr, "out of memory" ); /* longjmps to handler */
   cleanup_row = row_pointer;
   for ( row = 0; (png_uint_32) row < height; row++ ) {
     png_read_rows ( png_ptr, &row_pointer, NULL, 1 );
@@ -168,13 +165,13 @@ IError _IReadPNG ( FILE *fp, IOptions options, IImageP **image_return )
   }
   free ( row_pointer );
   row_pointer = NULL;
-  cleanup_row = NULL;   /* avoid double-free if png_read_end longjmps */
+  cleanup_row = NULL; /* avoid double-free if png_read_end longjmps */
 
   /* read rest of file, and get additional chunks in info_ptr - REQUIRED */
   png_read_end ( png_ptr, info_ptr );
 
   /* clean up */
-  png_destroy_read_struct ( &png_ptr, &info_ptr, (png_infopp)NULL );
+  png_destroy_read_struct ( &png_ptr, &info_ptr, (png_infopp) NULL );
 
   *image_return = image;
 
@@ -183,4 +180,3 @@ IError _IReadPNG ( FILE *fp, IOptions options, IImageP **image_return )
 
 
 #endif /* HAVE_PNGLIB */
-

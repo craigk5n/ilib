@@ -15,9 +15,9 @@
     -dec	display ascii char numbers in decimal (default)
 
   19-Jul-1999	Added -png option
-		Craig Knudsen	cknudsen@radix.net
+                Craig Knudsen	cknudsen@radix.net
   12-Apr-1999	Created
-		Craig Knudsen	cknudsen@radix.net
+                Craig Knudsen	cknudsen@radix.net
 
 ***************************************************************************/
 
@@ -33,10 +33,7 @@
 
 #include <Ilib.h>
 
-#include "courR10.h"	/* font for labeling table */
-
-
-
+#include "courR10.h" /* font for labeling table */
 
 
 /*
@@ -128,11 +125,12 @@ int main ( int argc, char *argv[] )
     if ( loop % 16 == 0 && loop ) {
       y += cell_height;
       x = 5;
-    } else if ( loop ) {
+    }
+    else if ( loop ) {
       x += cell_width;
     }
-    IDrawRectangle ( image, gc, x, y, (unsigned int)cell_width,
-      (unsigned int)cell_height );
+    IDrawRectangle ( image, gc, x, y, (unsigned int) cell_width,
+      (unsigned int) cell_height );
     if ( usehex )
       sprintf ( temp, "%02X", loop );
     else
@@ -170,5 +168,3 @@ int main ( int argc, char *argv[] )
   /* exit */
   return ( 0 );
 }
-
-

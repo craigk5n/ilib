@@ -11,7 +11,7 @@
  *
  *	Get the JPEG distribution at:
  *		ftp://ftp.uu.net/graphics/jpeg/
- *	
+ *
  *
  * History:
  *	15-Aug-01	Craig Knudsen	cknudsen@cknudsen.com
@@ -36,21 +36,21 @@
 #include "Ilib.h"
 #include "IlibP.h"
 
-#define DEFAULT_JPEG_QUALITY	75
+#define DEFAULT_JPEG_QUALITY 75
 
 
 struct my_error_mgr {
-  struct jpeg_error_mgr pub;    /* "public" fields */
-  jmp_buf setjmp_buffer;        /* for return to caller */
+  struct jpeg_error_mgr pub; /* "public" fields */
+  jmp_buf setjmp_buffer;     /* for return to caller */
 };
 
-typedef struct my_error_mgr * my_error_ptr;
+typedef struct my_error_mgr *my_error_ptr;
 
 /*
  * The routine that will replace the standard error_exit method:
  */
-METHODDEF(void)
-my_error_exit (j_common_ptr cinfo)
+METHODDEF ( void )
+my_error_exit ( j_common_ptr cinfo )
 {
   /* cinfo->err really points to a my_error_mgr struct, so coerce pointer */
   my_error_ptr myerr = (my_error_ptr) cinfo->err;
@@ -60,11 +60,8 @@ my_error_exit (j_common_ptr cinfo)
   /* (*cinfo->err->output_message) (cinfo); */
 
   /* Return control to the setjmp point */
-  longjmp(myerr->setjmp_buffer, 1);
+  longjmp ( myerr->setjmp_buffer, 1 );
 }
-
-
-
 
 
 IError _IWriteJPEG ( FILE *fp, IImageP *image, IOptions options )
@@ -86,10 +83,11 @@ IError _IWriteJPEG ( FILE *fp, IImageP *image, IOptions options )
   cinfo.image_width = image->width;
   cinfo.image_height = image->height;
   if ( image->greyscale ) {
-    cinfo.input_components = 1; /* # of color components per pixel */
+    cinfo.input_components = 1;           /* # of color components per pixel */
     cinfo.in_color_space = JCS_GRAYSCALE; /* colorspace of input image */
-  } else {
-    cinfo.input_components = 3; /* # of color components per pixel */
+  }
+  else {
+    cinfo.input_components = 3;     /* # of color components per pixel */
     cinfo.in_color_space = JCS_RGB; /* colorspace of input image */
   }
 
@@ -115,30 +113,27 @@ IError _IWriteJPEG ( FILE *fp, IImageP *image, IOptions options )
 }
 
 
-
-
-
 IError _IReadJPEG ( FILE *fp, IOptions options, IImageP **image_return )
 {
   /* volatile: read in the setjmp() handler after a libjpeg longjmp */
-  IImageP * volatile image = NULL;
+  IImageP *volatile image = NULL;
   struct jpeg_decompress_struct cinfo;
   struct my_error_mgr jerr;
   JSAMPROW row_pointer[1];
   int loop;
   (void) options;
-  
+
   /* We set up the normal JPEG error routines */
   cinfo.err = jpeg_std_error ( &jerr.pub );
 
   /* Install the new error handler so that we don't get dumped out unceremoniously -- GLM 2000 */
   /* RETURNS IInvalidError on error! (Should really insert a new error enum for it though). */
   jerr.pub.error_exit = my_error_exit;
-  if (setjmp (jerr.setjmp_buffer))  {
+  if ( setjmp ( jerr.setjmp_buffer ) ) {
     /* If we get here, then the JPEG library has signalled an event */
     if ( image )
       _IFreeImage ( image );
-    jpeg_destroy_decompress (&cinfo);
+    jpeg_destroy_decompress ( &cinfo );
     return IInvalidImage;
   }
 
@@ -157,7 +152,7 @@ IError _IReadJPEG ( FILE *fp, IOptions options, IImageP **image_return )
   /* allocate Ilib image as either grayscale or rgb */
   image = (IImageP *) ICreateImage ( cinfo.output_width, cinfo.output_height,
     cinfo.output_components == 1 ? IOPTION_GREYSCALE : IOPTION_NONE );
-  if ( ! image ) {
+  if ( !image ) {
     jpeg_destroy_decompress ( &cinfo );
     return ( IInvalidImage );
   }
@@ -167,7 +162,7 @@ IError _IReadJPEG ( FILE *fp, IOptions options, IImageP **image_return )
   /* Step 6: while (scan lines remain to be read) */
   for ( loop = 0; (JDIMENSION) loop < cinfo.output_height; loop++ ) {
     row_pointer[0] = &image->data[loop * cinfo.output_width *
-      cinfo.output_components];
+                                  cinfo.output_components];
     (void) jpeg_read_scanlines ( &cinfo, row_pointer, 1 );
   }
 

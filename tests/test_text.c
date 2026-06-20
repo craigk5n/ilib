@@ -16,7 +16,7 @@ TEST load_font_succeeds ( void )
 {
   IFont font = NULL;
   ASSERT_EQ ( INoError,
-              ILoadFontFromFile ( "helvR08", FONT_PATH, &font ) );
+    ILoadFontFromFile ( "helvR08", FONT_PATH, &font ) );
   ASSERT ( font != NULL );
   IFreeFont ( font );
   PASS ();
@@ -62,7 +62,7 @@ TEST draw_string_succeeds ( void )
   ISetFont ( gc, font );
   ISetForeground ( gc, black );
   ASSERT_EQ ( INoError,
-              IDrawString ( im, gc, 2, 15, (char *) s, strlen ( s ) ) );
+    IDrawString ( im, gc, 2, 15, (char *) s, strlen ( s ) ) );
 
   IFreeColor ( black );
   IFreeFont ( font );

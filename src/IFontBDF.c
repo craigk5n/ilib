@@ -15,7 +15,6 @@
 */
 
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -102,28 +101,28 @@ static char *trans_table[256];
 #define IFONT_MAX_GLYPH_DIM 4096
 
 typedef struct {
-  char *name;			/* translated name ("A", "B", "\033agrave;") */
-  unsigned int *data;		/* character definition */
-  unsigned int width;		/* character width */
-  unsigned int height;		/* height (size of lines array) */
-  unsigned int actual_width;	/* width with padding on left and right */
-  int xoffset;			/* pixels to move to the right before drawing */
-  int yoffset;			/* pixels to move to up before drawing */
+  char *name;                /* translated name ("A", "B", "\033agrave;") */
+  unsigned int *data;        /* character definition */
+  unsigned int width;        /* character width */
+  unsigned int height;       /* height (size of lines array) */
+  unsigned int actual_width; /* width with padding on left and right */
+  int xoffset;               /* pixels to move to the right before drawing */
+  int yoffset;               /* pixels to move to up before drawing */
 } Char;
 
 typedef struct {
-  char *name;			/* font name */
-  char *family;			/* font family ("Times") */
-  char *face_name;		/* face name ("Times Roman") */
-  char *width_name;		/* face name ("Normal") */
-  char *weight;			/* font weight ("R") */
-  int proportional;		/* yes or no? (fixed/proportional font) */
+  char *name;       /* font name */
+  char *family;     /* font family ("Times") */
+  char *face_name;  /* face name ("Times Roman") */
+  char *width_name; /* face name ("Normal") */
+  char *weight;     /* font weight ("R") */
+  int proportional; /* yes or no? (fixed/proportional font) */
   int pixel_size;
   int font_ascent;
   int font_descent;
-  Char *chars[256];		/* list of chars */
-  Char **other_chars;		/* non ASCII chars */
-  unsigned int num_other_chars;	/* size of above array */
+  Char *chars[256];             /* list of chars */
+  Char **other_chars;           /* non ASCII chars */
+  unsigned int num_other_chars; /* size of above array */
 } Font;
 
 
@@ -147,13 +146,13 @@ IError IFontBDFReadFile ( char *name, char *path )
     if ( !fp )
       return ( INoSuchFile );
     lines = malloc ( 1 );
-    if ( ! lines ) {
+    if ( !lines ) {
       fclose ( fp );
       return ( IFontError );
     }
     while ( fgets ( text, 256, fp ) ) {
       tmp = realloc ( lines, ( num_lines + 1 ) * sizeof ( char * ) );
-      if ( ! tmp ) {
+      if ( !tmp ) {
         for ( loop = 0; loop < num_lines; loop++ )
           free ( lines[loop] );
         free ( lines );
@@ -161,16 +160,16 @@ IError IFontBDFReadFile ( char *name, char *path )
         return ( IFontError );
       }
       lines = tmp;
-      if ( text[strlen(text)-1] == '\012' )
-        text[strlen(text)-1] = '\0';
-      if ( text[strlen(text)-1] == '\015' )
-        text[strlen(text)-1] = '\0';
+      if ( text[strlen ( text ) - 1] == '\012' )
+        text[strlen ( text ) - 1] = '\0';
+      if ( text[strlen ( text ) - 1] == '\015' )
+        text[strlen ( text ) - 1] = '\0';
       lines[num_lines] = (char *) malloc ( strlen ( text ) + 1 );
       strcpy ( lines[num_lines++], text );
     }
     fclose ( fp );
     tmp = realloc ( lines, ( num_lines + 1 ) * sizeof ( char * ) );
-    if ( ! tmp ) {
+    if ( !tmp ) {
       for ( loop = 0; loop < num_lines; loop++ )
         free ( lines[loop] );
       free ( lines );
@@ -185,8 +184,8 @@ IError IFontBDFReadFile ( char *name, char *path )
     return ( ret );
   }
   else {
-   fprintf ( stderr, "Cannot find font file: %s\n", path );
-   return ( INoSuchFile );
+    fprintf ( stderr, "Cannot find font file: %s\n", path );
+    return ( INoSuchFile );
   }
 }
 
@@ -290,27 +289,28 @@ IError IFontBDFReadData ( char *name, char **lines )
       sscanf ( text, "DWIDTH %d %d", &character->actual_width, &temp );
     }
     else if ( strcmp ( text, "BITMAP" ) == 0 ) {
-/*
-      if ( character->width <= 0 || character->height <= 0 ) {
-        fprintf ( stderr, "BBX line not found. (line %d)\n", line_no + 1 );
-        return ( IFontError );
-      }
-*/
+      /*
+            if ( character->width <= 0 || character->height <= 0 ) {
+              fprintf ( stderr, "BBX line not found. (line %d)\n", line_no + 1 );
+              return ( IFontError );
+            }
+      */
       in_bitmap = 1;
       ypos = 0;
-    } else if ( strcmp ( text, "ENDCHAR" ) == 0 ) {
+    }
+    else if ( strcmp ( text, "ENDCHAR" ) == 0 ) {
       if ( in_bitmap ) {
         in_bitmap = 0;
-        if ( ! character ) {
+        if ( !character ) {
           free_font ( font );
           return ( IFontError );
         }
         if ( strlen ( character->name ) == 1 )
-          font->chars[(unsigned char)character->name[0]] = character;
+          font->chars[(unsigned char) character->name[0]] = character;
         else {
           Char **ctmp = (Char **) realloc ( font->other_chars,
             ( font->num_other_chars + 1 ) * sizeof ( Char * ) );
-          if ( ! ctmp ) {
+          if ( !ctmp ) {
             free_character ( character );
             free_font ( font );
             return ( IFontError );
@@ -318,18 +318,19 @@ IError IFontBDFReadData ( char *name, char **lines )
           font->other_chars = ctmp;
           font->other_chars[font->num_other_chars++] = character;
         }
-        character = NULL;   /* ownership transferred to font */
+        character = NULL; /* ownership transferred to font */
       }
-/*
-      for ( loop = 0; loop < character->width * character->height; loop++ ) {
-        if ( character->data[loop] )
-          printf ( "+" );
-        else
-          printf ( "-" );
-      }
-      printf ( "\n-------------------\n" );
-*/
-    } else if ( in_bitmap && character != NULL && character->data != NULL ) {
+      /*
+            for ( loop = 0; loop < character->width * character->height; loop++ ) {
+              if ( character->data[loop] )
+                printf ( "+" );
+              else
+                printf ( "-" );
+            }
+            printf ( "\n-------------------\n" );
+      */
+    }
+    else if ( in_bitmap && character != NULL && character->data != NULL ) {
       xpos = 0;
       for ( loop = 0; (unsigned int) loop < character->width; loop++ ) {
         which_char = loop / 4;
@@ -362,12 +363,12 @@ IError IFontBDFReadData ( char *name, char **lines )
   /* Now add this font to the tree of loaded fonts */
   {
     Font **ftmp;
-    if ( ! fonts )
+    if ( !fonts )
       ftmp = (Font **) malloc ( sizeof ( Font * ) );
     else
       ftmp = (Font **) realloc ( fonts,
         ( num_fonts + 1 ) * sizeof ( Font * ) );
-    if ( ! ftmp ) {
+    if ( !ftmp ) {
       free_font ( font );
       return ( IFontError );
     }
@@ -387,7 +388,7 @@ Font *_IGetFont ( char *name )
     for ( loop = 0; loop < num_fonts; loop++ ) {
       if ( fonts[loop] ) {
         if ( strcmp ( fonts[loop]->name, name ) == 0 )
-          return ( (Font *)fonts[loop] );
+          return ( (Font *) fonts[loop] );
       }
     }
   }
@@ -409,7 +410,7 @@ static void free_font ( Font *font )
 {
   unsigned int loop;
 
-  if ( ! font )
+  if ( !font )
     return;
   for ( loop = 0; loop < 256; loop++ ) {
     if ( font->chars[loop] )
@@ -434,7 +435,7 @@ IError IFontBDFFree ( char *name )
   unsigned int loop;
 
   font = _IGetFont ( name );
-  if ( ! font )
+  if ( !font )
     return ( INoSuchFont );
 
   /* Remove this font from the cache *before* freeing it, so a later
@@ -454,14 +455,13 @@ IError _IFontBDFGetSize ( char *name, unsigned int *height_return )
   Font *font;
 
   font = _IGetFont ( name );
-  if ( ! font )
+  if ( !font )
     return ( INoSuchFont );
 
   *height_return = font->pixel_size;
 
   return ( INoError );
 }
-
 
 
 IError IFontBDFGetChar ( char *name, char *ch, unsigned int **bitdata,
@@ -474,7 +474,7 @@ IError IFontBDFGetChar ( char *name, char *ch, unsigned int **bitdata,
   static char *last_name = NULL;
   static Font *last_font = NULL;
 
-  if ( ! ch || ! strlen ( ch ) )
+  if ( !ch || !strlen ( ch ) )
     return ( IInvalidArgument );
 
   if ( last_name == name ) {
@@ -482,18 +482,18 @@ IError IFontBDFGetChar ( char *name, char *ch, unsigned int **bitdata,
   }
   else {
     font = _IGetFont ( name );
-    if ( ! font )
+    if ( !font )
       return ( INoSuchFont );
     last_name = name;
     last_font = font;
   }
 
-  if ( ! font )
+  if ( !font )
     return ( INoSuchFont );
 
   /* we got the font.  now get the character */
   if ( strlen ( ch ) == 1 ) {
-    character = font->chars[(unsigned char)ch[0]];
+    character = font->chars[(unsigned char) ch[0]];
   }
   /* if more than a single char, must not be in the ascii list */
   else {
@@ -503,15 +503,15 @@ IError IFontBDFGetChar ( char *name, char *ch, unsigned int **bitdata,
         break;
       }
     }
-    if ( ! character )
+    if ( !character )
       character = font->chars[' '];
   }
   /* if still not there, use space */
-  if ( ! character ) {
+  if ( !character ) {
     /* This should not happen if font is defined correctly */
     return ( IFontError );
   }
-  
+
   *height = character->height;
   *width = character->width;
   *actual_width = character->actual_width;
@@ -522,5 +522,3 @@ IError IFontBDFGetChar ( char *name, char *ch, unsigned int **bitdata,
 
   return ( INoError );
 }
-
-

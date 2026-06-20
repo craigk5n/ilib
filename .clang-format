@@ -1,0 +1,36 @@
+# clang-format configuration approximating Ilib's existing C style.
+#
+# ColumnLimit is 0 (no reflow) on purpose: the goal is to lock in spacing,
+# indentation, and brace placement for *new/changed* lines without rewrapping
+# the legacy sources. CI enforces this only on changed lines (git-clang-format).
+Language: Cpp
+BasedOnStyle: LLVM
+IndentWidth: 2
+ContinuationIndentWidth: 2
+TabWidth: 8
+UseTab: Never
+ColumnLimit: 0
+PointerAlignment: Right
+SpaceBeforeParens: Always
+SpacesInParentheses: true
+SpacesInSquareBrackets: false
+SpaceBeforeAssignmentOperators: true
+SpacesInCStyleCastParentheses: false
+SpaceAfterCStyleCast: true
+AlignAfterOpenBracket: DontAlign
+AlignEscapedNewlines: Left
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 2
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true
+  AfterControlStatement: Never
+  AfterEnum: false
+  AfterStruct: false
+  AfterUnion: false
+  BeforeElse: true
+  IndentBraces: false
+SortIncludes: false

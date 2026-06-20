@@ -27,7 +27,7 @@
 #include "IFontBDF.h"
 
 
-#define SPACES_PER_TAB		8
+#define SPACES_PER_TAB 8
 
 IError ITextWidth ( IGC gc, IFont font, char *text, unsigned int len, unsigned int *width_return )
 {
@@ -45,11 +45,10 @@ IError ITextHeight ( IGC gc, IFont font, char *text, unsigned int len, unsigned 
 }
 
 
-
 IError ITextDimensions ( IGC gc, IFont font, char *text, unsigned int len, unsigned int *width_return, unsigned int *height_return )
 {
-  IGCP *gcp = (IGCP *)gc;
-  IFontP *fontp = (IFontP *)font;
+  IGCP *gcp = (IGCP *) gc;
+  IFontP *fontp = (IFontP *) font;
   unsigned int *bitdata;
   unsigned int height, width, actual_width, size, font_height;
   int xoffset, yoffset, charx;
@@ -59,13 +58,13 @@ IError ITextDimensions ( IGC gc, IFont font, char *text, unsigned int len, unsig
   int char_num = 0;
   int ret_width = 0, ret_height = 0;
 
-  if ( ! font )
+  if ( !font )
     return ( INoFontSet );
 
   if ( fontp->magic != IMAGIC_FONT )
     return ( IInvalidFont );
 
-  if ( ! gcp )
+  if ( !gcp )
     return ( IInvalidGC );
   if ( gcp->magic != IMAGIC_GC )
     return ( IInvalidGC );
@@ -86,7 +85,7 @@ IError ITextDimensions ( IGC gc, IFont font, char *text, unsigned int len, unsig
     else if ( *ptr == '\t' ) {
       ret = IFontBDFGetChar ( fontp->name, ch, &bitdata, &width, &height,
         &actual_width, &size, &xoffset, &yoffset );
-      if ( ! ret ) {
+      if ( !ret ) {
         charx += ( 8 - ( char_num % 8 ) ) * actual_width;
         if ( charx > ret_width )
           ret_width = charx;
@@ -113,7 +112,7 @@ IError ITextDimensions ( IGC gc, IFont font, char *text, unsigned int len, unsig
     }
     ret = IFontBDFGetChar ( fontp->name, ch, &bitdata, &width, &height,
       &actual_width, &size, &xoffset, &yoffset );
-    if ( ! ret ) {
+    if ( !ret ) {
       charx += actual_width;
       char_num++;
       if ( charx > ret_width )
@@ -125,11 +124,8 @@ IError ITextDimensions ( IGC gc, IFont font, char *text, unsigned int len, unsig
     ret_width /= 2;
     ret_height /= 2;
   }
-  *width_return = (unsigned int)ret_width;
-  *height_return = (unsigned int)ret_height;
+  *width_return = (unsigned int) ret_width;
+  *height_return = (unsigned int) ret_height;
 
   return ( INoError );
 }
-
-
-

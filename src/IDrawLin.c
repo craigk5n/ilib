@@ -23,12 +23,12 @@
 #include "IlibP.h"
 
 
-#define ON_OFF_PIXELS	3.0
+#define ON_OFF_PIXELS 3.0
 
 IError IDrawLine ( IImage image, IGC gc, int x1, int y1, int x2, int y2 )
 {
-  IGCP *gcp = (IGCP *)gc;
-  IImageP *imagep = (IImageP *)image;
+  IGCP *gcp = (IGCP *) gc;
+  IImageP *imagep = (IImageP *) image;
   int myx, myy;
   double slope = 0.0;
   double myslope;
@@ -38,11 +38,11 @@ IError IDrawLine ( IImage image, IGC gc, int x1, int y1, int x2, int y2 )
   double draw_count = 0.0;
   double on_off_size = 0.0;
 
-  if ( ! gcp )
+  if ( !gcp )
     return ( IInvalidGC );
   if ( gcp->magic != IMAGIC_GC )
     return ( IInvalidGC );
-  if ( ! imagep )
+  if ( !imagep )
     return ( IInvalidImage );
   if ( imagep->magic != IMAGIC_IMAGE )
     return ( IInvalidImage );
@@ -69,7 +69,7 @@ IError IDrawLine ( IImage image, IGC gc, int x1, int y1, int x2, int y2 )
     }
   }
   else
-    slope = - ( (double) y2 - (double) y1 ) / ( (double) x1 - (double) x2 );
+    slope = -( (double) y2 - (double) y1 ) / ( (double) x1 - (double) x2 );
   curx = (double) x1;
   cury = (double) y1;
 
@@ -90,15 +90,15 @@ IError IDrawLine ( IImage image, IGC gc, int x1, int y1, int x2, int y2 )
     }
   }
 
-  while ( ! done ) {
+  while ( !done ) {
     if ( x1 == x2 ) {
-      if ( cury >= (double)y2 )
+      if ( cury >= (double) y2 )
         done = 1;
       else
         cury += 1.0;
     }
     else if ( slope >= 1.0 ) {
-      if ( cury >= (double)y2 )
+      if ( cury >= (double) y2 )
         done = 1;
       else {
         cury += 1.0;
@@ -106,7 +106,7 @@ IError IDrawLine ( IImage image, IGC gc, int x1, int y1, int x2, int y2 )
       }
     }
     else if ( slope < -1.0 ) {
-      if ( cury <= (double)y2 )
+      if ( cury <= (double) y2 )
         done = 1;
       else {
         cury -= 1.0;
@@ -114,7 +114,7 @@ IError IDrawLine ( IImage image, IGC gc, int x1, int y1, int x2, int y2 )
       }
     }
     else if ( slope >= 0.0 ) {
-      if ( curx >= (double)x2 )
+      if ( curx >= (double) x2 )
         done = 1;
       else {
         curx += 1.0;
@@ -122,7 +122,7 @@ IError IDrawLine ( IImage image, IGC gc, int x1, int y1, int x2, int y2 )
       }
     }
     else if ( slope < 0.0 ) {
-      if ( curx >= (double)x2 )
+      if ( curx >= (double) x2 )
         done = 1;
       else {
         curx += 1.0;
@@ -132,38 +132,35 @@ IError IDrawLine ( IImage image, IGC gc, int x1, int y1, int x2, int y2 )
 
     if ( gcp->line_style == ILINE_ON_OFF_DASH ) {
       draw_count += 1.0;
-      if ( ( (int)( floor ( draw_count / on_off_size ) ) % 2 ) == 1 )
+      if ( ( (int) ( floor ( draw_count / on_off_size ) ) % 2 ) == 1 )
         continue;
     }
 
-    if ( ! done ) {
+    if ( !done ) {
       myx = (int) curx;
       myy = (int) cury;
       switch ( gcp->line_width ) {
-        default:
-        case 0:
-        case 1:
-          _IDrawPoint ( imagep, gcp, myx, myy );
-          break;
-        case 2:
-          _IDrawPoint ( imagep, gcp, myx, myy );
-          _IDrawPoint ( imagep, gcp, myx - 1, myy );
-          _IDrawPoint ( imagep, gcp, myx - 1, myy - 1 );
-          _IDrawPoint ( imagep, gcp, myx, myy - 1 );
-          break;
-        case 3:
-          _IDrawPoint ( imagep, gcp, myx, myy );
-          _IDrawPoint ( imagep, gcp, myx - 1, myy );
-          _IDrawPoint ( imagep, gcp, myx + 1, myy - 1 );
-          _IDrawPoint ( imagep, gcp, myx, myy - 1 );
-          _IDrawPoint ( imagep, gcp, myx, myy + 1 );
-          break;
+      default:
+      case 0:
+      case 1:
+        _IDrawPoint ( imagep, gcp, myx, myy );
+        break;
+      case 2:
+        _IDrawPoint ( imagep, gcp, myx, myy );
+        _IDrawPoint ( imagep, gcp, myx - 1, myy );
+        _IDrawPoint ( imagep, gcp, myx - 1, myy - 1 );
+        _IDrawPoint ( imagep, gcp, myx, myy - 1 );
+        break;
+      case 3:
+        _IDrawPoint ( imagep, gcp, myx, myy );
+        _IDrawPoint ( imagep, gcp, myx - 1, myy );
+        _IDrawPoint ( imagep, gcp, myx + 1, myy - 1 );
+        _IDrawPoint ( imagep, gcp, myx, myy - 1 );
+        _IDrawPoint ( imagep, gcp, myx, myy + 1 );
+        break;
       }
     }
   }
 
   return ( INoError );
 }
-
-
-

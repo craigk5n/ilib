@@ -24,14 +24,14 @@
 
 IError IDrawRectangle ( IImage image, IGC gc, int x, int y, unsigned int w, unsigned int h )
 {
-  IGCP *gcp = (IGCP *)gc;
-  IImageP *imagep = (IImageP *)image;
+  IGCP *gcp = (IGCP *) gc;
+  IImageP *imagep = (IImageP *) image;
 
-  if ( ! gcp )
+  if ( !gcp )
     return ( IInvalidGC );
   if ( gcp->magic != IMAGIC_GC )
     return ( IInvalidGC );
-  if ( ! imagep )
+  if ( !imagep )
     return ( IInvalidImage );
   if ( imagep->magic != IMAGIC_IMAGE )
     return ( IInvalidImage );
@@ -43,6 +43,3 @@ IError IDrawRectangle ( IImage image, IGC gc, int x, int y, unsigned int w, unsi
 
   return ( INoError );
 }
-
-
-
