@@ -33,8 +33,18 @@
 IImage ICreateImage ( unsigned width, unsigned height, unsigned options )
 {
   IImageP *image;
-  size_t channels = ( options & IOPTION_GREYSCALE ) ? 1 : 3;
+  size_t channels;
   size_t npixels, nbytes;
+
+  /* Greyscale and alpha are mutually exclusive (no greyscale+alpha yet). */
+  if ( ( options & IOPTION_GREYSCALE ) && ( options & IOPTION_ALPHA ) )
+    return ( NULL );
+  if ( options & IOPTION_GREYSCALE )
+    channels = 1;
+  else if ( options & IOPTION_ALPHA )
+    channels = 4;
+  else
+    channels = 3;
 
   if ( width == 0 || height == 0 )
     return ( NULL );
@@ -49,8 +59,11 @@ IImage ICreateImage ( unsigned width, unsigned height, unsigned options )
   memset ( image, '\0', sizeof ( IImageP ) );
   image->width = width;
   image->height = height;
+  image->channels = (unsigned short) channels;
   if ( options & IOPTION_GREYSCALE )
     image->greyscale = 1;
+  if ( channels == 4 )
+    image->has_alpha = 1;
 
   image->data = (unsigned char *) malloc ( nbytes );
   if ( !image->data ) {
@@ -79,14 +92,16 @@ IError IDuplicateImage ( IImage image, IImage *image_return )
 
   if ( i->greyscale )
     *image_return = ICreateImage ( i->width, i->height, IOPTION_GREYSCALE );
+  else if ( i->channels == 4 )
+    *image_return = ICreateImage ( i->width, i->height, IOPTION_ALPHA );
   else
     *image_return = ICreateImage ( i->width, i->height, IOPTION_NONE );
   ret = (IImageP *) *image_return;
+  if ( !ret )
+    return ( IInvalidImage );
 
-  if ( i->greyscale )
-    memcpy ( ret->data, i->data, i->width * i->height );
-  else
-    memcpy ( ret->data, i->data, i->width * i->height * 3 );
+  memcpy ( ret->data, i->data,
+    (size_t) i->width * i->height * ret->channels );
   ret->transparent = i->transparent;
   ret->interlaced = i->interlaced;
   ret->greyscale = i->greyscale;
@@ -142,10 +157,37 @@ IError _IFreeImage ( IImage image )
   return ( INoError );
 }
 
+/* Flatten an RGBA image to a new RGB image by compositing over an opaque white
+   background. The output borrows the source comments/transparent pointers; the
+   caller must clear ret->comments before freeing it to avoid a double free. */
+static IImageP *flatten_rgba ( IImageP *src )
+{
+  IImageP *dst = (IImageP *) ICreateImage ( src->width, src->height, IOPTION_NONE );
+  int n, i;
+
+  if ( !dst )
+    return ( NULL );
+  n = src->width * src->height;
+  for ( i = 0; i < n; i++ ) {
+    unsigned int a = src->data[i * 4 + 3];
+    unsigned int inv = 255 - a;
+    dst->data[i * 3 + 0] =
+      (unsigned char) ( ( src->data[i * 4 + 0] * a + 255 * inv + 127 ) / 255 );
+    dst->data[i * 3 + 1] =
+      (unsigned char) ( ( src->data[i * 4 + 1] * a + 255 * inv + 127 ) / 255 );
+    dst->data[i * 3 + 2] =
+      (unsigned char) ( ( src->data[i * 4 + 2] * a + 255 * inv + 127 ) / 255 );
+  }
+  dst->comments = src->comments; /* shared; cleared by caller before free */
+  dst->transparent = src->transparent;
+  return ( dst );
+}
+
 IError IWriteImageFile ( FILE *fp, IImage image, IFileFormat format, IOptions options )
 {
   IError ret;
   IImageP *imagep = (IImageP *) image;
+  IImageP *flat = NULL;
 
   if ( imagep ) {
     if ( imagep->magic != IMAGIC_IMAGE )
@@ -154,12 +196,25 @@ IError IWriteImageFile ( FILE *fp, IImage image, IFileFormat format, IOptions op
   else
     return ( IInvalidImage );
 
+  /* The format writers are alpha-unaware; flatten RGBA over white first. */
+  if ( imagep->has_alpha ) {
+    flat = flatten_rgba ( imagep );
+    if ( !flat )
+      return ( IErrorWriting );
+    imagep = flat;
+  }
+
   if ( IFileFormats[format].write_func )
     ret = IFileFormats[format].write_func ( fp, imagep, options );
   else {
     fprintf ( stderr, "IWriteImageFile: %s format write not implemented.\n",
       IFileFormats[format].name );
     ret = IFunctionNotImplemented;
+  }
+
+  if ( flat ) {
+    flat->comments = NULL; /* shared with the source image; do not free */
+    _IFreeImage ( (IImage) flat );
   }
 
   return ( ret );

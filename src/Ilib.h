@@ -175,6 +175,14 @@ typedef enum {
 } ITextDirection;
 
 /**
+ * Pixel compositing modes (set on a graphics context with ISetBlendMode).
+ */
+typedef enum {
+  IBLEND_REPLACE = 0, /* overwrite the destination (default) */
+  IBLEND_OVER         /* source-over alpha compositing */
+} IBlendMode;
+
+/**
  * Defines a structure for specifying a point.
  */
 typedef struct {
@@ -191,6 +199,7 @@ typedef struct {
 /* use the following with ICreateImage() */
 #define IOPTION_GREYSCALE 0x0001 /* greyscale image */
 #define IOPTION_GRAYSCALE IOPTION_GREYSCALE
+#define IOPTION_ALPHA 0x0004 /* RGBA image (4 channels) */
 
 /* use the following with IWriteImageFile() */
 #define IOPTION_ASCII 0x0001      /* ascii output for pbm/pgm/ppm */
@@ -380,6 +389,39 @@ IError IGetPixel (
   unsigned int *red_return,   /* out: red value (or NULL) */
   unsigned int *green_return, /* out: green value (or NULL) */
   unsigned int *blue_return   /* out: blue value (or NULL) */
+#endif
+);
+
+/**
+ * Set the color of a single pixel including alpha. On a non-alpha (RGB or
+ * greyscale) image the alpha is ignored. Returns IInvalidArgument if (x,y) is
+ * outside the image or any channel exceeds 255.
+ */
+IError ISetPixelAlpha (
+#ifndef _NO_PROTO
+  IImage image,       /* image */
+  int x,              /* x coordinate */
+  int y,              /* y coordinate */
+  unsigned int red,   /* red value (0-255) */
+  unsigned int green, /* green value (0-255) */
+  unsigned int blue,  /* blue value (0-255) */
+  unsigned int alpha  /* alpha value (0-255) */
+#endif
+);
+
+/**
+ * Get the color of a single pixel including alpha. For non-alpha images the
+ * returned alpha is 255 (opaque). Any of the return pointers may be NULL.
+ */
+IError IGetPixelAlpha (
+#ifndef _NO_PROTO
+  IImage image,               /* image */
+  int x,                      /* x coordinate */
+  int y,                      /* y coordinate */
+  unsigned int *red_return,   /* out: red (or NULL) */
+  unsigned int *green_return, /* out: green (or NULL) */
+  unsigned int *blue_return,  /* out: blue (or NULL) */
+  unsigned int *alpha_return  /* out: alpha (or NULL) */
 #endif
 );
 
@@ -606,6 +648,20 @@ IColor IAllocColor (
 );
 
 /**
+ * Allocates a translucent color. Like IAllocColor() but with an alpha value
+ * (0 = transparent .. 255 = opaque). Used with ISetForeground() and the
+ * IBLEND_OVER blend mode (see ISetBlendMode()).
+ */
+IColor IAllocColorAlpha (
+#ifndef _NO_PROTO
+  unsigned int red,   /* red value (0-255) */
+  unsigned int green, /* green value (0-255) */
+  unsigned int blue,  /* blue value (0-255) */
+  unsigned int alpha  /* alpha value (0-255) */
+#endif
+);
+
+/**
  * Allocates a color by name (i.e. "blue") to be used for drawing.
  * (See ISetForeground()).
  */
@@ -664,6 +720,19 @@ IError ISetForeground (
 #ifndef _NO_PROTO
   IGC gc,      /* graphics context */
   IColor color /* color */
+#endif
+);
+
+/**
+ * Set the pixel compositing mode of a graphics context. IBLEND_REPLACE (the
+ * default) overwrites pixels; IBLEND_OVER composites the foreground using its
+ * alpha (source-over). Affects IDrawPoint() (and, in later phases, the other
+ * primitives).
+ */
+IError ISetBlendMode (
+#ifndef _NO_PROTO
+  IGC gc,         /* graphics context */
+  IBlendMode mode /* IBLEND_REPLACE or IBLEND_OVER */
 #endif
 );
 

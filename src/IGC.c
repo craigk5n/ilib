@@ -212,3 +212,20 @@ IError ISetTextStyle ( IGC gc, ITextStyle text_style )
 
   return ( INoError );
 }
+
+
+IError ISetBlendMode ( IGC gc, IBlendMode mode )
+{
+  IGCP *gcp = (IGCP *) gc;
+
+  if ( gcp ) {
+    if ( gcp->magic != IMAGIC_GC )
+      return ( IInvalidGC );
+  }
+  else
+    return ( IInvalidGC );
+
+  gcp->blend_mode = mode;
+
+  return ( INoError );
+}

@@ -10,6 +10,12 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Optional alpha channel (RGBA) and source-over compositing — Phase A of the
+  alpha/anti-aliasing work (see `docs/design/alpha-aa.md`):
+  `ICreateImage(IOPTION_ALPHA)`, `IAllocColorAlpha()`, `IGetPixelAlpha()` /
+  `ISetPixelAlpha()`, and a GC blend mode (`ISetBlendMode`, `IBLEND_OVER`)
+  honored by `IDrawPoint()`. RGBA images are flattened over white when written
+  to formats that have no alpha.
 - `IGetPixel()` / `ISetPixel()`: public per-pixel read/write accessors (RGB,
   GC-independent), with bounds and handle validation.
 - `IReduceColors()`: median-cut color quantization to fit an image into a
