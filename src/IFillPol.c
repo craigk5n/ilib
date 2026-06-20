@@ -66,6 +66,62 @@ static int line_includes_y_value ( linetype line, int yval )
   return 0;
 }
 
+/* Even-odd point-in-polygon test (works for convex or concave polygons). */
+static int point_in_polygon ( IPoint *p, int n, double px, double py )
+{
+  int i, j, inside = 0;
+  for ( i = 0, j = n - 1; i < n; j = i++ ) {
+    if ( ( ( p[i].y > py ) != ( p[j].y > py ) ) &&
+         ( px < (double) ( p[j].x - p[i].x ) * ( py - p[i].y ) /
+                    (double) ( p[j].y - p[i].y ) +
+                  p[i].x ) )
+      inside = !inside;
+  }
+  return ( inside );
+}
+
+/* Anti-aliased polygon fill via NxN supersampled coverage: each pixel is
+   blended with the fraction of its sub-samples that fall inside the polygon,
+   giving smooth edges. Used when GC anti-aliasing is on. */
+#define IFILL_AA_SS 4
+static void fill_polygon_aa ( IImageP *img, IGCP *gc, IPoint *pts, int n )
+{
+  int minx, miny, maxx, maxy, x, y, sx, sy, cnt, i;
+
+  minx = maxx = pts[0].x;
+  miny = maxy = pts[0].y;
+  for ( i = 1; i < n; i++ ) {
+    minx = min ( minx, pts[i].x );
+    maxx = max ( maxx, pts[i].x );
+    miny = min ( miny, pts[i].y );
+    maxy = max ( maxy, pts[i].y );
+  }
+  if ( minx < 0 )
+    minx = 0;
+  if ( miny < 0 )
+    miny = 0;
+  if ( maxx >= img->width )
+    maxx = img->width - 1;
+  if ( maxy >= img->height )
+    maxy = img->height - 1;
+
+  for ( y = miny; y <= maxy; y++ ) {
+    for ( x = minx; x <= maxx; x++ ) {
+      cnt = 0;
+      for ( sy = 0; sy < IFILL_AA_SS; sy++ ) {
+        for ( sx = 0; sx < IFILL_AA_SS; sx++ ) {
+          if ( point_in_polygon ( pts, n, x + ( sx + 0.5 ) / IFILL_AA_SS,
+                 y + ( sy + 0.5 ) / IFILL_AA_SS ) )
+            cnt++;
+        }
+      }
+      if ( cnt )
+        _IBlendPoint ( img, gc, x, y,
+          (unsigned int) ( cnt * 255 / ( IFILL_AA_SS * IFILL_AA_SS ) ) );
+    }
+  }
+}
+
 static int get_intersection_x_value ( linetype line, int yval )
 {
   double b, ret;
@@ -118,6 +174,14 @@ IError IFillPolygon ( IImage image, IGC gc, IPoint *points, int npoints )
     return ( IInvalidImage );
   if ( npoints < 2 )
     return ( INoError );
+
+  /* Anti-aliased fill (supersampled coverage). Handles convex or concave
+     polygons; the aliased scanline path below is convex-only. IFillCircle /
+     IFillEllipse / IFillArc reach this through IFillPolygon. */
+  if ( gcp->aa ) {
+    fill_polygon_aa ( imagep, gcp, points, npoints );
+    return ( INoError );
+  }
 
   save_line_width = gcp->line_width;
   gcp->line_width = 1;

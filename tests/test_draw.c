@@ -147,6 +147,49 @@ TEST set_antialias_rejects_bad_handle ( void )
   PASS ();
 }
 
+/* An anti-aliased filled circle (IFillCircle -> IFillPolygon) has a solid
+   interior and blended edge pixels, and leaves the corners untouched. */
+TEST aa_fill_circle_blends_edges ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+  IColor black = IAllocColor ( 0, 0, 0 );
+
+  ISetForeground ( gc, black );
+  ASSERT_EQ ( INoError, ISetAntiAlias ( gc, 1 ) );
+  ASSERT_EQ ( INoError, IFillCircle ( im, gc, 5, 5, 3 ) );
+
+  ASSERT_EQ ( 0, px_r ( im, 5, 5 ) );   /* interior fully covered */
+  ASSERT_EQ ( 255, px_r ( im, 0, 0 ) ); /* corner untouched */
+  ASSERT ( has_blended_pixel ( im ) );  /* soft edge */
+
+  IFreeColor ( black );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
+/* An anti-aliased filled triangle has interior coverage and soft edges. */
+TEST aa_fill_polygon_blends_edges ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+  IColor black = IAllocColor ( 0, 0, 0 );
+  IPoint tri[3] = { { 1, 1 }, { 8, 2 }, { 3, 8 } };
+
+  ISetForeground ( gc, black );
+  ASSERT_EQ ( INoError, ISetAntiAlias ( gc, 1 ) );
+  ASSERT_EQ ( INoError, IFillPolygon ( im, gc, tri, 3 ) );
+
+  ASSERT ( px_r ( im, 3, 3 ) < 128 ); /* well inside the triangle */
+  ASSERT ( has_blended_pixel ( im ) );
+
+  IFreeColor ( black );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
 /* An anti-aliased circle covers its cardinal points and produces blended
    edge pixels. */
 TEST aa_circle_blends_edges ( void )
@@ -185,6 +228,8 @@ SUITE ( draw )
   RUN_TEST ( aa_line_blends_edges );
   RUN_TEST ( set_antialias_rejects_bad_handle );
   RUN_TEST ( aa_circle_blends_edges );
+  RUN_TEST ( aa_fill_circle_blends_edges );
+  RUN_TEST ( aa_fill_polygon_blends_edges );
 }
 
 GREATEST_MAIN_DEFS ();
