@@ -10,6 +10,9 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Smooth curves: `IDrawBezier()` (chained cubic Bezier paths) and
+  `IDrawSpline()` (Catmull-Rom spline through a set of points, for line/area
+  charts). Both honor the GC line style and anti-aliasing.
 - Optional scalable (TrueType/OpenType) fonts via FreeType: `ILoadFontFromFileTTF()`
   loads a font at a pixel size and `IDrawString()` renders it **anti-aliased**.
   Text styles (etched/shadowed), the `IDrawStringRotated()` directions, and

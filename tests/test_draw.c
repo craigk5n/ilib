@@ -304,6 +304,75 @@ TEST aa_circle_blends_edges ( void )
   PASS ();
 }
 
+/* A cubic Bezier inks its endpoints and rejects a malformed point count. */
+TEST bezier_draws_curve ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+  IColor black = IAllocColor ( 0, 0, 0 );
+  IPoint cps[4] = { { 1, 8 }, { 1, 1 }, { 8, 1 }, { 8, 8 } };
+
+  ISetForeground ( gc, black );
+  ASSERT_EQ ( IInvalidArgument, IDrawBezier ( im, gc, cps, 3 ) ); /* bad count */
+  ASSERT_EQ ( INoError, IDrawBezier ( im, gc, cps, 4 ) );
+
+  ASSERT ( px_r ( im, 1, 8 ) < 128 ); /* start point */
+  ASSERT ( px_r ( im, 8, 8 ) < 128 ); /* end point */
+
+  IFreeColor ( black );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
+/* A Catmull-Rom spline passes through each of its input points. */
+TEST spline_passes_through_points ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+  IColor black = IAllocColor ( 0, 0, 0 );
+  IPoint pts[4] = { { 1, 5 }, { 4, 1 }, { 7, 8 }, { 8, 3 } };
+  int i;
+
+  ISetForeground ( gc, black );
+  ASSERT_EQ ( INoError, IDrawSpline ( im, gc, pts, 4 ) );
+
+  for ( i = 0; i < 4; i++ )
+    ASSERT ( px_r ( im, pts[i].x, pts[i].y ) < 128 );
+
+  IFreeColor ( black );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
+/* An anti-aliased curve produces blended edge pixels. */
+TEST aa_curve_blends_edges ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+  IColor black = IAllocColor ( 0, 0, 0 );
+  IPoint cps[4] = { { 1, 8 }, { 2, 1 }, { 7, 1 }, { 8, 8 } };
+
+  ISetForeground ( gc, black );
+  ASSERT_EQ ( INoError, ISetAntiAlias ( gc, 1 ) );
+  ASSERT_EQ ( INoError, IDrawBezier ( im, gc, cps, 4 ) );
+  ASSERT ( has_blended_pixel ( im ) );
+
+  IFreeColor ( black );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST curve_rejects_bad_handle ( void )
+{
+  IPoint pts[4] = { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 } };
+  ASSERT_EQ ( IInvalidGC, IDrawBezier ( NULL, NULL, pts, 4 ) );
+  ASSERT_EQ ( IInvalidGC, IDrawSpline ( NULL, NULL, pts, 4 ) );
+  PASS ();
+}
+
 SUITE ( draw )
 {
   RUN_TEST ( draw_point_sets_one_pixel );
@@ -320,6 +389,10 @@ SUITE ( draw )
   RUN_TEST ( aa_fill_ellipse_blends_edges );
   RUN_TEST ( aa_fill_arc_wedge );
   RUN_TEST ( aa_arc_outline_partial );
+  RUN_TEST ( bezier_draws_curve );
+  RUN_TEST ( spline_passes_through_points );
+  RUN_TEST ( aa_curve_blends_edges );
+  RUN_TEST ( curve_rejects_bad_handle );
 }
 
 GREATEST_MAIN_DEFS ();
