@@ -32,7 +32,7 @@ jobs:
           cmake -B build
           cmake --build build --target docs
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: build/docs/html
 
