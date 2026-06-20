@@ -10,6 +10,11 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Image filters (whole-image point operations), the first batch of
+  ImageMagick-style transforms (`IFilter.c`): `IGreyscale()` (Rec.601 luma
+  desaturation; `IGrayscale` alias), `INegate()`, `IBrightnessContrast()`
+  (each control -100..100), `IGamma()`, and `IThreshold()`. They operate in
+  place, leave alpha untouched, and are exposed in the Python bindings.
 - Python bindings (`python/`) via cffi in ABI mode: load an installed
   `libilib` at runtime (no C compiler needed to install the package) and expose
   a Pythonic `Image` / `GC` / `Font` API covering the full drawing and image

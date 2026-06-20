@@ -196,6 +196,34 @@ class Image:
         check(lib.IReduceColors(self._as_parameter_, int(max_colors)))
         return self
 
+    # -- filters (whole-image point operations) ---------------------------
+    def greyscale(self):
+        """Desaturate to greyscale (Rec.601 luma), in place."""
+        check(lib.IGreyscale(self._as_parameter_))
+        return self
+
+    grayscale = greyscale  # American-spelling alias
+
+    def negate(self):
+        """Invert the colors (each channel becomes 255 - value), in place."""
+        check(lib.INegate(self._as_parameter_))
+        return self
+
+    def brightness_contrast(self, brightness=0, contrast=0):
+        """Adjust brightness and contrast (each -100..100), in place."""
+        check(lib.IBrightnessContrast(self._as_parameter_, int(brightness), int(contrast)))
+        return self
+
+    def gamma(self, gamma):
+        """Apply gamma correction (``gamma`` > 0), in place."""
+        check(lib.IGamma(self._as_parameter_, float(gamma)))
+        return self
+
+    def threshold(self, threshold):
+        """Threshold each channel to black/white at ``threshold`` (0..255)."""
+        check(lib.IThreshold(self._as_parameter_, int(threshold)))
+        return self
+
     # -- transparency / comment -------------------------------------------
     def set_transparent(self, color):
         """Set the transparent color (relevant when writing GIF/XPM)."""

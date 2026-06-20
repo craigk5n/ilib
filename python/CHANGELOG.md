@@ -10,7 +10,10 @@ This changelog tracks the **Python package** (`ilib-graphics`, imported as
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+- Image filter methods mirroring the new C point operations:
+  `Image.greyscale()` (alias `grayscale()`), `negate()`,
+  `brightness_contrast()`, `gamma()`, and `threshold()`.
 
 ## [0.1.0] - 2026-06-20
 

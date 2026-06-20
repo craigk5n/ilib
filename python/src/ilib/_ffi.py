@@ -52,6 +52,13 @@ IError ICopyImageScaled(IImage source, IImage dest, IGC gc, int src_x,
                         unsigned int src_height, int dest_x, int dest_y,
                         unsigned int dest_width, unsigned int dest_height);
 IError IReduceColors(IImage image, unsigned int max_colors);
+
+IError IGreyscale(IImage image);
+IError INegate(IImage image);
+IError IBrightnessContrast(IImage image, int brightness, int contrast);
+IError IGamma(IImage image, double gamma);
+IError IThreshold(IImage image, unsigned int threshold);
+
 IError _IFreeImage(IImage image);
 unsigned int IImageHeight(IImage image);
 unsigned int IImageWidth(IImage image);

@@ -4,7 +4,7 @@ set(ILIB_SOURCES
   IArcProp.c IBMP.c IColor.c ICopyImg.c
   IDrawArc.c IDrawCir.c IDrawCurve.c IDrawEll.c IDrawLin.c IDrawPol.c IDrawPt.c
   IDrawRec.c IDrawStr.c IErrorStr.c IFileType.c
-  IFillArc.c IFillCir.c IFillEll.c IFillPol.c IFillRec.c IFlood.c
+  IFillArc.c IFillCir.c IFillEll.c IFillPol.c IFillRec.c IFilter.c IFlood.c
   IFont.c IFontBDF.c IFontTTF.c IGC.c IGIF.c IImage.c IJPEG.c
   IPGM.c IPixel.c IPNG.c IPPM.c IQuantize.c ITextDim.c IXPM.c)
 # NOTE: IXBM.c is intentionally excluded. It has never compiled (an
