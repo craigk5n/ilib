@@ -147,6 +147,34 @@ TEST set_antialias_rejects_bad_handle ( void )
   PASS ();
 }
 
+/* An anti-aliased circle covers its cardinal points and produces blended
+   edge pixels. */
+TEST aa_circle_blends_edges ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+  IColor black = IAllocColor ( 0, 0, 0 );
+
+  ISetForeground ( gc, black );
+  ASSERT_EQ ( INoError, ISetAntiAlias ( gc, 1 ) );
+  ASSERT_EQ ( INoError, IDrawCircle ( im, gc, 5, 5, 3 ) );
+
+  /* cardinal points of the radius-3 circle are fully covered (dark) */
+  ASSERT ( px_r ( im, 8, 5 ) < 128 );
+  ASSERT ( px_r ( im, 2, 5 ) < 128 );
+  ASSERT ( px_r ( im, 5, 8 ) < 128 );
+  ASSERT ( px_r ( im, 5, 2 ) < 128 );
+  /* the center is untouched (white) */
+  ASSERT_EQ ( 255, px_r ( im, 5, 5 ) );
+  /* and there is at least one blended edge pixel */
+  ASSERT ( has_blended_pixel ( im ) );
+
+  IFreeColor ( black );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
 SUITE ( draw )
 {
   RUN_TEST ( draw_point_sets_one_pixel );
@@ -156,6 +184,7 @@ SUITE ( draw )
   RUN_TEST ( aliased_line_is_binary );
   RUN_TEST ( aa_line_blends_edges );
   RUN_TEST ( set_antialias_rejects_bad_handle );
+  RUN_TEST ( aa_circle_blends_edges );
 }
 
 GREATEST_MAIN_DEFS ();
