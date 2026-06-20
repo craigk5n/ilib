@@ -134,6 +134,12 @@ One-time setup on the index side: create the project and register this repo's
 `python-publish.yml` workflow as a trusted publisher under the `pypi` (and
 `testpypi`) environments. See the comments at the top of the workflow file.
 
+## Changelog
+
+Notable changes to the Python package are recorded in
+[CHANGELOG.md](CHANGELOG.md) (the package versions independently of the C
+library).
+
 ## License
 
 GPL-2.0-only, matching the Ilib C library.
