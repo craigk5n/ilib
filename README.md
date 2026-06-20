@@ -7,11 +7,25 @@
 Copyright (C) 2001-2016 Craig Knudsen, craig@k5n.us — https://www.k5n.us/Ilib.php
 
 Ilib is a library (and some tools and examples) written in C
-that can read, create, manipulate and save images.  It is capable
-of using X11 BDF fonts for drawing text.  That means you get
-lots (208, to be exact) of fonts to use.  You can even create your
-own if you know how to create an X11 BDF font.  It can read and
+that can read, create, manipulate and save images.  It can read and
 write PPM, PGM, XPM, BMP, GIF, PNG and JPG image formats.
+
+## Graphics
+
+The drawing API is modeled on a subset of the X11 graphics functions:
+
+- **Shapes:** points, lines, rectangles, polygons, circles, ellipses, and arcs,
+  each with outline (`IDraw*`) and filled (`IFill*`) forms, plus flood fill.
+- **Curves:** cubic Bézier paths (`IDrawBezier`) and Catmull-Rom splines through
+  points (`IDrawSpline`) — handy for line/area charts.
+- **Anti-aliasing:** enable per graphics context with `ISetAntiAlias()`; lines,
+  curves, circles, ellipses, arcs, and fills all render with smooth edges.
+- **Color & alpha:** RGB and named colors; an optional alpha channel
+  (`IOPTION_ALPHA`) with source-over compositing (`ISetBlendMode(IBLEND_OVER)`)
+  for translucent drawing.
+- **Text:** X11 BDF bitmap fonts (208 ship in the distribution), and — when
+  built with FreeType — scalable, anti-aliased TrueType/OpenType fonts
+  (`ILoadFontFromFileTTF`). Both support text styles and rotation.
 
 Note: This code was originally developed in the late 1990s in "classic"
 (K&R) C. It has since been modernized to ISO C (ANSI-style prototypes) and

@@ -946,6 +946,35 @@ IError IDrawPolygon (
 );
 
 /**
+ * Draw a chain of cubic Bezier curves. points[0] is the start point; each
+ * following group of three points is (control1, control2, end) of one cubic
+ * segment, so npoints must be 1 + 3k (4, 7, 10, ...). The curve honors the GC
+ * line style and anti-aliasing.
+ */
+IError IDrawBezier (
+#ifndef _NO_PROTO
+  IImage image,   /* image */
+  IGC gc,         /* graphics context */
+  IPoint *points, /* start point followed by (c1, c2, end) triples */
+  int npoints     /* size of above array (1 + 3k) */
+#endif
+);
+
+/**
+ * Draw a smooth Catmull-Rom spline that passes through all the given points
+ * (good for line/area charts). npoints must be >= 2 (two points draw a line).
+ * The curve honors the GC line style and anti-aliasing.
+ */
+IError IDrawSpline (
+#ifndef _NO_PROTO
+  IImage image,   /* image */
+  IGC gc,         /* graphics context */
+  IPoint *points, /* points the curve passes through */
+  int npoints     /* size of above array */
+#endif
+);
+
+/**
  * Draws a rectangle onto the image of the specified width and
  * height using the graphic context's current line stlye (
  * see ISetLineStyle()).
