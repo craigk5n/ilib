@@ -57,11 +57,3 @@ Makefile.in
 /clients/iwebreprt/iwebreprt
 /examples/iconvert/iconvert
 /examples/isample/isample
-
-# Perl module build artifacts
-/perl/Makefile
-/perl/Makefile.old
-/perl/blib/
-/perl/pm_to_blib
-/perl/*.bs
-/perl/Ilib.c

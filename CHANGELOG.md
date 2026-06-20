@@ -89,6 +89,10 @@ without breaking the public API.
 - A use-after-free in the font cache and several smaller correctness issues.
 
 ### Removed
+- The bundled Perl XS bindings (`perl/`). They were 1999-era alpha code that
+  wrapped only a handful of functions, linked against the old `-lIlib`/`-lX11`
+  build, and had a broken `IColor` typemap. Rather than carry incomplete
+  bindings, they have been dropped; language bindings can be revisited later.
 - Legacy hand-written makefiles and a half-finished Autotools setup.
 - The never-compiling `IXBM.c` and the bespoke `h2html.pl` doc generator.
 
