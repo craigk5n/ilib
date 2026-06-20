@@ -229,3 +229,20 @@ IError ISetBlendMode ( IGC gc, IBlendMode mode )
 
   return ( INoError );
 }
+
+
+IError ISetAntiAlias ( IGC gc, int on )
+{
+  IGCP *gcp = (IGCP *) gc;
+
+  if ( gcp ) {
+    if ( gcp->magic != IMAGIC_GC )
+      return ( IInvalidGC );
+  }
+  else
+    return ( IInvalidGC );
+
+  gcp->aa = on ? 1 : 0;
+
+  return ( INoError );
+}

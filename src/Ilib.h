@@ -737,6 +737,20 @@ IError ISetBlendMode (
 );
 
 /**
+ * Enable or disable anti-aliasing of drawing primitives on a graphics context
+ * (off by default). When on, IDrawLine() renders smooth (coverage-blended)
+ * edges for thin solid lines; thick or dashed lines fall back to the aliased
+ * rasterizer. Anti-aliasing composites edge coverage regardless of the blend
+ * mode. (This is independent of ISetAntiAliasedFont(), which affects text.)
+ */
+IError ISetAntiAlias (
+#ifndef _NO_PROTO
+  IGC gc, /* graphics context */
+  int on  /* non-zero to enable */
+#endif
+);
+
+/**
  * Set the background color of a graphics context.
  * This will affect colors when using text styles.
  */
