@@ -73,7 +73,7 @@ img.free()
 ```
 
 ```bash
-pip install ilib                      # from PyPI (once published)
+pip install ilib-graphics             # from PyPI (once published); import ilib
 # or, straight from the repo without cloning:
 pip install "git+https://github.com/craigk5n/ilib.git#subdirectory=python"
 # or, from a local checkout:
