@@ -1,6 +1,10 @@
 # Ilib
-Copyright (C) 2001-2016 Craig Knudsen, craig@k5n.us
-http://www.k5n.us/Ilib.php
+
+[![CI](https://github.com/craigk5n/ilib/actions/workflows/ci.yml/badge.svg)](https://github.com/craigk5n/ilib/actions/workflows/ci.yml)
+[![Docs](https://github.com/craigk5n/ilib/actions/workflows/docs.yml/badge.svg)](https://craigk5n.github.io/ilib/)
+[![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](COPYING)
+
+Copyright (C) 2001-2016 Craig Knudsen, craig@k5n.us — https://www.k5n.us/Ilib.php
 
 Ilib is a library (and some tools and examples) written in C
 that can read, create, manipulate and save images.  It is capable
@@ -135,3 +139,16 @@ tool. More BDF fonts:
 - [Search the web](https://www.google.com/search?q=timR24.bdf)
 - [Apple X11 fonts](https://opensource.apple.com/source/X11fonts/X11fonts-10.2/font-adobe-100dpi/font-adobe-100dpi-X11R7.0-1.0.0/)
 - Edit or create BDF fonts with any [BDF font editor](https://www.google.com/search?q=bdf+font+editor).
+
+## Contributing
+
+Bug reports and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md)
+for the build/test workflow and coding conventions, and
+[SECURITY.md](SECURITY.md) for reporting vulnerabilities in the image parsers.
+Notable changes are recorded in [CHANGELOG.md](CHANGELOG.md).
+
+## License
+
+Ilib is licensed under the GNU General Public License, version 2 only
+(`GPL-2.0-only`). See [COPYING](COPYING) for the full text. Each source file
+carries an `SPDX-License-Identifier: GPL-2.0-only` tag.

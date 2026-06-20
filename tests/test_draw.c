@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
 /* Drawing primitives, checked with golden-pixel assertions via white-box
    access to the image buffer (see pixutil.h). */
 

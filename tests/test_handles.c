@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
 /* Handle validation: the magic-number guards must reject NULL and bogus
    handles with the right IError instead of crashing. */
 

@@ -1,0 +1,62 @@
+name: Bug report
+description: Report a crash, incorrect output, or other defect.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug. For **security vulnerabilities** in the image
+        or font parsers, please follow [SECURITY.md](../blob/master/SECURITY.md)
+        instead of opening a public issue.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the bug and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: >
+        Commands, a code snippet, or a minimal input file that triggers the
+        problem. Attaching the offending image/font file is very helpful.
+      placeholder: |
+        1. Build with `cmake -B build && cmake --build build`
+        2. Run `...`
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      description: Release tag or `git rev-parse HEAD`.
+    validations:
+      required: true
+  - type: dropdown
+    id: format
+    attributes:
+      label: Image format involved (if any)
+      options:
+        - "Not format-specific"
+        - PPM/PGM
+        - XPM
+        - BMP
+        - GIF
+        - PNG
+        - JPEG
+        - BDF font
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, compiler + version, and which codecs were enabled.
+      placeholder: "Ubuntu 24.04, gcc 13, libpng/libjpeg/giflib enabled"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output / sanitizer trace
+      description: Any error output. An ASan/UBSan trace is ideal for crashes.
+      render: shell

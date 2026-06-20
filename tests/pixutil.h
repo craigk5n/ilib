@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * White-box pixel access for tests. Ilib exposes no public per-pixel getter,
  * so tests reach into the internal IImageP layout (src/IlibP.h) to read back

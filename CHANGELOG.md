@@ -1,0 +1,51 @@
+# Changelog
+
+All notable changes to this project are documented here. The format is based on
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project aims
+to follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+A modernization effort brought the late-1990s codebase up to current practice
+without breaking the public API.
+
+### Added
+- CMake build system with optional codec detection, install rules, an exported
+  CMake package config (`find_package(Ilib)`), and a relocatable `ilib.pc`.
+- GitHub Actions CI: gcc/clang on Linux and macOS, a no-optional-codecs build,
+  AddressSanitizer/UBSan, coverage, a libFuzzer decoder smoke test, and a
+  blocking `clang-tidy` static-analysis gate.
+- Test suite (greatest + CTest) covering handle validation, drawing,
+  format round-trips, and malformed-input decoder hardening.
+- Doxygen API reference published to GitHub Pages; man pages for the client
+  tools; a usage tutorial in `docs/`.
+- Packaging: bundled BDF fonts install to `share/ilib/fonts`; CPack source and
+  binary tarballs; a tag-triggered release workflow producing artifacts with
+  checksums.
+- `SPDX-License-Identifier` headers across the sources.
+
+### Changed
+- Converted all K&R function definitions to ISO C prototypes; the library and
+  clients build warning-clean under `-Wall -Wextra` (`-Werror` in CI).
+- GIF support ported to giflib 5.x.
+- Single-sourced the version (`src/Ilib.h`) and de-duplicated the public header.
+- Fixed the dead `ilib.sourceforge.net` URLs.
+
+### Fixed
+- Numerous decoder bugs found via fuzzing and sanitizers: heap overflows,
+  out-of-bounds reads, integer-overflow allocations, and leaks on error paths
+  in the PPM/PGM/XPM/BMP/GIF/PNG/JPEG readers; a GIF reader infinite loop on
+  image-less input.
+- Null-pointer dereferences in the GC setters, font parser, and text drawing.
+- A use-after-free in the font cache and several smaller correctness issues.
+
+### Removed
+- Legacy hand-written makefiles and a half-finished Autotools setup.
+- The never-compiling `IXBM.c` and the bespoke `h2html.pl` doc generator.
+
+## [1.1.10]
+
+Baseline release prior to the modernization work described above.
+
+[Unreleased]: https://github.com/craigk5n/ilib/compare/v1.1.10...HEAD
+[1.1.10]: https://github.com/craigk5n/ilib/releases/tag/v1.1.10

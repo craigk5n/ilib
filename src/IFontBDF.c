@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
 /*
 ** Routines for reading in a BDF (font) file.
 ** BDF files can be obtained as part of the X Windows System
