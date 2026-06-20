@@ -202,6 +202,14 @@ IError _IReadBMP (
 #endif
 );
 
+IError _IWriteBMP (
+#ifndef _NO_PROTO
+  FILE *fp,
+  IImageP *image,
+  IOptions options
+#endif
+);
+
 typedef struct {
   char *name;
   IError ( *read_func ) (
@@ -243,7 +251,7 @@ static IFormatDef IFileFormats[] = {
 #else
   { /* IFORMAT_JPEG */ "JPEG", NULL, NULL, 24, 0 },
 #endif
-  { /* IFORMAT_BMP */ "BMP", _IReadBMP, NULL, 24, 0 },
+  { /* IFORMAT_BMP */ "BMP", _IReadBMP, _IWriteBMP, 24, 0 },
 };
 #endif /* IIncludeFileFormats */
 

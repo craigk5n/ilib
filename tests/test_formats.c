@@ -79,6 +79,42 @@ TEST pgm_roundtrip_greyscale ( void )
   PASS ();
 }
 
+/* BMP is now writable as well as readable. Use a non-square, non-4-aligned
+   width so the row-padding path is exercised, and check a couple of pixels and
+   the corners survive the bottom-up row ordering. */
+TEST bmp_roundtrip ( void )
+{
+  IImage im = ICreateImage ( 5, 3, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+  IColor red = IAllocColor ( 255, 0, 0 );
+  IColor green = IAllocColor ( 0, 255, 0 );
+  IError wr, rd;
+  IImage back;
+
+  ISetForeground ( gc, red );
+  IDrawPoint ( im, gc, 0, 0 ); /* top-left */
+  ISetForeground ( gc, green );
+  IDrawPoint ( im, gc, 4, 2 ); /* bottom-right */
+
+  back = roundtrip ( im, IFORMAT_BMP, &wr, &rd );
+  ASSERT_EQ ( INoError, wr );
+  ASSERT_EQ ( INoError, rd );
+  ASSERT ( back != NULL );
+  ASSERT_EQ ( 5, px_width ( back ) );
+  ASSERT_EQ ( 3, px_height ( back ) );
+  ASSERT_EQ ( 255, px_r ( back, 0, 0 ) );
+  ASSERT_EQ ( 0, px_g ( back, 0, 0 ) );
+  ASSERT_EQ ( 255, px_g ( back, 4, 2 ) );
+  ASSERT_EQ ( 0, px_r ( back, 4, 2 ) );
+
+  IFreeImage ( back );
+  IFreeColor ( red );
+  IFreeColor ( green );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
 /* Feeding garbage to a decoder must return an error, not crash. */
 TEST garbage_ppm_rejected ( void )
 {
@@ -137,6 +173,7 @@ SUITE ( formats )
 {
   RUN_TEST ( ppm_roundtrip );
   RUN_TEST ( pgm_roundtrip_greyscale );
+  RUN_TEST ( bmp_roundtrip );
   RUN_TEST ( garbage_ppm_rejected );
   RUN_TEST ( truncated_ppm_rejected );
   RUN_TEST ( optional_codec_write_is_clean );

@@ -11,8 +11,7 @@ that can read, create, manipulate and save images.  It is capable
 of using X11 BDF fonts for drawing text.  That means you get
 lots (208, to be exact) of fonts to use.  You can even create your
 own if you know how to create an X11 BDF font.  It can read and
-write PPM, XPM, GIF, PNG and JPG image format.  It can read (but not
-yet write) BMP.
+write PPM, PGM, XPM, BMP, GIF, PNG and JPG image formats.
 
 Note: This code was originally developed in the late 1990s in "classic"
 (K&R) C. It has since been modernized to ISO C (ANSI-style prototypes) and

@@ -5,7 +5,7 @@
  * Image library
  *
  * Description:
- *	Read BMP files.
+ *	Read and write BMP files.
  *
  * History:
  *	01-Apr-00	Jim Winstead	jimw@trainedmonkey.com
@@ -206,7 +206,9 @@ IError _IReadBMP ( FILE *fp, IOptions options, IImageP **image_return )
     goto fail;
 
   if ( depth == 24 && compression == BI_RGB ) {
-    int x, y;
+    int x, y, p;
+    /* BMP rows are padded to a 4-byte boundary. */
+    int pad = ( 4 - ( ( w * 3 ) % 4 ) ) % 4;
     /* slurp in the data */
     for ( y = h - 1; y >= 0; y-- ) {
       for ( x = 0; x < w; x++ ) {
@@ -221,10 +223,13 @@ IError _IReadBMP ( FILE *fp, IOptions options, IImageP **image_return )
         *( image->data + ( y * 3 * w ) + ( x * 3 ) + 1 ) = g;
         *( image->data + ( y * 3 * w ) + ( x * 3 ) + 2 ) = r;
       }
+      for ( p = 0; p < pad; p++ )
+        fgetc ( fp );
     }
   }
   else if ( depth == 16 && compression == BI_BITFIELDS ) {
-    int x, y;
+    int x, y, p;
+    int pad = ( 4 - ( ( w * 2 ) % 4 ) ) % 4;
     /* slurp in the data */
     for ( y = h - 1; y >= 0; y-- ) {
       for ( x = 0; x < w; x++ ) {
@@ -238,10 +243,13 @@ IError _IReadBMP ( FILE *fp, IOptions options, IImageP **image_return )
         *( pixel + 1 ) = ( ( ( color & greenmask ) >> greenshift ) << 8 ) >> greenbits;
         *( pixel + 2 ) = ( ( ( color & bluemask ) >> blueshift ) << 8 ) >> bluebits;
       }
+      for ( p = 0; p < pad; p++ )
+        fgetc ( fp );
     }
   }
   else if ( depth == 8 && compression == BI_RGB ) {
-    int x, y;
+    int x, y, p;
+    int pad = ( 4 - ( w % 4 ) ) % 4;
     /*fprintf(stderr, "8 bit, no compression\n");*/
     for ( y = h - 1; y >= 0; y-- ) {
       for ( x = 0; x < w; x++ ) {
@@ -251,6 +259,8 @@ IError _IReadBMP ( FILE *fp, IOptions options, IImageP **image_return )
           goto fail;
         SET_PIXEL ( pixel, byte );
       }
+      for ( p = 0; p < pad; p++ )
+        fgetc ( fp );
     }
   }
   else if ( depth <= 8 && compression ) {
@@ -353,4 +363,89 @@ fail:
   if ( image )
     _IFreeImage ( image );
   return ( IInvalidFormat );
+}
+
+static int WriteShort ( FILE *fp, unsigned int v )
+{
+  if ( fputc ( (int) ( v & 0xff ), fp ) == EOF )
+    return 0;
+  if ( fputc ( (int) ( ( v >> 8 ) & 0xff ), fp ) == EOF )
+    return 0;
+  return 1;
+}
+
+static int WriteLong ( FILE *fp, unsigned int v )
+{
+  int i;
+  for ( i = 0; i < 4; i++ ) {
+    if ( fputc ( (int) ( ( v >> ( i * 8 ) ) & 0xff ), fp ) == EOF )
+      return 0;
+  }
+  return 1;
+}
+
+/* Write a 24-bit uncompressed (BI_RGB) BMP. Greyscale images are expanded to
+   R=G=B. BMP stores rows bottom-to-top, pixels as BGR, each row padded to a
+   4-byte boundary. */
+IError _IWriteBMP ( FILE *fp, IImageP *image, IOptions options )
+{
+  int row, col, i;
+  int width = image->width;
+  int height = image->height;
+  int row_bytes = width * 3;
+  int pad = ( 4 - ( row_bytes % 4 ) ) % 4;
+  unsigned int image_size = (unsigned int) ( row_bytes + pad ) * height;
+  unsigned char *ptr;
+
+  (void) options;
+
+  if ( width <= 0 || height <= 0 )
+    return ( IInvalidImage );
+
+  /* BITMAPFILEHEADER (14 bytes) */
+  if ( fputc ( 'B', fp ) == EOF || fputc ( 'M', fp ) == EOF )
+    return ( IErrorWriting );
+  if ( !WriteLong ( fp, 14 + 40 + image_size ) || /* file size */
+       !WriteLong ( fp, 0 ) ||                    /* reserved */
+       !WriteLong ( fp, 14 + 40 ) )               /* offset to pixel data */
+    return ( IErrorWriting );
+
+  /* BITMAPINFOHEADER (40 bytes) */
+  if ( !WriteLong ( fp, 40 ) ||                    /* header size */
+       !WriteLong ( fp, (unsigned int) width ) ||  /* width */
+       !WriteLong ( fp, (unsigned int) height ) || /* height (bottom-up) */
+       !WriteShort ( fp, 1 ) ||                    /* planes */
+       !WriteShort ( fp, 24 ) ||                   /* bits per pixel */
+       !WriteLong ( fp, BI_RGB ) ||                /* compression */
+       !WriteLong ( fp, image_size ) ||            /* image size */
+       !WriteLong ( fp, 2835 ) ||                  /* x px/meter (~72 dpi) */
+       !WriteLong ( fp, 2835 ) ||                  /* y px/meter */
+       !WriteLong ( fp, 0 ) ||                     /* colors used */
+       !WriteLong ( fp, 0 ) )                      /* important colors */
+    return ( IErrorWriting );
+
+  for ( row = height - 1; row >= 0; row-- ) {
+    for ( col = 0; col < width; col++ ) {
+      unsigned char r, g, b;
+      if ( image->greyscale ) {
+        ptr = image->data + ( row * width ) + col;
+        r = g = b = *ptr;
+      }
+      else {
+        ptr = image->data + ( row * width * 3 ) + ( col * 3 );
+        r = *ptr;
+        g = *( ptr + 1 );
+        b = *( ptr + 2 );
+      }
+      if ( fputc ( b, fp ) == EOF || fputc ( g, fp ) == EOF ||
+           fputc ( r, fp ) == EOF )
+        return ( IErrorWriting );
+    }
+    for ( i = 0; i < pad; i++ ) {
+      if ( fputc ( 0, fp ) == EOF )
+        return ( IErrorWriting );
+    }
+  }
+
+  return ( INoError );
 }
