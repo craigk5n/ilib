@@ -5,7 +5,7 @@ set(ILIB_SOURCES
   IDrawArc.c IDrawCir.c IDrawEll.c IDrawLin.c IDrawPol.c IDrawPt.c
   IDrawRec.c IDrawStr.c IErrorStr.c IFileType.c
   IFillArc.c IFillCir.c IFillEll.c IFillPol.c IFillRec.c IFlood.c
-  IFont.c IFontBDF.c IGC.c IGIF.c IImage.c IJPEG.c
+  IFont.c IFontBDF.c IFontTTF.c IGC.c IGIF.c IImage.c IJPEG.c
   IPGM.c IPixel.c IPNG.c IPPM.c IQuantize.c ITextDim.c IXPM.c)
 # NOTE: IXBM.c is intentionally excluded. It has never compiled (an
 # unterminated string literal since the initial checkin), its only unique
@@ -72,6 +72,18 @@ if(ILIB_WITH_GIF)
   endif()
 endif()
 
+set(_freetype_enabled OFF)
+if(ILIB_WITH_FREETYPE)
+  find_package(Freetype)
+  if(Freetype_FOUND)
+    target_link_libraries(ilib PRIVATE Freetype::Freetype)
+    target_compile_definitions(ilib PRIVATE HAVE_FREETYPE)
+    set(_freetype_enabled ON)
+  else()
+    message(STATUS "FreeType not found -- TrueType font support disabled")
+  endif()
+endif()
+
 # Math library (sin/cos/sqrt in the drawing routines) -- separate lib on Linux.
 find_library(ILIB_MATH_LIBRARY m)
 if(ILIB_MATH_LIBRARY)
@@ -82,6 +94,7 @@ endif()
 set(ILIB_PNG_ENABLED  ${_png_enabled}  PARENT_SCOPE)
 set(ILIB_JPEG_ENABLED ${_jpeg_enabled} PARENT_SCOPE)
 set(ILIB_GIF_ENABLED  ${_gif_enabled}  PARENT_SCOPE)
+set(ILIB_FREETYPE_ENABLED ${_freetype_enabled} PARENT_SCOPE)
 
 # --- Install ----------------------------------------------------------------
 install(TARGETS ilib

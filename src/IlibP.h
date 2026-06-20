@@ -76,9 +76,13 @@ typedef struct {
   IColorP *transparent;      /* transparent color */
 } IImageP;
 
+#define IFONT_BDF 0 /* X11 BDF bitmap font (IFontBDF) */
+#define IFONT_TTF 1 /* scalable font via FreeType (IFontTTF) */
+
 typedef struct {
   unsigned int magic; /* memory verification */
   char *name;
+  int type; /* IFONT_BDF (default) or IFONT_TTF */
 } IFontP;
 
 typedef struct {
@@ -296,6 +300,42 @@ IError _IFontBDFGetSize (
   unsigned int *height_return /* out: height of font */
 #endif
 );
+
+#ifdef HAVE_FREETYPE
+/* Scalable (TrueType/OpenType) fonts via FreeType. The face is kept in a
+   private registry keyed by name, mirroring the BDF backend. */
+IError _IFontTTFLoad (
+#ifndef _NO_PROTO
+  char *name,    /* registry name */
+  char *path,    /* path to .ttf/.otf file */
+  int pixel_size /* nominal pixel height */
+#endif
+);
+
+IError _IFontTTFGetSize (
+#ifndef _NO_PROTO
+  char *name,
+  unsigned int *height_return
+#endif
+);
+
+IError _IFontTTFDrawString (
+#ifndef _NO_PROTO
+  IImageP *image,
+  IGCP *gc,
+  int x,
+  int y,
+  char *text,
+  unsigned int len
+#endif
+);
+
+void _IFontTTFFree (
+#ifndef _NO_PROTO
+  char *name
+#endif
+);
+#endif /* HAVE_FREETYPE */
 
 /*
 ** Define a function to draw a point.  Must be inline because this
