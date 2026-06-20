@@ -10,6 +10,8 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- `IGetPixel()` / `ISetPixel()`: public per-pixel read/write accessors (RGB,
+  GC-independent), with bounds and handle validation.
 - `IReduceColors()`: median-cut color quantization to fit an image into a
   bounded palette. The GIF writer now calls it automatically, replacing the
   previous first-256-colors hack (which collapsed all excess colors to one

@@ -352,6 +352,38 @@ unsigned int IImageWidth (
 );
 
 /**
+ * Set the color of a single pixel (RGB, 0-255 per channel). For a greyscale
+ * image the red value is stored. Returns IInvalidArgument if (x,y) is outside
+ * the image or any channel exceeds 255.
+ */
+IError ISetPixel (
+#ifndef _NO_PROTO
+  IImage image,       /* image */
+  int x,              /* x coordinate */
+  int y,              /* y coordinate */
+  unsigned int red,   /* red value (0-255) */
+  unsigned int green, /* green value (0-255) */
+  unsigned int blue   /* blue value (0-255) */
+#endif
+);
+
+/**
+ * Get the color of a single pixel. For a greyscale image all three channels
+ * return the stored value. Any of the return pointers may be NULL. Returns
+ * IInvalidArgument if (x,y) is outside the image.
+ */
+IError IGetPixel (
+#ifndef _NO_PROTO
+  IImage image,               /* image */
+  int x,                      /* x coordinate */
+  int y,                      /* y coordinate */
+  unsigned int *red_return,   /* out: red value (or NULL) */
+  unsigned int *green_return, /* out: green value (or NULL) */
+  unsigned int *blue_return   /* out: blue value (or NULL) */
+#endif
+);
+
+/**
  * Set the comment.
  */
 IError ISetComment (
