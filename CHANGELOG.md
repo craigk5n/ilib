@@ -19,12 +19,14 @@ without breaking the public API.
   produces an RGBA image when the file has alpha (or a tRNS chunk; grey/palette
   inputs are normalized to RGB/RGBA), and the writer emits `PNG_COLOR_TYPE_RGBA`
   for alpha images. Formats that cannot store alpha still flatten over white.
-- Anti-aliased line and circle drawing — Phase C of the alpha/anti-aliasing
-  work: `ISetAntiAlias()` toggles per-GC anti-aliasing; when on, `IDrawLine()`
-  renders smooth thin solid lines via Xiaolin Wu's algorithm and `IDrawCircle()`
-  uses a dedicated Wu circle rasterizer. Thick/dashed lines, ellipses, and
-  partial arcs keep their existing rasterizers (arcs/ellipses are still
-  anti-aliased through their AA line segments).
+- Anti-aliased drawing — Phase C of the alpha/anti-aliasing work:
+  `ISetAntiAlias()` toggles per-GC anti-aliasing. When on, `IDrawLine()` renders
+  smooth thin solid lines (Xiaolin Wu), `IDrawCircle()` uses a Wu circle
+  rasterizer, `IFillPolygon()` fills with supersampled edge coverage (also
+  smoothing filled rectangles/triangles/area shapes), and `IFillCircle()` fills
+  a smooth disk. Thick/dashed lines, ellipses, and partial arcs keep their
+  existing rasterizers (still anti-aliased through their AA line segments where
+  applicable).
 - Optional alpha channel (RGBA) and source-over compositing — Phase A of the
   alpha/anti-aliasing work (see `docs/design/alpha-aa.md`):
   `ICreateImage(IOPTION_ALPHA)`, `IAllocColorAlpha()`, `IGetPixelAlpha()` /
