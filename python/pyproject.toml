@@ -30,6 +30,9 @@ Source = "https://github.com/craigk5n/ilib"
 [project.optional-dependencies]
 test = ["pytest>=7"]
 
+[tool.setuptools]
+license-files = ["LICENSE"]
+
 [tool.setuptools.dynamic]
 # Read statically from the import-free _version.py (no package import at build).
 version = { attr = "ilib._version.__version__" }
