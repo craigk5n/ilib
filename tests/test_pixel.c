@@ -159,6 +159,51 @@ TEST blend_over_rgb ( void )
   PASS ();
 }
 
+/* Phase B: the blend mode now reaches the other solid primitives, not just
+   IDrawPoint. A 50%-alpha fill over white lands near 127 everywhere. */
+TEST blend_over_fill_rectangle ( void )
+{
+  IImage im = ICreateImage ( 4, 4, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+  IColor half_black = IAllocColorAlpha ( 0, 0, 0, 128 );
+  unsigned int r;
+
+  ISetForeground ( gc, half_black );
+  ISetBlendMode ( gc, IBLEND_OVER );
+  ASSERT_EQ ( INoError, IFillRectangle ( im, gc, 0, 0, 4, 4 ) );
+
+  ASSERT_EQ ( INoError, IGetPixel ( im, 0, 0, &r, NULL, NULL ) );
+  ASSERT_IN_RANGE ( 127, r, 1 );
+  ASSERT_EQ ( INoError, IGetPixel ( im, 3, 3, &r, NULL, NULL ) );
+  ASSERT_IN_RANGE ( 127, r, 1 );
+
+  IFreeColor ( half_black );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
+/* A plain (non-AA) line composites under IBLEND_OVER too. */
+TEST blend_over_line ( void )
+{
+  IImage im = ICreateImage ( 6, 6, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+  IColor half_black = IAllocColorAlpha ( 0, 0, 0, 128 );
+  unsigned int r;
+
+  ISetForeground ( gc, half_black );
+  ISetBlendMode ( gc, IBLEND_OVER );
+  ASSERT_EQ ( INoError, IDrawLine ( im, gc, 0, 3, 5, 3 ) );
+
+  ASSERT_EQ ( INoError, IGetPixel ( im, 2, 3, &r, NULL, NULL ) );
+  ASSERT_IN_RANGE ( 127, r, 1 );
+
+  IFreeColor ( half_black );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
 /* Blending over an opaque RGBA destination keeps it opaque. */
 TEST blend_over_rgba_stays_opaque ( void )
 {
@@ -259,6 +304,8 @@ SUITE ( pixel )
   RUN_TEST ( setpixel_on_rgba_is_opaque );
   RUN_TEST ( alpha_greyscale_rejected );
   RUN_TEST ( blend_over_rgb );
+  RUN_TEST ( blend_over_fill_rectangle );
+  RUN_TEST ( blend_over_line );
   RUN_TEST ( blend_over_rgba_stays_opaque );
   RUN_TEST ( rgba_flattens_on_write );
   RUN_TEST ( png_rgba_roundtrips );

@@ -304,28 +304,38 @@ IError _IFontBDFGetSize (
 ** Arguments are ( ImageP *, IGCP *, int, int ).
 */
 #define _IDrawPoint _ISetPoint
-#define _ISetPoint( i, g, x, y )                                                       \
-  {                                                                                    \
-    unsigned char *ptrX;                                                               \
-    if ( ( x ) >= 0 && ( x ) < ( i )->width && ( y ) >= 0 && ( y ) < ( i )->height ) { \
-      if ( ( i )->greyscale ) {                                                        \
-        ptrX = ( i )->data + ( ( y ) * ( i )->width ) + ( x );                         \
-        *ptrX = ( g )->foreground->red;                                                \
-      }                                                                                \
-      else if ( ( i )->channels == 4 ) {                                               \
-        ptrX = ( i )->data + ( ( y ) * ( i )->width + ( x ) ) * 4;                     \
-        *ptrX = ( g )->foreground->red;                                                \
-        *( ptrX + 1 ) = ( g )->foreground->green;                                      \
-        *( ptrX + 2 ) = ( g )->foreground->blue;                                       \
-        *( ptrX + 3 ) = ( g )->foreground->alpha;                                      \
-      }                                                                                \
-      else {                                                                           \
-        ptrX = ( i )->data + ( ( y ) * ( i )->width * 3 ) + ( (x) *3 );                \
-        *ptrX = ( g )->foreground->red;                                                \
-        *( ptrX + 1 ) = ( g )->foreground->green;                                      \
-        *( ptrX + 2 ) = ( g )->foreground->blue;                                       \
-      }                                                                                \
-    }                                                                                  \
+/* Write the GC foreground at (x,y). With IBLEND_OVER the foreground is
+   composited (source-over) via _IBlendPoint; otherwise it overwrites the
+   pixel. The replace path keeps separate literal-stride branches per channel
+   count for speed. */
+#define _ISetPoint( i, g, x, y )                                          \
+  {                                                                       \
+    if ( ( g )->blend_mode == IBLEND_OVER ) {                             \
+      _IBlendPoint ( ( i ), ( g ), ( x ), ( y ), 255 );                   \
+    }                                                                     \
+    else {                                                                \
+      unsigned char *ptrX;                                                \
+      if ( ( x ) >= 0 && ( x ) < ( i )->width && ( y ) >= 0 &&            \
+           ( y ) < ( i )->height ) {                                      \
+        if ( ( i )->greyscale ) {                                         \
+          ptrX = ( i )->data + ( ( y ) * ( i )->width ) + ( x );          \
+          *ptrX = ( g )->foreground->red;                                 \
+        }                                                                 \
+        else if ( ( i )->channels == 4 ) {                                \
+          ptrX = ( i )->data + ( ( y ) * ( i )->width + ( x ) ) * 4;      \
+          *ptrX = ( g )->foreground->red;                                 \
+          *( ptrX + 1 ) = ( g )->foreground->green;                       \
+          *( ptrX + 2 ) = ( g )->foreground->blue;                        \
+          *( ptrX + 3 ) = ( g )->foreground->alpha;                       \
+        }                                                                 \
+        else {                                                            \
+          ptrX = ( i )->data + ( ( y ) * ( i )->width * 3 ) + ( (x) *3 ); \
+          *ptrX = ( g )->foreground->red;                                 \
+          *( ptrX + 1 ) = ( g )->foreground->green;                       \
+          *( ptrX + 2 ) = ( g )->foreground->blue;                        \
+        }                                                                 \
+      }                                                                   \
+    }                                                                     \
   }
 
 #define _ISetPointRGB( i, x, y, r, g, b )                                              \

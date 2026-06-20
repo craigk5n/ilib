@@ -10,6 +10,11 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- The `IBLEND_OVER` blend mode now applies to every primitive — Phase B of the
+  alpha/anti-aliasing work. The core point-write (`_ISetPoint`) composites
+  source-over when the GC blend mode is `IBLEND_OVER`, so lines, rectangles,
+  polygons, circles, arcs, fills, flood fill, and text all honor it (previously
+  only `IDrawPoint` did). The default `IBLEND_REPLACE` is unchanged.
 - PNG alpha I/O — Phase D of the alpha/anti-aliasing work: the PNG reader now
   produces an RGBA image when the file has alpha (or a tRNS chunk; grey/palette
   inputs are normalized to RGB/RGBA), and the writer emits `PNG_COLOR_TYPE_RGBA`
