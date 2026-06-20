@@ -10,6 +10,8 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- BMP write support (`IFORMAT_BMP`): 24-bit uncompressed output; greyscale
+  images are expanded to RGB. BMP was previously read-only.
 - CMake build system with optional codec detection, install rules, an exported
   CMake package config (`find_package(Ilib)`), and a relocatable `ilib.pc`.
 - GitHub Actions CI: gcc/clang on Linux and macOS, a no-optional-codecs build,
@@ -36,6 +38,8 @@ without breaking the public API.
   out-of-bounds reads, integer-overflow allocations, and leaks on error paths
   in the PPM/PGM/XPM/BMP/GIF/PNG/JPEG readers; a GIF reader infinite loop on
   image-less input.
+- BMP reader now skips the 4-byte row padding in the uncompressed paths; it
+  previously misread any BMP whose row stride was not already 4-aligned.
 - Null-pointer dereferences in the GC setters, font parser, and text drawing.
 - A use-after-free in the font cache and several smaller correctness issues.
 
