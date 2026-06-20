@@ -326,7 +326,8 @@ IError _IFontTTFDrawString (
   int x,
   int y,
   char *text,
-  unsigned int len
+  unsigned int len,
+  double angle /* degrees; 0 = horizontal left-to-right */
 #endif
 );
 
