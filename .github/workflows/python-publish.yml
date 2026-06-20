@@ -13,7 +13,8 @@ name: Publish Python package
 # the two release streams independent.
 #
 # One-time maintainer setup (on the PyPI / TestPyPI side):
-#   1. Create the project (or reserve the name) on the index.
+#   1. Create/reserve the project "ilib-graphics" on the index (the bare "ilib"
+#      name is taken by an unrelated project; the import name stays "ilib").
 #   2. Add a "trusted publisher" for this GitHub repo:
 #        Owner: craigk5n   Repo: ilib
 #        Workflow: python-publish.yml

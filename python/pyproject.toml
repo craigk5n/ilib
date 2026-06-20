@@ -3,7 +3,10 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ilib"
+# The bare "ilib" name is taken on PyPI by an unrelated project, so the
+# distribution is published as "ilib-graphics". The import name is still
+# "ilib" (import ilib).
+name = "ilib-graphics"
 dynamic = ["version"]
 description = "Python bindings (cffi) for the Ilib C raster-image library"
 readme = "README.md"

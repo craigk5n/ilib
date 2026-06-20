@@ -31,10 +31,14 @@ sudo cmake --install build      # puts libilib on the system library path
 > `libilib` installed (see above), or point `ILIB_LIBRARY` at it. Without it,
 > `import ilib` raises a clear "could not locate the Ilib shared library" error.
 
-From PyPI (once published):
+From PyPI (once published) — the distribution is named **`ilib-graphics`**
+(the bare `ilib` name was already taken); the import name is still `ilib`:
 
 ```bash
-pip install ilib
+pip install ilib-graphics
+```
+```python
+import ilib  # the import name is unchanged
 ```
 
 Straight from the repository, without cloning (pip understands the
