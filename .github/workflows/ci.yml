@@ -22,7 +22,7 @@ jobs:
     env:
       CC: ${{ matrix.cc }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
@@ -47,7 +47,7 @@ jobs:
     name: build without optional codecs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -68,7 +68,7 @@ jobs:
     # formatted with; newer versions can differ. The whole tree is kept
     # clang-format-clean, so this checks every source file.
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install clang-format-14
         run: |
           sudo apt-get update
@@ -86,7 +86,7 @@ jobs:
     # Blocking gate: the curated bugprone / static-analyzer baseline (.clang-tidy)
     # is clean, so any new finding fails the build.
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -101,7 +101,7 @@ jobs:
     name: sanitizers (asan+ubsan)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -117,7 +117,7 @@ jobs:
     name: coverage
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -138,7 +138,7 @@ jobs:
           lcov --list coverage.info
           genhtml coverage.info --output-directory coverage-html 2>/dev/null || true
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-html
           path: coverage-html
@@ -150,7 +150,7 @@ jobs:
     env:
       CC: clang
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install dependencies
         run: |
           sudo apt-get update
