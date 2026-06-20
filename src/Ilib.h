@@ -305,6 +305,20 @@ IError ICopyImageScaled (
 #endif
 );
 
+/**
+ * Reduce the number of distinct colors in an image to at most max_colors,
+ * using median-cut quantization. This is mainly useful before writing GIF,
+ * which is limited to 256 colors (the GIF writer calls it automatically).
+ * Greyscale images, and images that already have at most max_colors colors,
+ * are left unchanged. max_colors is clamped to 256.
+ */
+IError IReduceColors (
+#ifndef _NO_PROTO
+  IImage image,           /* image to reduce (modified in place) */
+  unsigned int max_colors /* maximum number of colors to keep (<= 256) */
+#endif
+);
+
 
 #define IFreeImage( i ) \
   _IFreeImage ( i );    \

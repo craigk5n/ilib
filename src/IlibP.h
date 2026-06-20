@@ -210,6 +210,17 @@ IError _IWriteBMP (
 #endif
 );
 
+/* Median-cut color reduction. Writes <= max_colors distinct colors from src
+   (npixels of RGB) into dst, which may alias src. */
+void _IReduceColorsRGB (
+#ifndef _NO_PROTO
+  const unsigned char *src,
+  int npixels,
+  int max_colors,
+  unsigned char *dst
+#endif
+);
+
 typedef struct {
   char *name;
   IError ( *read_func ) (

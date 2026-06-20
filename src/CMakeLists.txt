@@ -6,7 +6,7 @@ set(ILIB_SOURCES
   IDrawRec.c IDrawStr.c IErrorStr.c IFileType.c
   IFillArc.c IFillCir.c IFillEll.c IFillPol.c IFillRec.c IFlood.c
   IFont.c IFontBDF.c IGC.c IGIF.c IImage.c IJPEG.c
-  IPGM.c IPNG.c IPPM.c ITextDim.c IXPM.c)
+  IPGM.c IPNG.c IPPM.c IQuantize.c ITextDim.c IXPM.c)
 # NOTE: IXBM.c is intentionally excluded. It has never compiled (an
 # unterminated string literal since the initial checkin), its only unique
 # symbol _IWriteXBM is dead (XBM is NULL/NULL in the format dispatch table),
