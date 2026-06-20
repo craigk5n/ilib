@@ -22,7 +22,7 @@ jobs:
     name: Build Doxygen site
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install Doxygen
         run: |
           sudo apt-get update
