@@ -51,6 +51,35 @@ Note that the drawing API is modeled after a subset of the
 [X11 API drawing functions](https://www.x.org/releases/X11R7.6/doc/libX11/specs/libX11/libX11.html#graphics_functions).
 
 
+## Python bindings
+
+Python bindings live in [`python/`](python/) and use
+[cffi](https://cffi.readthedocs.io/) in **ABI mode**: they load an installed
+`libilib` shared library at runtime, so installing them needs no C compiler —
+only the Ilib C library (built and installed as below).
+
+```python
+import ilib
+
+img = ilib.Image(320, 120, ilib.Option.ALPHA)
+with ilib.GC() as gc:
+    gc.set_antialias(True)
+    gc.set_foreground(ilib.named_color("midnightblue"))
+    img.fill_rectangle(gc, 0, 0, *img.size)
+    gc.set_foreground(ilib.named_color("white"))
+    img.draw_circle(gc, 80, 60, 45)
+img.save("out.png")
+img.free()
+```
+
+```bash
+cd python
+pip install .            # needs cffi; the Ilib C library must be installed
+```
+
+See [`python/README.md`](python/README.md) for the full API, library
+discovery (the `ILIB_LIBRARY` environment variable), and how to run the tests.
+
 ## Building
 
 Ilib uses [CMake](https://cmake.org/) (3.16 or newer). It builds with no

@@ -57,3 +57,11 @@ Makefile.in
 /clients/iwebreprt/iwebreprt
 /examples/iconvert/iconvert
 /examples/isample/isample
+
+# Python bindings build artifacts
+__pycache__/
+*.py[cod]
+/python/build/
+/python/dist/
+/python/src/*.egg-info/
+/python/.pytest_cache/
