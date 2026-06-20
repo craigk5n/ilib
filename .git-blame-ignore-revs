@@ -1,0 +1,6 @@
+# Revisions to skip in `git blame` (bulk, mechanical reformats).
+# Enable with:  git config blame.ignoreRevsFile .git-blame-ignore-revs
+# (GitHub honors this file automatically.)
+
+# style: adopt clang-format and reformat the tree (Phase 8, part 2)
+aee520636685ecb5e9d1b13635887e16877f0735
