@@ -36,7 +36,12 @@ IError IDrawPoint ( IImage image, IGC gc, int x, int y )
   if ( imagep->magic != IMAGIC_IMAGE )
     return ( IInvalidImage );
 
-  _IDrawPoint ( imagep, gcp, x, y )
+  if ( gcp->blend_mode == IBLEND_OVER ) {
+    _IBlendPoint ( imagep, gcp, x, y, 255 );
+  }
+  else {
+    _IDrawPoint ( imagep, gcp, x, y )
+  }
 
-    return ( INoError );
+  return ( INoError );
 }

@@ -59,6 +59,7 @@ typedef struct {
   unsigned char red;   /* red value (0-255) */
   unsigned char green; /* green value (0-255) */
   unsigned char blue;  /* blue value (0-255) */
+  unsigned char alpha; /* alpha (0=transparent .. 255=opaque) */
   unsigned long value; /* pixel value */
 } IColorP;
 
@@ -70,6 +71,8 @@ typedef struct {
   unsigned char *data;       /* image data */
   unsigned short interlaced; /* interlaced output? */
   unsigned short greyscale;  /* greyscale? */
+  unsigned short channels;   /* bytes per pixel: 1=grey, 3=RGB, 4=RGBA */
+  unsigned short has_alpha;  /* convenience flag: channels == 4 */
   IColorP *transparent;      /* transparent color */
 } IImageP;
 
@@ -87,6 +90,7 @@ typedef struct {
   unsigned int line_width;    /* line width */
   ILineStyle line_style;      /* line style */
   ITextStyle text_style;      /* line style */
+  IBlendMode blend_mode;      /* how foreground is composited (default REPLACE) */
   /* add more later ... */
 } IGCP;
 
@@ -221,6 +225,18 @@ void _IReduceColorsRGB (
 #endif
 );
 
+/* Composite the GC foreground over pixel (x,y) using source-over, scaled by
+   cover (0-255 edge coverage; 255 = fully covered). Bounds-checked. */
+void _IBlendPoint (
+#ifndef _NO_PROTO
+  IImageP *image,
+  IGCP *gc,
+  int x,
+  int y,
+  unsigned int cover
+#endif
+);
+
 typedef struct {
   char *name;
   IError ( *read_func ) (
@@ -294,6 +310,13 @@ IError _IFontBDFGetSize (
         ptrX = ( i )->data + ( ( y ) * ( i )->width ) + ( x );                         \
         *ptrX = ( g )->foreground->red;                                                \
       }                                                                                \
+      else if ( ( i )->channels == 4 ) {                                               \
+        ptrX = ( i )->data + ( ( y ) * ( i )->width + ( x ) ) * 4;                     \
+        *ptrX = ( g )->foreground->red;                                                \
+        *( ptrX + 1 ) = ( g )->foreground->green;                                      \
+        *( ptrX + 2 ) = ( g )->foreground->blue;                                       \
+        *( ptrX + 3 ) = ( g )->foreground->alpha;                                      \
+      }                                                                                \
       else {                                                                           \
         ptrX = ( i )->data + ( ( y ) * ( i )->width * 3 ) + ( (x) *3 );                \
         *ptrX = ( g )->foreground->red;                                                \
@@ -311,6 +334,13 @@ IError _IFontBDFGetSize (
         ptrX = ( i )->data + ( ( y ) * ( i )->width ) + ( x );                         \
         *ptrX = ( r );                                                                 \
       }                                                                                \
+      else if ( ( i )->channels == 4 ) {                                               \
+        ptrX = ( i )->data + ( ( y ) * ( i )->width + ( x ) ) * 4;                     \
+        *ptrX = ( r );                                                                 \
+        *( ptrX + 1 ) = ( g );                                                         \
+        *( ptrX + 2 ) = ( b );                                                         \
+        *( ptrX + 3 ) = 255;                                                           \
+      }                                                                                \
       else {                                                                           \
         ptrX = ( i )->data + ( ( y ) * ( i )->width * 3 ) + ( (x) *3 );                \
         *ptrX = ( r );                                                                 \
@@ -327,12 +357,21 @@ IError _IFontBDFGetSize (
       if ( ( i )->greyscale ) {                                                        \
         ptrX = ( i )->data + ( ( y ) * ( i )->width ) + ( x );                         \
         ( c ).red = ( c ).green = ( c ).blue = *ptrX;                                  \
+        ( c ).alpha = 255;                                                             \
+      }                                                                                \
+      else if ( ( i )->channels == 4 ) {                                               \
+        ptrX = ( i )->data + ( ( y ) * ( i )->width + ( x ) ) * 4;                     \
+        ( c ).red = *ptrX;                                                             \
+        ( c ).green = *( ptrX + 1 );                                                   \
+        ( c ).blue = *( ptrX + 2 );                                                    \
+        ( c ).alpha = *( ptrX + 3 );                                                   \
       }                                                                                \
       else {                                                                           \
         ptrX = ( i )->data + ( ( y ) * ( i )->width * 3 ) + ( (x) *3 );                \
         ( c ).red = *ptrX;                                                             \
         ( c ).green = *( ptrX + 1 );                                                   \
         ( c ).blue = *( ptrX + 2 );                                                    \
+        ( c ).alpha = 255;                                                             \
       }                                                                                \
     }                                                                                  \
   }

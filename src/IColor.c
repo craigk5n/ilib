@@ -38,12 +38,14 @@ static void init_colors ( void )
   /* add black as color 0 */
   color = (IColorP *) malloc ( sizeof ( IColorP ) );
   color->red = color->green = color->blue = 0;
+  color->alpha = 255;
   color->value = num_colors++;
   colors[0] = color;
 
   /* add white as color 1 */
   color = (IColorP *) malloc ( sizeof ( IColorP ) );
   color->red = color->green = color->blue = 255;
+  color->alpha = 255;
   color->value = num_colors++;
   colors[1] = color;
 }
@@ -61,15 +63,16 @@ IColorP *_IGetColor ( int color )
 }
 
 
-IColor IAllocColor ( unsigned int red, unsigned int green, unsigned int blue )
+IColor IAllocColorAlpha ( unsigned int red, unsigned int green,
+  unsigned int blue, unsigned int alpha )
 {
   IColorP *color;
 
   if ( colors == NULL )
     init_colors ();
 
-  if ( red > 255 || green > 255 || blue > 255 ) {
-    fprintf ( stderr, "Bad color: %d/%d/%d\n", red, green, blue );
+  if ( red > 255 || green > 255 || blue > 255 || alpha > 255 ) {
+    fprintf ( stderr, "Bad color: %d/%d/%d/%d\n", red, green, blue, alpha );
     return ( 0 ); /* black */
   }
   else {
@@ -81,6 +84,7 @@ IColor IAllocColor ( unsigned int red, unsigned int green, unsigned int blue )
     color->red = red;
     color->green = green;
     color->blue = blue;
+    color->alpha = alpha;
     color->value = num_colors++;
     new_colors = (IColorP **) realloc ( (void *) colors,
       ( num_colors * sizeof ( IColorP * ) ) );
@@ -93,6 +97,11 @@ IColor IAllocColor ( unsigned int red, unsigned int green, unsigned int blue )
     colors[color->value] = color;
     return ( color->value );
   }
+}
+
+IColor IAllocColor ( unsigned int red, unsigned int green, unsigned int blue )
+{
+  return ( IAllocColorAlpha ( red, green, blue, 255 ) );
 }
 
 
