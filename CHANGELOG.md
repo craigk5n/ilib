@@ -28,7 +28,9 @@ without breaking the public API.
   `ilib-anim` with `assemble` (stills → animated GIF), `split` (frames → image
   files) and `info` subcommands. A looping demo animation
   (`docs/images/anim-demo.gif`, drawn by `docs/samples/animation.py`) is shown
-  in the README.
+  in the README. The demo is regenerated with a quantized gradient backdrop
+  written **with dithering** and collected, with the other showcase output, in
+  a new [`docs/gallery.md`](docs/gallery.md).
 - Charting: two new chart types — **horizontal bar** (`ICHART_HBAR`, grouped or
   stacked) and **donut** (`ICHART_DONUT`) — plus display toggles
   `IChartSetMarkers()` (point markers on line/area), `IChartSetGrid()` and

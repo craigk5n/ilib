@@ -50,9 +50,13 @@ The drawing API is modeled on a subset of the X11 graphics functions:
   `IReadAnimationFile` / `IWriteAnimationFile` (the reader composites frames
   honoring GIF disposal methods). In Python: the `Animation` class; from the
   shell: `ilib-anim`. The looping GIF below was drawn and assembled by
-  [`docs/samples/animation.py`](docs/samples/animation.py):
+  [`docs/samples/animation.py`](docs/samples/animation.py) — a spinner over a
+  smooth gradient that the GIF writer quantizes and **dithers** so it does not
+  band:
 
   ![Animated GIF demo](docs/images/anim-demo.gif)
+
+  More showcase output is collected in the [gallery](docs/gallery.md).
 - **Charting:** a small charting layer (`Ichart.h`) builds line, bar (grouped
   or stacked, vertical or horizontal), pie, donut, area and scatter charts —
   with title, axes, gridlines (linear or log scale), tick/category labels,

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Regenerate the README demo animation (docs/images/anim-demo.gif).
+"""Regenerate the README/gallery demo animation (docs/images/anim-demo.gif).
 
-Draws a rotating ring of anti-aliased dots with the drawing API and assembles
-the frames into a looping animated GIF. Run from the repo root with the built
-library discoverable, e.g.:
+Draws a rotating ring of dots over a smooth two-hue gradient and assembles the
+frames into a looping animated GIF. The gradient has far more than 256 colors,
+so the GIF writer must quantize it -- the animation is saved with dithering so
+the backdrop stays smooth instead of banding. Run from the repo root with the
+built library discoverable, e.g.:
 
     ILIB_LIBRARY=build/src/libilib.so PYTHONPATH=python/src \\
         python3 docs/samples/animation.py
@@ -11,7 +13,7 @@ library discoverable, e.g.:
 import math
 
 import ilib
-from ilib import GC, Animation, Image
+from ilib import GC, Animation, Image, Option
 
 OUT = "docs/images/anim-demo.gif"
 W = H = 200
@@ -20,41 +22,47 @@ RING = 62
 FRAMES = 24
 DELAY_MS = 70
 
-_PALETTE = [
-    (0x4E, 0x79, 0xA7), (0xF2, 0x8E, 0x2B), (0x59, 0xA1, 0x4F),
-    (0xE1, 0x57, 0x59), (0x76, 0xB7, 0xB2), (0xED, 0xC9, 0x48),
-    (0xB0, 0x7A, 0xA1), (0xFF, 0x9D, 0xA7),
-]
+
+def _lerp(a, b, t):
+    return int(a + (b - a) * t + 0.5)
+
+
+def _gradient():
+    """A diagonal deep-blue -> warm-orange gradient (many colors)."""
+    img = Image(W, H)
+    for y in range(H):
+        for x in range(W):
+            t = (x + y) / (W + H - 2)
+            img.set_pixel(x, y, _lerp(36, 242, t), _lerp(54, 150, t),
+                          _lerp(150, 44, t))
+    return img
 
 
 def main():
     white = ilib.alloc_color(255, 255, 255)
-    colors = [ilib.alloc_color(*rgb) for rgb in _PALETTE]
+    base = _gradient()
     anim = Animation()
 
     for f in range(FRAMES):
-        img = Image(W, H)
+        img = base.duplicate()
         gc = GC()
         gc.set_antialias(True)
-        gc.set_foreground(white)
-        img.fill_rectangle(gc, 0, 0, W, H)
-
-        base = 2.0 * math.pi * f / FRAMES
+        base_ang = 2.0 * math.pi * f / FRAMES
         for i in range(DOTS):
-            ang = base + 2.0 * math.pi * i / DOTS
+            ang = base_ang + 2.0 * math.pi * i / DOTS
             x = W / 2 + RING * math.cos(ang)
             y = H / 2 + RING * math.sin(ang)
             # Dot size ramps around the ring so it reads as a spinning comet.
             radius = 4 + 11 * i / (DOTS - 1)
-            gc.set_foreground(colors[i % len(colors)])
+            gc.set_foreground(white)
             img.fill_circle(gc, int(x), int(y), int(radius))
-
         anim.add_frame(img, DELAY_MS)
         img.free()
         gc.free()
 
+    base.free()
     anim.loop_count = 0  # forever
-    anim.save(OUT)
+    anim.save(OUT, options=Option.DITHER)  # dither the quantized gradient
     anim.free()
     print("wrote", OUT)
 
