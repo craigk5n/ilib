@@ -10,6 +10,10 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Sample output images for the bundled client tools (`ilib-index`,
+  `ilib-displayfont`, `ilib-webreprt`, `ilib-fraggraph`) under
+  `docs/images/clients/`, shown in a new README "Client tools" section, with
+  the sample inputs and a regeneration script in `docs/samples/`.
 - Per-value chart labels (`IChartSetValueLabels`): draw each data value as text
   above points/bars, inside stacked-bar segments, and on pie slices. Exposed in
   the Python bindings (`Chart.set_value_labels`). The `ilib-chart` demo enables
