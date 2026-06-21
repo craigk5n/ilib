@@ -243,7 +243,8 @@ typedef enum {
   IWEBPError,
   INoWEBPSupport,
   IAVIFError,
-  INoAVIFSupport
+  INoAVIFSupport,
+  IInvalidChart
 } IError;
 
 

@@ -29,8 +29,10 @@ from .color import (
     free_color,
     named_color,
 )
+from .chart import Chart
 from .constants import (
     BlendMode,
+    ChartType,
     FillStyle,
     Format,
     LineStyle,
@@ -48,6 +50,8 @@ __all__ = [
     "Image",
     "GC",
     "Font",
+    "Chart",
+    "ChartType",
     "ArcPoints",
     # colors
     "alloc_color",

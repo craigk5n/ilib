@@ -1,0 +1,113 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * ichart.c
+ *
+ * Ilib charting demo (installed-style example).
+ *
+ * Description:
+ *	Builds a line, bar and pie chart with the Ichart API, then combines them
+ *	into one image with IMontage and writes it out (default charts.png).
+ *	The label font is compiled in from a BDF font, so the demo is
+ *	self-contained.
+ *
+ *	Usage:  ilib-chart [outfile]
+ *
+ ****************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <Ichart.h>
+#include <Ilib.h>
+
+/* Compiled-in font (generated from fonts/helvR08.bdf by ifont2h). */
+#include "helvR08.h"
+
+int main ( int argc, char *argv[] )
+{
+  const char *outfile = ( argc > 1 ) ? argv[1] : "charts.png";
+  const char *months[5] = { "Jan", "Feb", "Mar", "Apr", "May" };
+  const char *slices[3] = { "Direct", "Email", "Social" };
+  double y2023[5] = { 3, 5, 4, 7, 6 };
+  double y2024[5] = { 2, 3, 5, 4, 8 };
+  double region[4] = { 12, 19, 8, 15 };
+  double share[3] = { 45, 30, 25 };
+  const char *quarters[4] = { "Q1", "Q2", "Q3", "Q4" };
+  IFont font;
+  IChart lc, bc, pc;
+  IImage line_img, bar_img, pie_img, montage;
+  IImage list[3];
+  IFileFormat fmt = IFORMAT_PNG;
+  FILE *fp;
+  IError ret;
+
+  if ( ILoadFontFromData ( "helv8", helvR08_font, &font ) != INoError ) {
+    fprintf ( stderr, "Failed to load the built-in font.\n" );
+    return ( 1 );
+  }
+
+  /* Line chart with two series. */
+  lc = ICreateChart ( ICHART_LINE, 320, 240 );
+  IChartSetFont ( lc, font );
+  IChartSetTitle ( lc, "Monthly Sales" );
+  IChartSetAxisLabels ( lc, "month", "k$" );
+  IChartSetCategories ( lc, months, 5 );
+  IChartAddSeries ( lc, "2023", y2023, 5, IAllocColor ( 0x4e, 0x79, 0xa7 ) );
+  IChartAddSeries ( lc, "2024", y2024, 5, IAllocColor ( 0xe1, 0x57, 0x59 ) );
+  line_img = IChartRender ( lc );
+
+  /* Bar chart. */
+  bc = ICreateChart ( ICHART_BAR, 320, 240 );
+  IChartSetFont ( bc, font );
+  IChartSetTitle ( bc, "Units by Quarter" );
+  IChartSetCategories ( bc, quarters, 4 );
+  IChartAddSeries ( bc, "units", region, 4, IAllocColor ( 0x59, 0xa1, 0x4f ) );
+  bar_img = IChartRender ( bc );
+
+  /* Pie chart. */
+  pc = ICreateChart ( ICHART_PIE, 260, 240 );
+  IChartSetFont ( pc, font );
+  IChartSetTitle ( pc, "Traffic Sources" );
+  IChartSetCategories ( pc, slices, 3 );
+  IChartAddSeries ( pc, NULL, share, 3, IAllocColor ( 0, 0, 0 ) );
+  pie_img = IChartRender ( pc );
+
+  if ( !line_img || !bar_img || !pie_img ) {
+    fprintf ( stderr, "Chart rendering failed.\n" );
+    return ( 1 );
+  }
+
+  /* Combine the three charts into one image. */
+  list[0] = line_img;
+  list[1] = bar_img;
+  list[2] = pie_img;
+  montage = IMontage ( list, 3, 2, 8, IAllocColor ( 245, 245, 245 ) );
+  if ( !montage ) {
+    fprintf ( stderr, "Montage failed.\n" );
+    return ( 1 );
+  }
+
+  IFileType ( (char *) outfile, &fmt );
+  fp = fopen ( outfile, "wb" );
+  if ( !fp ) {
+    perror ( "open output" );
+    return ( 1 );
+  }
+  ret = IWriteImageFile ( fp, montage, fmt, IOPTION_NONE );
+  fclose ( fp );
+  if ( ret != INoError ) {
+    fprintf ( stderr, "Write failed: %s\n", IErrorString ( ret ) );
+    return ( 1 );
+  }
+  printf ( "Wrote %s\n", outfile );
+
+  IFreeImage ( montage );
+  IFreeImage ( line_img );
+  IFreeImage ( bar_img );
+  IFreeImage ( pie_img );
+  IFreeChart ( lc );
+  IFreeChart ( bc );
+  IFreeChart ( pc );
+  IFreeFont ( font );
+  return ( 0 );
+}

@@ -93,6 +93,14 @@ class BlendMode(IntEnum):
     OVER = 1
 
 
+class ChartType(IntEnum):
+    """Chart types (``ICHART_*``)."""
+
+    LINE = 0
+    BAR = 1
+    PIE = 2
+
+
 # Predefined color handles (indexes into the library's color table).
 BLACK_PIXEL = 0
 WHITE_PIXEL = 1
