@@ -35,8 +35,10 @@ The drawing API is modeled on a subset of the X11 graphics functions:
 - **Convolution:** a generic kernel filter (`IConvolve`) plus blur, Gaussian
   blur, sharpen, edge detect, and emboss (`IBlur`, `IGaussianBlur`, `ISharpen`,
   `IEdgeDetect`, `IEmboss`).
-- **Resampling:** bilinear resize to any dimensions (`IResize`) and
-  arbitrary-angle rotation with a background fill (`IRotateAngle`).
+- **Resampling:** resize to any dimensions — bilinear (`IResize`) or a chosen
+  filter (`IResizeFiltered`: nearest, bilinear, bicubic, area-averaging, or
+  `AUTO` = area-down / bicubic-up) — and arbitrary-angle rotation with a
+  background fill (`IRotateAngle`).
 - **Composition:** autocrop a uniform border (`ITrim`), add a solid frame
   (`IBorder`), and combine images — side-by-side/stacked (`IAppend`) or in a
   grid / contact sheet (`IMontage`).

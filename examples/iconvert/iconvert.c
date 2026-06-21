@@ -174,7 +174,8 @@ static void apply_op ( IImage image, const Op *op, const char *background )
     ret = IEmboss ( image );
     break;
   case OP_RESIZE:
-    ret = IResize ( image, (unsigned int) op->i1, (unsigned int) op->i2 );
+    ret = IResizeFiltered ( image, (unsigned int) op->i1,
+      (unsigned int) op->i2, IRESIZE_AUTO );
     break;
   case OP_REDUCE_COLORS:
     ret = IReduceColors ( image, (unsigned int) op->i1 );

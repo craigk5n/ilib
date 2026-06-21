@@ -2,6 +2,7 @@
 /* Resampling transforms (IResample.c): bilinear resize and arbitrary-angle
    rotation, checked through the public accessors. */
 
+#include <stdlib.h>
 #include <Ilib.h>
 #include "greatest.h"
 
@@ -99,6 +100,91 @@ TEST resize_preserves_alpha ( void )
   PASS ();
 }
 
+/* A black/white checkerboard downscaled to 1x1: area-averaging yields mid-grey,
+   while nearest/point sampling yields one extreme. */
+static IImage make_checker ( int n )
+{
+  IImage im = ICreateImage ( n, n, IOPTION_NONE );
+  int x, y;
+  for ( y = 0; y < n; y++ )
+    for ( x = 0; x < n; x++ ) {
+      unsigned int v = ( ( x + y ) % 2 == 0 ) ? 255 : 0;
+      ISetPixel ( im, x, y, v, v, v );
+    }
+  return ( im );
+}
+
+TEST area_downscale_averages ( void )
+{
+  IImage im = make_checker ( 8 );
+  unsigned int r;
+
+  ASSERT_EQ ( INoError, IResizeFiltered ( im, 1, 1, IRESIZE_AREA ) );
+  IGetPixel ( im, 0, 0, &r, NULL, NULL );
+  ASSERT ( r > 118 && r < 138 ); /* ~127 grey */
+
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST nearest_downscale_does_not_average ( void )
+{
+  IImage im = make_checker ( 8 );
+  unsigned int r;
+
+  ASSERT_EQ ( INoError, IResizeFiltered ( im, 1, 1, IRESIZE_NEAREST ) );
+  IGetPixel ( im, 0, 0, &r, NULL, NULL );
+  ASSERT ( r == 0 || r == 255 ); /* a single source pixel, not a blend */
+
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST auto_shrinks_with_area ( void )
+{
+  IImage im = make_checker ( 8 );
+  unsigned int r;
+
+  /* AUTO should choose area-averaging when shrinking. */
+  ASSERT_EQ ( INoError, IResizeFiltered ( im, 1, 1, IRESIZE_AUTO ) );
+  IGetPixel ( im, 0, 0, &r, NULL, NULL );
+  ASSERT ( r > 118 && r < 138 );
+
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST bicubic_preserves_solid_and_dims ( void )
+{
+  IImage im = ICreateImage ( 4, 4, IOPTION_NONE );
+  int x, y;
+  unsigned int r, g, b;
+
+  for ( y = 0; y < 4; y++ )
+    for ( x = 0; x < 4; x++ )
+      ISetPixel ( im, x, y, 100, 150, 200 );
+  ASSERT_EQ ( INoError, IResizeFiltered ( im, 16, 16, IRESIZE_BICUBIC ) );
+  ASSERT_EQ ( 16, (int) IImageWidth ( im ) );
+  IGetPixel ( im, 8, 8, &r, &g, &b );
+  ASSERT ( abs ( (int) r - 100 ) <= 1 );
+  ASSERT ( abs ( (int) g - 150 ) <= 1 );
+  ASSERT ( abs ( (int) b - 200 ) <= 1 );
+
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST resize_filtered_rejects_zero ( void )
+{
+  IImage im = ICreateImage ( 4, 4, IOPTION_NONE );
+
+  ASSERT_EQ ( IInvalidArgument, IResizeFiltered ( im, 0, 4, IRESIZE_AREA ) );
+  ASSERT_EQ ( IInvalidImage, IResizeFiltered ( NULL, 4, 4, IRESIZE_AUTO ) );
+
+  IFreeImage ( im );
+  PASS ();
+}
+
 TEST rotate_angle_zero_is_identity ( void )
 {
   IImage im = ICreateImage ( 4, 3, IOPTION_NONE );
@@ -181,6 +267,11 @@ SUITE ( resample )
   RUN_TEST ( resize_downscale );
   RUN_TEST ( resize_rejects_zero );
   RUN_TEST ( resize_preserves_alpha );
+  RUN_TEST ( area_downscale_averages );
+  RUN_TEST ( nearest_downscale_does_not_average );
+  RUN_TEST ( auto_shrinks_with_area );
+  RUN_TEST ( bicubic_preserves_solid_and_dims );
+  RUN_TEST ( resize_filtered_rejects_zero );
   RUN_TEST ( rotate_angle_zero_is_identity );
   RUN_TEST ( rotate_angle_90_clockwise );
   RUN_TEST ( rotate_angle_45_grows_and_fills_background );

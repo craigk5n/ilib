@@ -37,6 +37,7 @@ from .constants import (
     Format,
     LineStyle,
     Option,
+    ResizeFilter,
     TextDirection,
     TextStyle,
 )
@@ -68,6 +69,7 @@ __all__ = [
     "TextStyle",
     "TextDirection",
     "BlendMode",
+    "ResizeFilter",
     # errors
     "IError",
     "IlibError",

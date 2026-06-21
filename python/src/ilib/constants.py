@@ -93,6 +93,16 @@ class BlendMode(IntEnum):
     OVER = 1
 
 
+class ResizeFilter(IntEnum):
+    """Resampling filters for :meth:`ilib.image.Image.resize` (``IRESIZE_*``)."""
+
+    NEAREST = 0
+    BILINEAR = 1
+    BICUBIC = 2
+    AREA = 3
+    AUTO = 4
+
+
 class ChartType(IntEnum):
     """Chart types (``ICHART_*``)."""
 

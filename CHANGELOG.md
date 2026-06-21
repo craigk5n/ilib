@@ -10,6 +10,12 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Higher-quality resizing: `IResizeFiltered()` adds a resampling-filter choice
+  (`IResizeFilter`: nearest, bilinear, bicubic Catmull-Rom, area-averaging, or
+  `IRESIZE_AUTO` = area when shrinking / bicubic when enlarging). `IResize()`
+  stays bilinear for compatibility. Exposed in the Python bindings
+  (`Image.resize(..., filter=ResizeFilter.AUTO)`, defaulting to AUTO); the
+  `--resize` CLI option now uses AUTO for cleaner up- and down-scaling.
 - Output-format options for `ilib-webreprt` and `ilib-fraggraph`: both
   previously wrote GIF only; they now accept `-png`, `-ppm`, `-jpeg` and `-bmp`
   (GIF remains the default) and report a clear error if the library lacks the

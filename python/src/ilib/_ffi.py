@@ -77,6 +77,8 @@ IError IEdgeDetect(IImage image);
 IError IEmboss(IImage image);
 
 IError IResize(IImage image, unsigned int width, unsigned int height);
+IError IResizeFiltered(IImage image, unsigned int width, unsigned int height,
+                       int filter);
 IError IRotateAngle(IImage image, double degrees, IColor background);
 
 IError ITrim(IImage image, unsigned int tolerance);
