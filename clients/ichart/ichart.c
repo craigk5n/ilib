@@ -94,7 +94,13 @@ static IChartType parse_type ( const char *s )
     return ( ICHART_AREA );
   if ( strcmp ( s, "scatter" ) == 0 )
     return ( ICHART_SCATTER );
-  fprintf ( stderr, "Unknown chart type \"%s\" (use line|bar|pie|area|scatter)\n",
+  if ( strcmp ( s, "hbar" ) == 0 )
+    return ( ICHART_HBAR );
+  if ( strcmp ( s, "donut" ) == 0 )
+    return ( ICHART_DONUT );
+  fprintf ( stderr,
+    "Unknown chart type \"%s\" "
+    "(use line|bar|hbar|pie|donut|area|scatter)\n",
     s );
   exit ( 1 );
 }
@@ -109,17 +115,20 @@ static void usage ( const char *prog )
     "column is a data series, named by the header row.\n"
     "\n"
     "Options:\n"
-    "  --type T          line | bar | pie | area | scatter (default line)\n"
+    "  --type T          line|bar|hbar|pie|donut|area|scatter (default line)\n"
     "  --title TEXT      chart title\n"
     "  --xlabel TEXT     x-axis label\n"
     "  --ylabel TEXT     y-axis label\n"
     "  --width N         image width (default 640)\n"
     "  --height N        image height (default 400)\n"
-    "  --stacked         stack bar series\n"
+    "  --stacked         stack bar/hbar series\n"
     "  --log             logarithmic value axis\n"
     "  --values          draw value labels\n"
     "  --background NAME  background color (default white)\n"
     "  --no-header       the CSV has no header row\n"
+    "  --no-markers      omit point markers on line/area charts\n"
+    "  --no-grid         omit gridlines\n"
+    "  --no-legend       omit the legend\n"
     "  -h, --help        show this help\n",
     prog );
 }
@@ -131,6 +140,7 @@ int main ( int argc, char *argv[] )
   IChartType type = ICHART_LINE;
   int width = 640, height = 400;
   int stacked = 0, logscale = 0, values = 0, header = 1;
+  int markers = 1, grid = 1, legend = 1;
   char *cat[MAX_ROWS];
   double val[MAX_SERIES][MAX_ROWS];
   char *sname[MAX_SERIES];
@@ -174,6 +184,12 @@ int main ( int argc, char *argv[] )
       values = 1;
     else if ( strcmp ( argv[i], "--no-header" ) == 0 )
       header = 0;
+    else if ( strcmp ( argv[i], "--no-markers" ) == 0 )
+      markers = 0;
+    else if ( strcmp ( argv[i], "--no-grid" ) == 0 )
+      grid = 0;
+    else if ( strcmp ( argv[i], "--no-legend" ) == 0 )
+      legend = 0;
     else if ( argv[i][0] == '-' && argv[i][1] != '\0' &&
               strcmp ( argv[i], "-" ) != 0 ) {
       fprintf ( stderr, "Unknown option: %s\n", argv[i] );
@@ -261,6 +277,12 @@ int main ( int argc, char *argv[] )
     IChartSetLogScale ( chart, 1 );
   if ( values )
     IChartSetValueLabels ( chart, 1 );
+  if ( !markers )
+    IChartSetMarkers ( chart, 0 );
+  if ( !grid )
+    IChartSetGrid ( chart, 0 );
+  if ( !legend )
+    IChartSetLegend ( chart, 0 );
   if ( background ) {
     IColor bg;
     if ( IAllocNamedColor ( (char *) background, &bg ) == INoError )

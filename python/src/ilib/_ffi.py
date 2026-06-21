@@ -197,6 +197,9 @@ IError IChartSetRange(IChart chart, double ymin, double ymax);
 IError IChartSetStacked(IChart chart, int stacked);
 IError IChartSetLogScale(IChart chart, int on);
 IError IChartSetValueLabels(IChart chart, int on);
+IError IChartSetMarkers(IChart chart, int on);
+IError IChartSetGrid(IChart chart, int on);
+IError IChartSetLegend(IChart chart, int on);
 IError IChartAddSeries(IChart chart, const char *label, const double *values,
                        int count, IColor color);
 IError IChartAddXYSeries(IChart chart, const char *label,

@@ -105,6 +105,21 @@ class Chart:
         check(lib.IChartSetValueLabels(self._as_parameter_, 1 if on else 0))
         return self
 
+    def set_markers(self, on=True):
+        """Draw a marker at each line/area point (on by default)."""
+        check(lib.IChartSetMarkers(self._as_parameter_, 1 if on else 0))
+        return self
+
+    def set_grid(self, on=True):
+        """Show or hide gridlines (on by default)."""
+        check(lib.IChartSetGrid(self._as_parameter_, 1 if on else 0))
+        return self
+
+    def set_legend(self, on=True):
+        """Show or hide the legend (on by default)."""
+        check(lib.IChartSetLegend(self._as_parameter_, 1 if on else 0))
+        return self
+
     def add_series(self, values, label=None, color=0):
         """Add a data series (a sequence of values) with a legend label/color."""
         values = [float(v) for v in values]

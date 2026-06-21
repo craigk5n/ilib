@@ -24,8 +24,8 @@ are ignored.
 .SH OPTIONS
 .TP
 .BI --type " T"
-Chart type: \fBline\fR (default), \fBbar\fR, \fBpie\fR, \fBarea\fR or
-\fBscatter\fR.
+Chart type: \fBline\fR (default), \fBbar\fR, \fBhbar\fR (horizontal bar),
+\fBpie\fR, \fBdonut\fR, \fBarea\fR or \fBscatter\fR.
 .TP
 .BI --title " TEXT"
 Chart title.
@@ -41,7 +41,7 @@ Axis labels.
 Image size in pixels (default 640x400).
 .TP
 .B --stacked
-Stack the series of a bar chart instead of grouping them.
+Stack the series of a bar/hbar chart instead of grouping them.
 .TP
 .B --log
 Use a logarithmic value axis.
@@ -54,6 +54,15 @@ Background color (default white).
 .TP
 .B --no-header
 Treat the first row as data, not series names.
+.TP
+.B --no-markers
+Omit the point markers on line and area charts.
+.TP
+.B --no-grid
+Omit the gridlines.
+.TP
+.B --no-legend
+Omit the legend.
 .TP
 .B -h ", " --help
 Show a usage summary.

@@ -41,6 +41,9 @@ typedef struct {
   int stacked;      /* bar charts: stack series instead of grouping */
   int log_scale;    /* logarithmic value (y) axis */
   int value_labels; /* draw each data value as a text label */
+  int markers;      /* line/area: draw a marker at each point (default on) */
+  int show_grid;    /* draw gridlines (default on) */
+  int show_legend;  /* draw the legend (default on) */
 } IChartP;
 
 #endif /* _ichartp_h */
