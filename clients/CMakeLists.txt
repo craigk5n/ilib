@@ -1,7 +1,13 @@
 # Bundled client tools.
 
+# Installed binaries are prefixed "ilib-" (e.g. ifont2h -> ilib-font2h). The
+# CMake target names keep their historical spelling so the font-header helper
+# ($<TARGET_FILE:ifont2h>) and TARGET checks keep working; only OUTPUT_NAME
+# changes. Convention: drop the leading "i", prepend "ilib-".
+
 # ifont2h converts an X11 BDF font into a C header (no libilib dependency).
 add_executable(ifont2h ifont2h/ifont2h.c)
+set_target_properties(ifont2h PROPERTIES OUTPUT_NAME ilib-font2h)
 ilib_set_warnings(ifont2h)
 install(TARGETS ifont2h RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
@@ -10,6 +16,8 @@ install(TARGETS ifont2h RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 find_library(ILIB_CLIENT_MATH_LIBRARY m)
 foreach(_client idisplayfont ifraggraph iindex iwebreprt)
   add_executable(${_client} ${_client}/${_client}.c)
+  string(SUBSTRING "${_client}" 1 -1 _stripped) # drop leading "i"
+  set_target_properties(${_client} PROPERTIES OUTPUT_NAME "ilib-${_stripped}")
   target_link_libraries(${_client} PRIVATE Ilib::ilib)
   if(ILIB_CLIENT_MATH_LIBRARY)
     target_link_libraries(${_client} PRIVATE "${ILIB_CLIENT_MATH_LIBRARY}")
@@ -24,9 +32,10 @@ ilib_use_font_headers(ifraggraph   courR10 helvB18)
 ilib_use_font_headers(iindex       helvR08)
 ilib_use_font_headers(iwebreprt    courR10 helvB18)
 
-# Man pages for the installed client tools (section 1). Configured to stamp in
-# the version, then installed to <prefix>/share/man/man1.
-foreach(_man ifont2h idisplayfont ifraggraph iindex iwebreprt)
+# Man pages for the installed client tools (section 1), named after the
+# installed binary (ilib-*.1). Configured to stamp in the version, then
+# installed to <prefix>/share/man/man1.
+foreach(_man ilib-font2h ilib-displayfont ilib-fraggraph ilib-index ilib-webreprt)
   configure_file(
     "${CMAKE_SOURCE_DIR}/docs/man/${_man}.1"
     "${CMAKE_CURRENT_BINARY_DIR}/${_man}.1" @ONLY)

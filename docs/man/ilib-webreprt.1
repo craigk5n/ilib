@@ -1,14 +1,14 @@
-.TH IWEBREPRT 1 "June 2026" "ilib @ILIB_VERSION@" "Ilib Manual"
+.TH ILIB-WEBREPRT 1 "June 2026" "ilib @ILIB_VERSION@" "Ilib Manual"
 .SH NAME
-iwebreprt \- graph web server access-log usage
+ilib-webreprt \- graph web server access-log usage
 .SH SYNOPSIS
-.B iwebreprt
+.B ilib-webreprt
 .RI [ options ]
 .RB [ \-tod | \-dom | \-dow | \-moy ]
 .I accesslog
 .RI [ accesslog ...]
 .SH DESCRIPTION
-.B iwebreprt
+.B ilib-webreprt
 parses one or more Common Log Format web server access logs and writes an
 image graph of request volume to standard output. By default it produces a
 time-of-day report as a line graph using all available data.
@@ -61,11 +61,11 @@ Set the label used for the retrievals being counted.
 .SH EXAMPLES
 .RS
 .nf
-iwebreprt -dom -bar -thismonth /var/log/apache2/access.log > usage.gif
+ilib-webreprt -dom -bar -thismonth /var/log/apache2/access.log > usage.gif
 .fi
 .RE
 .SH SEE ALSO
-.BR iindex (1)
+.BR ilib-index (1)
 .PP
 Full API documentation: https://craigk5n.github.io/ilib/
 .SH AUTHOR

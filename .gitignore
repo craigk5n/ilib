@@ -48,15 +48,15 @@ Makefile.in
 /compile
 /ltmain.sh
 
-# Built client/example binaries
-/ifont2h
-/clients/ifont2h/ifont2h
-/clients/idisplayfont/idisplayfont
-/clients/ifraggraph/ifraggraph
-/clients/iindex/iindex
-/clients/iwebreprt/iwebreprt
-/examples/iconvert/iconvert
-/examples/isample/isample
+# Built client/example binaries (installed names are ilib-*)
+/ilib-font2h
+/clients/ifont2h/ilib-font2h
+/clients/idisplayfont/ilib-displayfont
+/clients/ifraggraph/ilib-fraggraph
+/clients/iindex/ilib-index
+/clients/iwebreprt/ilib-webreprt
+/examples/iconvert/ilib-convert
+/examples/isample/ilib-sample
 
 # Python bindings build artifacts
 __pycache__/

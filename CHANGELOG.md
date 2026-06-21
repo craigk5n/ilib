@@ -82,6 +82,12 @@ without breaking the public API.
 - `SPDX-License-Identifier` headers across the sources.
 
 ### Changed
+- The bundled command-line tools and examples now install with an `ilib-`
+  prefix (`iconvert` → `ilib-convert`, `ifont2h` → `ilib-font2h`, `iindex` →
+  `ilib-index`, `idisplayfont` → `ilib-displayfont`, `ifraggraph` →
+  `ilib-fraggraph`, `iwebreprt` → `ilib-webreprt`, `isample` → `ilib-sample`),
+  so they are clearly namespaced in `$PATH`. Man pages were renamed to match
+  (`man ilib-index`).
 - Converted all K&R function definitions to ISO C prototypes; the library and
   clients build warning-clean under `-Wall -Wextra` (`-Werror` in CI).
 - GIF support ported to giflib 5.x.

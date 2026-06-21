@@ -1,15 +1,15 @@
-.TH IDISPLAYFONT 1 "June 2026" "ilib @ILIB_VERSION@" "Ilib Manual"
+.TH ILIB-DISPLAYFONT 1 "June 2026" "ilib @ILIB_VERSION@" "Ilib Manual"
 .SH NAME
-idisplayfont \- render an X11 BDF font's glyph table to an image
+ilib-displayfont \- render an X11 BDF font's glyph table to an image
 .SH SYNOPSIS
-.B idisplayfont
+.B ilib-displayfont
 .RB [ \-gif | \-png | \-ppm ]
 .RB [ \-hex | \-dec ]
 .I font.bdf
 .B >
 .I out.img
 .SH DESCRIPTION
-.B idisplayfont
+.B ilib-displayfont
 loads the X11 BDF font
 .I font.bdf
 and writes an image to standard output showing each glyph in a labeled grid,
@@ -34,7 +34,7 @@ Label glyph cells with hexadecimal character codes.
 .SH EXAMPLES
 .RS
 .nf
-idisplayfont -png /usr/local/share/ilib/fonts/courR10.bdf > courR10.png
+ilib-displayfont -png /usr/local/share/ilib/fonts/courR10.bdf > courR10.png
 .fi
 .RE
 .SH EXIT STATUS
@@ -42,8 +42,8 @@ Returns 0 on success, or 1 on an unrecognized option, a missing font
 argument, a load error, or a request for a format the library was not built
 with.
 .SH SEE ALSO
-.BR ifont2h (1),
-.BR iconvert (1)
+.BR ilib-font2h (1),
+.BR ilib-convert (1)
 .PP
 Full API documentation: https://craigk5n.github.io/ilib/
 .SH AUTHOR

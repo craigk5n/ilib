@@ -48,7 +48,7 @@ cmake --build build --target docs    # output in build/docs/html/
 ```
 
 For a hands-on introduction see the [tutorial](docs/tutorial.md). The installed
-client tools have man pages (`man iindex`, `man ifont2h`, …).
+client tools have man pages (`man ilib-index`, `man ilib-font2h`, …).
 
 Note that the drawing API is modeled after a subset of the
 [X11 API drawing functions](https://www.x.org/releases/X11R7.6/doc/libX11/specs/libX11/libX11.html#graphics_functions).
@@ -147,9 +147,9 @@ For **static** linking, `pkg-config --static --libs ilib` adds the transitive
 codec/math dependencies (`-lm` plus `-lpng`/`-ljpeg`/`-lgif` for whichever
 backends were enabled at build time).
 
-The `examples/` and `clients/` directories show how to use the API: `iconvert`
-converts images between formats and `isample` demonstrates drawing text, lines,
-and shapes.
+The `examples/` and `clients/` directories show how to use the API: `ilib-convert`
+converts images between formats and `ilib-sample` demonstrates drawing text,
+lines, and shapes. (All bundled tools install with an `ilib-` prefix.)
 
 ### Packaging and releases
 
@@ -173,8 +173,8 @@ Downstream packaging notes (Homebrew, Debian, vcpkg) live in
 Ilib draws text using X11 BDF fonts. A few sample fonts ship in `fonts/` and are
 installed to `<prefix>/share/ilib/fonts` (query the exact path with
 `pkg-config --variable=fontdir ilib`). Pass a `.bdf` path to
-`ILoadFontFromFile()`, or compile a font into your program with the `ifont2h`
-tool. More BDF fonts:
+`ILoadFontFromFile()`, or compile a font into your program with the
+`ilib-font2h` tool. More BDF fonts:
 
 - [Search the web](https://www.google.com/search?q=timR24.bdf)
 - [Apple X11 fonts](https://opensource.apple.com/source/X11fonts/X11fonts-10.2/font-adobe-100dpi/font-adobe-100dpi-X11R7.0-1.0.0/)
