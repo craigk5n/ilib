@@ -93,6 +93,22 @@ class BlendMode(IntEnum):
     OVER = 1
 
 
+class HAlign(IntEnum):
+    """Horizontal text alignment for :meth:`ilib.gc.GC.text_coordinates`."""
+
+    LEFT = 0
+    CENTER = 1
+    RIGHT = 2
+
+
+class VAlign(IntEnum):
+    """Vertical text alignment for :meth:`ilib.gc.GC.text_coordinates`."""
+
+    TOP = 0
+    MIDDLE = 1
+    BOTTOM = 2
+
+
 class ResizeFilter(IntEnum):
     """Resampling filters for :meth:`ilib.image.Image.resize` (``IRESIZE_*``)."""
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import namedtuple
 
 from ._ffi import ffi, lib
-from .constants import BlendMode, LineStyle, TextStyle
+from .constants import BlendMode, HAlign, LineStyle, TextStyle, VAlign
 from .errors import check
 
 __all__ = ["GC", "ArcPoints"]
@@ -128,6 +128,22 @@ class GC:
             )
         )
         return int(w[0]), int(h[0])
+
+    def text_coordinates(self, font, text, anchor_x, anchor_y,
+                         halign=HAlign.LEFT, valign=VAlign.BOTTOM):
+        """Return the ``(x, y)`` to pass to ``draw_string`` so ``text`` is
+        aligned to ``(anchor_x, anchor_y)`` per ``halign``/``valign``."""
+        data, length = _text_bytes(text)
+        xr = ffi.new("int *")
+        yr = ffi.new("int *")
+        check(
+            lib.ICalculateTextCoordinates(
+                self._as_parameter_, font._as_parameter_, data, length,
+                int(anchor_x), int(anchor_y), int(HAlign(halign)),
+                int(VAlign(valign)), xr, yr
+            )
+        )
+        return int(xr[0]), int(yr[0])
 
     # -- geometry ----------------------------------------------------------
     def arc_properties(self, x, y, r1, r2, a1, a2):
