@@ -10,6 +10,11 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- New `ilib-mogrify` client tool: batch image editing. It applies the same
+  operation pipeline as `ilib-convert` (in command-line order) to any number of
+  files, overwriting each in place and keeping its format; with `--format EXT`
+  it writes converted copies (new `<name>.EXT` files) instead, leaving the
+  originals intact. Installed with a man page (`man ilib-mogrify`).
 - The `ilib-convert` example tool gained an operation pipeline: it now applies
   any number of image operations (in command-line order) between read and
   write, exposing the filter/transform/convolution/resampling API as flags

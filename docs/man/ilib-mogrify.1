@@ -1,0 +1,112 @@
+.TH ILIB-MOGRIFY 1 "June 2026" "ilib @ILIB_VERSION@" "Ilib Manual"
+.SH NAME
+ilib-mogrify \- batch-edit images in place
+.SH SYNOPSIS
+.B ilib-mogrify
+.RI [ options ]
+.I file1
+.RI [ file2 ...]
+.SH DESCRIPTION
+.B ilib-mogrify
+applies a pipeline of image operations to each named file and writes the
+result back to the
+.B same
+file, overwriting it in place. Each file keeps its own format (chosen by its
+extension). This is the batch counterpart of
+.BR ilib-convert (1),
+in the spirit of ImageMagick's
+.BR mogrify (1).
+.PP
+Operations are applied in the order they appear on the command line, so
+.B --resize 320x240 --sharpen
+is not the same as
+.BR "--sharpen --resize 320x240" .
+.PP
+With
+.B --format
+.IR EXT ,
+each result is written to a new file named after the input but with the given
+extension (and corresponding format), leaving the original files untouched.
+.SH OPTIONS
+.TP
+.BI --format " EXT"
+Write new \fI<name>.EXT\fR files instead of overwriting in place.
+.TP
+.B --greyscale ", " --grayscale
+Desaturate to grey (Rec.601 luma).
+.TP
+.B --negate
+Invert colours.
+.TP
+.BI --brightness " N"
+Adjust brightness (\fIN\fR in -100..100).
+.TP
+.BI --contrast " N"
+Adjust contrast (\fIN\fR in -100..100).
+.TP
+.BI --gamma " F"
+Gamma correction (\fIF\fR > 0).
+.TP
+.BI --threshold " N"
+Threshold each channel to black/white at \fIN\fR (0..255).
+.TP
+.B --flip
+Mirror vertically.
+.TP
+.B --flop
+Mirror horizontally.
+.TP
+.BI --rotate " DEG"
+Rotate clockwise by \fIDEG\fR degrees. Multiples of 90 are exact; other angles
+are interpolated and the revealed corners are filled with the
+.B --background
+colour.
+.TP
+.BI --background " NAME"
+Fill colour for non-90-degree rotations (default white).
+.TP
+.BI --blur " R"
+Box blur with radius \fIR\fR.
+.TP
+.BI --gaussian-blur " SIGMA"
+Gaussian blur with standard deviation \fISIGMA\fR.
+.TP
+.B --sharpen
+Sharpen.
+.TP
+.B --edge
+Edge detect.
+.TP
+.B --emboss
+Emboss.
+.TP
+.BI --resize " WxH"
+Resize to \fIW\fRx\fIH\fR using bilinear interpolation.
+.TP
+.BI --reduce-colors " N"
+Reduce the image to at most \fIN\fR colours.
+.TP
+.B -h ", " --help
+Show a usage summary.
+.SH EXAMPLES
+Make thumbnails of every PNG in place:
+.PP
+.RS
+.nf
+ilib-mogrify --resize 128x128 *.png
+.fi
+.RE
+.PP
+Convert every PNG to GIF (keeping the originals) and reduce colours:
+.PP
+.RS
+.nf
+ilib-mogrify --format gif --reduce-colors 256 *.png
+.fi
+.RE
+.SH "SEE ALSO"
+.BR ilib-convert (1),
+.BR ilib-index (1)
+.SH AUTHOR
+Craig Knudsen
+.RB ( https://www.k5n.us/Ilib.php )
