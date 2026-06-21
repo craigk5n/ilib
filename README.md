@@ -154,9 +154,21 @@ For **static** linking, `pkg-config --static --libs ilib` adds the transitive
 codec/math dependencies (`-lm` plus `-lpng`/`-ljpeg`/`-lgif` for whichever
 backends were enabled at build time).
 
-The `examples/` and `clients/` directories show how to use the API: `ilib-convert`
-converts images between formats and `ilib-sample` demonstrates drawing text,
-lines, and shapes. (All bundled tools install with an `ilib-` prefix.)
+The `examples/` and `clients/` directories show how to use the API:
+`ilib-convert` converts images between formats **and** applies a pipeline of
+operations (in command-line order), and `ilib-sample` demonstrates drawing
+text, lines, and shapes. (All bundled tools install with an `ilib-` prefix.)
+
+```bash
+# convert PNG to GIF, desaturate, sharpen, then scale down
+ilib-convert in.png out.gif --greyscale --sharpen --resize 320x240
+ilib-convert --help          # full list of operations
+```
+
+Supported `ilib-convert` operations: `--greyscale`, `--negate`,
+`--brightness`, `--contrast`, `--gamma`, `--threshold`, `--flip`, `--flop`,
+`--rotate` (with `--background`), `--blur`, `--gaussian-blur`, `--sharpen`,
+`--edge`, `--emboss`, `--resize`, and `--reduce-colors`.
 
 ### Packaging and releases
 

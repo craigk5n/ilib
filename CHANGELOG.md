@@ -10,6 +10,14 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- The `ilib-convert` example tool gained an operation pipeline: it now applies
+  any number of image operations (in command-line order) between read and
+  write, exposing the filter/transform/convolution/resampling API as flags
+  (`--greyscale`, `--negate`, `--brightness`, `--contrast`, `--gamma`,
+  `--threshold`, `--flip`, `--flop`, `--rotate` + `--background`, `--blur`,
+  `--gaussian-blur`, `--sharpen`, `--edge`, `--emboss`, `--resize`,
+  `--reduce-colors`), with `--help`. The original `infile outfile` positional
+  usage is unchanged.
 - Resampling transforms (with interpolation), the fourth batch of
   ImageMagick-style transforms (`IResample.c`): `IResize()` (bilinear scaling to
   arbitrary dimensions, a higher-quality alternative to the nearest-neighbour
