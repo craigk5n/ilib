@@ -517,6 +517,16 @@ class Charting(unittest.TestCase):
             finally:
                 img.free()
 
+    def test_value_labels(self):
+        with ilib.Chart(ilib.ChartType.BAR, 220, 160) as c:
+            c.set_value_labels(True)
+            c.add_series([2, 4, 3], label="a", color=ilib.alloc_color(50, 100, 200))
+            img = c.render()
+            try:
+                self.assertEqual(img.size, (220, 160))
+            finally:
+                img.free()
+
     def test_bar_chart_and_config(self):
         with ilib.Chart(ilib.ChartType.BAR, 220, 160) as c:
             c.set_title("T").set_categories(["Q1", "Q2", "Q3"]).set_range(0, 10)

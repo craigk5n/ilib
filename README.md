@@ -4,7 +4,7 @@
 [![Docs](https://github.com/craigk5n/ilib/actions/workflows/docs.yml/badge.svg)](https://craigk5n.github.io/ilib/)
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](COPYING)
 
-Copyright (C) 2001-2016 Craig Knudsen, craig@k5n.us — https://www.k5n.us/Ilib.php
+Copyright (C) 2001-2026 Craig Knudsen, craig@k5n.us — https://www.k5n.us/Ilib.php
 
 Ilib is a library (and some tools and examples) written in C
 that can read, create, manipulate and save images.  It can read and

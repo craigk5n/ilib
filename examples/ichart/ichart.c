@@ -5,10 +5,10 @@
  * Ilib charting demo (installed-style example).
  *
  * Description:
- *	Builds a line, bar and pie chart with the Ichart API, then combines them
- *	into one image with IMontage and writes it out (default charts.png).
- *	The label font is compiled in from a BDF font, so the demo is
- *	self-contained.
+ *	Builds line, stacked-bar, pie, area, scatter and log-scale charts with
+ *	the Ichart API, then combines them into one image with IMontage and
+ *	writes it out (default charts.png). Labels use an anti-aliased TrueType
+ *	font when one is found, falling back to a compiled-in bitmap font.
  *
  *	Usage:  ilib-chart [outfile]
  *
@@ -49,9 +49,26 @@ int main ( int argc, char *argv[] )
   FILE *fp;
   IError ret;
 
-  if ( ILoadFontFromData ( "helv8", helvR08_font, &font ) != INoError ) {
-    fprintf ( stderr, "Failed to load the built-in font.\n" );
-    return ( 1 );
+  /* Prefer a scalable, anti-aliased TrueType font (FreeType); fall back to the
+     compiled-in bitmap font when none is available. Charts draw text through
+     IDrawString, so anti-aliased fonts "just work". */
+  {
+    static const char *ttf_paths[] = {
+      "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+      "/usr/share/fonts/dejavu/DejaVuSans.ttf",
+      "/Library/Fonts/Arial.ttf",
+      "/System/Library/Fonts/Supplemental/Arial.ttf", NULL };
+    int i, loaded = 0;
+    for ( i = 0; ttf_paths[i] && !loaded; i++ ) {
+      if ( ILoadFontFromFileTTF ( "sans", (char *) ttf_paths[i], 11, &font ) ==
+           INoError )
+        loaded = 1;
+    }
+    if ( !loaded &&
+         ILoadFontFromData ( "helv8", helvR08_font, &font ) != INoError ) {
+      fprintf ( stderr, "Failed to load a font.\n" );
+      return ( 1 );
+    }
   }
 
   /* Line chart with two series. */
@@ -70,6 +87,7 @@ int main ( int argc, char *argv[] )
   IChartSetStacked ( bc, 1 );
   IChartSetTitle ( bc, "Revenue by Product" );
   IChartSetCategories ( bc, quarters, 4 );
+  IChartSetValueLabels ( bc, 1 );
   IChartAddSeries ( bc, "A", prodA, 4, IAllocColor ( 0x4e, 0x79, 0xa7 ) );
   IChartAddSeries ( bc, "B", prodB, 4, IAllocColor ( 0xf2, 0x8e, 0x2b ) );
   IChartAddSeries ( bc, "C", prodC, 4, IAllocColor ( 0x59, 0xa1, 0x4f ) );
@@ -79,6 +97,7 @@ int main ( int argc, char *argv[] )
   pc = ICreateChart ( ICHART_PIE, 260, 240 );
   IChartSetFont ( pc, font );
   IChartSetTitle ( pc, "Traffic Sources" );
+  IChartSetValueLabels ( pc, 1 );
   IChartSetCategories ( pc, slices, 3 );
   IChartAddSeries ( pc, NULL, share, 3, IAllocColor ( 0, 0, 0 ) );
   pie_img = IChartRender ( pc );

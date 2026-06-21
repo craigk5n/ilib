@@ -10,6 +10,12 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Per-value chart labels (`IChartSetValueLabels`): draw each data value as text
+  above points/bars, inside stacked-bar segments, and on pie slices. Exposed in
+  the Python bindings (`Chart.set_value_labels`). The `ilib-chart` demo enables
+  them on the stacked-bar and pie charts and now renders its labels with an
+  anti-aliased TrueType font when one is available (falling back to the
+  compiled-in bitmap font).
 - Stacked bar charts (`IChartSetStacked`) and a logarithmic value axis
   (`IChartSetLogScale`, ticks at powers of ten) for the charting library, both
   exposed in the Python bindings (`Chart.set_stacked` / `Chart.set_log_scale`).
@@ -167,6 +173,10 @@ without breaking the public API.
 - Fixed the dead `ilib.sourceforge.net` URLs.
 
 ### Fixed
+- Text metrics for scalable (TrueType) fonts: `ITextWidth` / `ITextDimensions`
+  always measured via the BDF glyph cache and returned ~0 for a TTF font, which
+  broke centering and right-anchored layout (e.g. clipped chart legends). They
+  now measure TTF text via FreeType glyph advances (`_IFontTTFTextWidth`).
 - Use-after-free in the BDF font glyph cache: `IFontBDFGetChar` cached the font
   by name pointer but `IFontBDFFree` never invalidated it, so a freed font whose
   name address was later reused could resolve to the dangling font. The cache is

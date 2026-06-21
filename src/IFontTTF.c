@@ -110,6 +110,37 @@ IError _IFontTTFGetSize ( char *name, unsigned int *height_return )
   return ( INoError );
 }
 
+/* Sum the (unrotated) glyph advances to get the pixel width of `text`. For
+   multi-line text the widest line is returned. */
+IError _IFontTTFTextWidth ( char *name, char *text, unsigned int len,
+  unsigned int *width_return )
+{
+  TTFEntry *entry = ttf_find ( name );
+  FT_Face face;
+  double line = 0.0, maxw = 0.0;
+  unsigned int i;
+
+  if ( !entry )
+    return ( INoSuchFont );
+  face = entry->face;
+  for ( i = 0; i < len; i++ ) {
+    if ( text[i] == '\012' ) { /* newline */
+      if ( line > maxw )
+        maxw = line;
+      line = 0.0;
+      continue;
+    }
+    if ( FT_Load_Char ( face, (FT_ULong) (unsigned char) text[i],
+           FT_LOAD_DEFAULT ) )
+      continue;
+    line += (double) face->glyph->advance.x / 64.0;
+  }
+  if ( line > maxw )
+    maxw = line;
+  *width_return = (unsigned int) ( maxw + 0.5 );
+  return ( INoError );
+}
+
 /* Draw text with (x,y) as the left end of the baseline, rotated by `angle`
    degrees (counterclockwise on screen). Each glyph is rendered to an 8-bit
    coverage bitmap (rotated by FreeType) and composited with the GC foreground.

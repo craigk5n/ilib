@@ -365,6 +365,15 @@ IError _IFontTTFGetSize (
 #endif
 );
 
+IError _IFontTTFTextWidth (
+#ifndef _NO_PROTO
+  char *name,
+  char *text,
+  unsigned int len,
+  unsigned int *width_return
+#endif
+);
+
 IError _IFontTTFDrawString (
 #ifndef _NO_PROTO
   IImageP *image,
