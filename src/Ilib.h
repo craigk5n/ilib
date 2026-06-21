@@ -95,7 +95,7 @@
  * handle or NULL/0 on failure.
  *
  * @section start Getting started
- * See the bundled `examples/` (iconvert, isample) and the project README for
+ * See the bundled `examples/` (ilib-convert, ilib-sample) and the project README for
  * build and usage instructions.
  */
 

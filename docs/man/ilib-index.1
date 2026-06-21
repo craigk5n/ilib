@@ -1,14 +1,14 @@
-.TH IINDEX 1 "June 2026" "ilib @ILIB_VERSION@" "Ilib Manual"
+.TH ILIB-INDEX 1 "June 2026" "ilib @ILIB_VERSION@" "Ilib Manual"
 .SH NAME
-iindex \- build a thumbnail index (contact sheet) image
+ilib-index \- build a thumbnail index (contact sheet) image
 .SH SYNOPSIS
-.B iindex
+.B ilib-index
 .RI [ options ]
 .I outfile
 .I infile1
 .RI [ infile2 ...]
 .SH DESCRIPTION
-.B iindex
+.B ilib-index
 reads one or more images and composes a single
 .I outfile
 image containing scaled-down thumbnails of each input arranged in a grid, with
@@ -16,7 +16,7 @@ the source file name printed under each thumbnail. The output format is chosen
 from the
 .I outfile
 extension (see
-.BR iconvert (1)).
+.BR ilib-convert (1)).
 .SH OPTIONS
 .TP
 .BI \-w N
@@ -49,7 +49,7 @@ Show usage information and exit.
 .SH EXAMPLES
 .RS
 .nf
-iindex -w120 -H120 -f index.png *.jpg
+ilib-index -w120 -H120 -f index.png *.jpg
 .fi
 .RE
 .SH EXIT STATUS
@@ -59,8 +59,8 @@ exists and
 .B \-f
 was not given.
 .SH SEE ALSO
-.BR iconvert (1),
-.BR iwebreprt (1)
+.BR ilib-convert (1),
+.BR ilib-webreprt (1)
 .PP
 Full API documentation: https://craigk5n.github.io/ilib/
 .SH AUTHOR

@@ -1,15 +1,15 @@
-.TH IFRAGGRAPH 1 "June 2026" "ilib @ILIB_VERSION@" "Ilib Manual"
+.TH ILIB-FRAGGRAPH 1 "June 2026" "ilib @ILIB_VERSION@" "Ilib Manual"
 .SH NAME
-ifraggraph \- graph a player's frags from QuakeWorld frag logs
+ilib-fraggraph \- graph a player's frags from QuakeWorld frag logs
 .SH SYNOPSIS
-.B ifraggraph
+.B ilib-fraggraph
 .I player
 .I fraglog
 .RI [ fraglog ...]
 .B >
 .I out.gif
 .SH DESCRIPTION
-.B ifraggraph
+.B ilib-fraggraph
 parses one or more QuakeWorld frag log files and writes an image graphing the
 named
 .IR player 's
@@ -22,14 +22,14 @@ tool reports the problem rather than crashing.
 .SH EXAMPLES
 .RS
 .nf
-ifraggraph "Player1" frag.log > player1.gif
+ilib-fraggraph "Player1" frag.log > player1.gif
 .fi
 .RE
 .SH NOTES
 This is a historical client tool retained as a worked example of using the
 Ilib drawing and graphing API on parsed log data.
 .SH SEE ALSO
-.BR iwebreprt (1)
+.BR ilib-webreprt (1)
 .PP
 Full API documentation: https://craigk5n.github.io/ilib/
 .SH AUTHOR

@@ -1,8 +1,8 @@
 # Ilib tutorial
 
 A short, practical introduction to using the Ilib C API. It mirrors the two
-bundled programs in [`examples/`](../examples): `iconvert` (format conversion)
-and `isample` (drawing). For the complete reference see the
+bundled programs in [`examples/`](../examples): `ilib-convert` (format
+conversion) and `ilib-sample` (drawing). For the complete reference see the
 [Doxygen API docs](https://craigk5n.github.io/ilib/).
 
 ## Contents
@@ -46,7 +46,7 @@ target_link_libraries(myprog PRIVATE Ilib::ilib)
 ## Example 1: converting between formats
 
 Reading an image, then writing it back in another format, is the whole job of
-`iconvert`. The format is discovered from the filename with `IFileType()`:
+`ilib-convert`. The format is discovered from the filename with `IFileType()`:
 
 ```c
 #include <stdio.h>
@@ -86,7 +86,7 @@ except BMP. Always open files in binary mode (`"rb"`/`"wb"`).
 
 ## Example 2: drawing an image
 
-`isample` builds an image from scratch: create the canvas, make a graphics
+`ilib-sample` builds an image from scratch: create the canvas, make a graphics
 context, allocate colors, set the foreground, then draw. Here is the gist:
 
 ```c
@@ -144,10 +144,10 @@ IFreeFont(font);
 
 Run `pkg-config --variable=fontdir ilib` to find where the bundled fonts were
 installed. To ship a self-contained binary instead, convert a font to a C
-header with [`ifont2h`](man/ifont2h.1) and embed it:
+header with [`ilib-font2h`](man/ilib-font2h.1) and embed it:
 
 ```bash
-ifont2h helvR24.bdf > helvR24.h
+ilib-font2h helvR24.bdf > helvR24.h
 ```
 
 ```c
@@ -173,6 +173,7 @@ Constructors signal failure differently — they return `NULL` (`ICreateImage`,
 
 - [`examples/iconvert`](../examples/iconvert) and
   [`examples/isample`](../examples/isample) — the full programs.
-- The client tools — [`iindex`](man/iindex.1), [`idisplayfont`](man/idisplayfont.1)
-  and others — are additional worked examples.
+- The client tools — [`ilib-index`](man/ilib-index.1),
+  [`ilib-displayfont`](man/ilib-displayfont.1) and others — are additional
+  worked examples.
 - [API reference](https://craigk5n.github.io/ilib/).
