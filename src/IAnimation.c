@@ -190,6 +190,7 @@ IError IWriteAnimationFile ( FILE *fp, IAnimation anim, IFileFormat format,
 #ifdef HAVE_GIFLIB
     return ( _IWriteAnimGIF ( fp, anim, options ) );
 #else
+    (void) options;
     return ( INoGIFSupport );
 #endif
   }
