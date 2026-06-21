@@ -10,6 +10,12 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Convolution / area filters, the third batch of ImageMagick-style transforms
+  (`IConvolve.c`): a generic `IConvolve()` (arbitrary odd N x N kernel, with
+  divisor and bias) plus `IBlur()` (box), `IGaussianBlur()`, `ISharpen()`,
+  `IEdgeDetect()`, and `IEmboss()`. They sample neighbours with clamp-to-edge
+  addressing, leave alpha untouched, and are exposed in the Python bindings
+  (`Image.convolve/blur/gaussian_blur/sharpen/edge_detect/emboss`).
 - Image transforms (geometric whole-image operations), the second batch of
   ImageMagick-style transforms (`ITransform.c`): `IFlip()` (vertical),
   `IFlop()` (horizontal), `IRotate()` (clockwise, by a multiple of 90 degrees;

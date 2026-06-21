@@ -1,7 +1,7 @@
 # Ilib core library
 
 set(ILIB_SOURCES
-  IArcProp.c IBMP.c IColor.c ICopyImg.c
+  IArcProp.c IBMP.c IColor.c IConvolve.c ICopyImg.c
   IDrawArc.c IDrawCir.c IDrawCurve.c IDrawEll.c IDrawLin.c IDrawPol.c IDrawPt.c
   IDrawRec.c IDrawStr.c IErrorStr.c IFileType.c
   IFillArc.c IFillCir.c IFillEll.c IFillPol.c IFillRec.c IFilter.c IFlood.c
