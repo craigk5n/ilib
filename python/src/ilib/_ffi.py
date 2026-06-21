@@ -22,6 +22,7 @@ from cffi import FFI
 # read/write functions and never dereference them.
 _CDEF = """
 typedef void *IImage;
+typedef void *IAnimation;
 typedef void *IFont;
 typedef void *IGC;
 typedef unsigned int IColor;
@@ -110,6 +111,18 @@ IError IReadImageFile(FILE *fp, IFileFormat format, IOptions options,
                       IImage *image_return);
 IError IWriteImageFile(FILE *fp, IImage image, IFileFormat format,
                        IOptions options);
+
+IAnimation ICreateAnimation(void);
+IError _IFreeAnimation(IAnimation anim);
+IError IAddAnimationFrame(IAnimation anim, IImage frame, int delay_ms);
+int IAnimationFrameCount(IAnimation anim);
+IImage IAnimationFrame(IAnimation anim, int index);
+int IAnimationFrameDelay(IAnimation anim, int index);
+IError ISetAnimationLoopCount(IAnimation anim, int loops);
+int IAnimationLoopCount(IAnimation anim);
+IAnimation IReadAnimationFile(FILE *fp, IFileFormat format);
+IError IWriteAnimationFile(FILE *fp, IAnimation anim, IFileFormat format,
+                           IOptions options);
 
 IGC ICreateGC(void);
 IError _IFreeGC(IGC gc);

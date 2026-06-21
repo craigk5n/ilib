@@ -8,7 +8,8 @@ Copyright (C) 2001-2026 Craig Knudsen, craig@k5n.us — https://www.k5n.us/Ilib.
 
 Ilib is a library (and some tools and examples) written in C
 that can read, create, manipulate and save images.  It can read and
-write PPM, PGM, XPM, BMP, GIF, PNG, JPG, WebP and AVIF image formats.
+write PPM, PGM, XPM, BMP, GIF, PNG, JPG, WebP and AVIF image formats,
+including **animated (multi-frame) GIFs**.
 
 ## Graphics
 
@@ -44,6 +45,10 @@ The drawing API is modeled on a subset of the X11 graphics functions:
 - **Composition:** autocrop a uniform border (`ITrim`), add a solid frame
   (`IBorder`), and combine images — side-by-side/stacked (`IAppend`) or in a
   grid / contact sheet (`IMontage`).
+- **Animation:** an `IAnimation` holds an ordered list of frames with per-frame
+  delays and a loop count; read and write animated (multi-frame) GIFs with
+  `IReadAnimationFile` / `IWriteAnimationFile` (the reader composites frames
+  honoring GIF disposal methods). In Python: the `Animation` class.
 - **Charting:** a small charting layer (`Ichart.h`) builds line, bar (grouped
   or stacked, vertical or horizontal), pie, donut, area and scatter charts —
   with title, axes, gridlines (linear or log scale), tick/category labels,

@@ -737,5 +737,59 @@ class Geometry(unittest.TestCase):
             self.assertGreater(pts.a1_x, 50)
 
 
+class Animations(unittest.TestCase):
+    @staticmethod
+    def _solid(w, h, r, g, b):
+        im = ilib.Image(w, h)
+        for y in range(h):
+            for x in range(w):
+                im.set_pixel(x, y, r, g, b)
+        return im
+
+    def test_build_and_query(self):
+        with ilib.Animation() as a:
+            self.assertEqual(len(a), 0)
+            for img, d in ((self._solid(8, 6, 255, 0, 0), 100),
+                           (self._solid(8, 6, 0, 0, 255), 200)):
+                with img:
+                    a.add_frame(img, d)
+            a.loop_count = 3
+            self.assertEqual(len(a), 2)
+            self.assertEqual(a.delay(0), 100)
+            self.assertEqual(a.loop_count, 3)
+            with a.frame(0) as f:
+                self.assertEqual(f.size, (8, 6))
+
+    def test_gif_round_trip(self):
+        a = ilib.Animation()
+        for img, d in ((self._solid(12, 10, 255, 0, 0), 100),
+                       (self._solid(12, 10, 0, 0, 255), 200)):
+            with img:
+                a.add_frame(img, d)
+        a.loop_count = 5
+        path = os.path.join(tempfile.gettempdir(), "ilib_pyanim.gif")
+        try:
+            try:
+                a.save(path)
+            except ilib.IlibError as e:
+                if e.code == ilib.IError.NoGIFSupport:
+                    self.skipTest("no giflib")
+                raise
+            finally:
+                a.free()
+            b = ilib.Animation.open(path)
+            try:
+                self.assertEqual(len(b), 2)
+                self.assertEqual(b.delay(1), 200)
+                self.assertEqual(b.loop_count, 5)
+                with b.frame(0) as f:
+                    self.assertEqual(f.get_pixel(6, 5), (255, 0, 0))
+            finally:
+                b.free()
+        finally:
+            if os.path.exists(path):
+                os.unlink(path)
+
+
 if __name__ == "__main__":
     unittest.main()
