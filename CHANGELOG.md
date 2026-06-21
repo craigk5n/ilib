@@ -10,6 +10,12 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- AVIF read/write support (`IAVIF.c`, format `IFORMAT_AVIF`, extension
+  `.avif`) via libavif, auto-detected with pkg-config (`HAVE_AVIFLIB`; toggle
+  with `ILIB_WITH_AVIF`). Decoding yields RGB or RGBA (high-bit-depth AVIFs are
+  down-converted to 8-bit); encoding takes RGB/RGBA (greyscale expanded) at a
+  fixed quality. New error codes `IAVIFError` / `INoAVIFSupport`. Exposed in the
+  Python bindings (`Format.AVIF`) and both CLIs.
 - WebP read/write support (`IWEBP.c`, format `IFORMAT_WEBP`, extension
   `.webp`) via libwebp, auto-detected with pkg-config like the other optional
   codecs (`HAVE_WEBPLIB`; toggle with `ILIB_WITH_WEBP`). Decoding yields RGB, or

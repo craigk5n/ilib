@@ -416,6 +416,32 @@ class FileIO(unittest.TestCase):
                     self.assertLess(abs(g - 100), 12)
                     self.assertLess(abs(b - 50), 12)
 
+    def test_avif_roundtrip_or_skip(self):
+        unsupported = {
+            ilib.IError.NoAVIFSupport,
+            ilib.IError.AVIFError,
+            ilib.IError.InvalidFormat,
+            ilib.IError.FunctionNotImplemented,
+        }
+        with ilib.Image(16, 16) as img:
+            for y in range(16):
+                for x in range(16):
+                    img.set_pixel(x, y, 200, 100, 50)
+            with tempfile.TemporaryDirectory() as d:
+                path = os.path.join(d, "x.avif")
+                try:
+                    img.save(path)
+                except ilib.IlibError as exc:
+                    if exc.code in unsupported:
+                        self.skipTest("library built without AVIF")
+                    raise
+                with ilib.Image.open(path) as back:
+                    self.assertEqual(back.size, (16, 16))
+                    r, g, b = back.get_pixel(8, 8)
+                    self.assertLess(abs(r - 200), 16)
+                    self.assertLess(abs(g - 100), 16)
+                    self.assertLess(abs(b - 50), 16)
+
     def test_explicit_format(self):
         with ilib.Image(4, 4) as img:
             with tempfile.TemporaryDirectory() as d:

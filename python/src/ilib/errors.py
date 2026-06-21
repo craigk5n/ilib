@@ -34,6 +34,8 @@ class IError(IntEnum):
     InvalidPolygon = 21
     WEBPError = 22
     NoWEBPSupport = 23
+    AVIFError = 24
+    NoAVIFSupport = 25
 
 
 def error_string(code):

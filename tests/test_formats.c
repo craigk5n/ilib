@@ -344,6 +344,66 @@ TEST webp_alpha_roundtrip ( void )
   PASS ();
 }
 
+/* AVIF round-trip (when libavif is compiled in). Lossy, so a solid colour is
+   checked with tolerance; skip-clean when the codec is absent. */
+TEST avif_roundtrip ( void )
+{
+  IImage im = ICreateImage ( 16, 16, IOPTION_NONE );
+  IError wr, rd;
+  IImage back;
+  int x, y;
+
+  for ( y = 0; y < 16; y++ )
+    for ( x = 0; x < 16; x++ )
+      ISetPixel ( im, x, y, 200, 100, 50 );
+
+  back = roundtrip ( im, IFORMAT_AVIF, &wr, &rd );
+  if ( wr == INoError ) {
+    unsigned int r, g, b;
+    ASSERT_EQ ( INoError, rd );
+    ASSERT ( back != NULL );
+    ASSERT_EQ ( 16, px_width ( back ) );
+    ASSERT_EQ ( 16, px_height ( back ) );
+    IGetPixel ( back, 8, 8, &r, &g, &b );
+    ASSERT ( abs ( (int) r - 200 ) <= 16 );
+    ASSERT ( abs ( (int) g - 100 ) <= 16 );
+    ASSERT ( abs ( (int) b - 50 ) <= 16 );
+    IFreeImage ( back );
+  }
+  else {
+    ASSERT ( back == NULL );
+  }
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST avif_alpha_roundtrip ( void )
+{
+  IImage im = ICreateImage ( 16, 16, IOPTION_ALPHA );
+  IError wr, rd;
+  IImage back;
+  int x, y;
+
+  for ( y = 0; y < 16; y++ )
+    for ( x = 0; x < 16; x++ )
+      ISetPixelAlpha ( im, x, y, 10, 20, 30, 128 );
+
+  back = roundtrip ( im, IFORMAT_AVIF, &wr, &rd );
+  if ( wr == INoError ) {
+    unsigned int a = 0;
+    ASSERT_EQ ( INoError, rd );
+    ASSERT ( back != NULL );
+    IGetPixelAlpha ( back, 8, 8, NULL, NULL, NULL, &a );
+    ASSERT ( abs ( (int) a - 128 ) <= 16 );
+    IFreeImage ( back );
+  }
+  else {
+    ASSERT ( back == NULL );
+  }
+  IFreeImage ( im );
+  PASS ();
+}
+
 SUITE ( formats )
 {
   RUN_TEST ( ppm_roundtrip );
@@ -358,6 +418,8 @@ SUITE ( formats )
   RUN_TEST ( optional_codec_write_is_clean );
   RUN_TEST ( webp_roundtrip );
   RUN_TEST ( webp_alpha_roundtrip );
+  RUN_TEST ( avif_roundtrip );
+  RUN_TEST ( avif_alpha_roundtrip );
 }
 
 GREATEST_MAIN_DEFS ();
