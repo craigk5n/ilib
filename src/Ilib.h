@@ -237,6 +237,7 @@ typedef struct {
 /* use the following with IWriteImageFile() */
 #define IOPTION_ASCII 0x0001      /* ascii output for pbm/pgm/ppm */
 #define IOPTION_INTERLACED 0x0002 /* interlaced output (GIF) */
+#define IOPTION_DITHER 0x0008     /* Floyd-Steinberg dither on color reduction */
 
 /**
  * Default color values for black and white
@@ -363,6 +364,19 @@ IError ICopyImageScaled (
 IError IReduceColors (
 #ifndef _NO_PROTO
   IImage image,           /* image to reduce (modified in place) */
+  unsigned int max_colors /* maximum number of colors to keep (<= 256) */
+#endif
+);
+
+/**
+ * Like IReduceColors(), but diffuses the quantization error (Floyd-Steinberg
+ * dithering) so smooth gradients keep their shape instead of banding into flat
+ * regions. Slower than IReduceColors() and adds fine dither noise. The GIF
+ * writer applies this when passed IOPTION_DITHER.
+ */
+IError IDither (
+#ifndef _NO_PROTO
+  IImage image,           /* image to reduce + dither (modified in place) */
   unsigned int max_colors /* maximum number of colors to keep (<= 256) */
 #endif
 );

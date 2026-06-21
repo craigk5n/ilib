@@ -242,6 +242,57 @@ TEST reduce_colors_rejects_bad_handle ( void )
   PASS ();
 }
 
+/* Count adjacent-pixel color changes along the middle row. */
+static int row_transitions ( IImage im, int w, int y )
+{
+  int x, t = 0;
+  unsigned int pr, pg, pb, r, g, b;
+  IGetPixel ( im, 0, y, &pr, &pg, &pb );
+  for ( x = 1; x < w; x++ ) {
+    IGetPixel ( im, x, y, &r, &g, &b );
+    if ( r != pr || g != pg || b != pb )
+      t++;
+    pr = r;
+    pg = g;
+    pb = b;
+  }
+  return ( t );
+}
+
+/* Dithering a smooth gradient down to 2 colors must scatter both palette colors
+   across the transition (many changes), where a plain reduce yields ~one hard
+   edge. */
+TEST dither_diffuses_gradient ( void )
+{
+  int w = 64, h = 8, x, y;
+  IImage plain = ICreateImage ( w, h, IOPTION_NONE );
+  IImage dith = ICreateImage ( w, h, IOPTION_NONE );
+
+  for ( y = 0; y < h; y++ ) {
+    for ( x = 0; x < w; x++ ) {
+      unsigned int v = (unsigned int) ( x * 255 / ( w - 1 ) );
+      ISetPixel ( plain, x, y, v, v, v );
+      ISetPixel ( dith, x, y, v, v, v );
+    }
+  }
+  ASSERT_EQ ( INoError, IReduceColors ( plain, 2 ) );
+  ASSERT_EQ ( INoError, IDither ( dith, 2 ) );
+
+  /* Plain reduction: a single hard edge. Dithered: many interleaved changes. */
+  ASSERT ( row_transitions ( dith, w, h / 2 ) >
+           row_transitions ( plain, w, h / 2 ) + 3 );
+
+  IFreeImage ( plain );
+  IFreeImage ( dith );
+  PASS ();
+}
+
+TEST dither_rejects_bad_handle ( void )
+{
+  ASSERT_EQ ( IInvalidImage, IDither ( NULL, 16 ) );
+  PASS ();
+}
+
 /* The GIF writer auto-quantizes a >256-color image down to a 256-color
    palette: writing one must succeed cleanly (when giflib is compiled in) or
    fail cleanly otherwise -- never crash or report a palette overflow. Palette
@@ -414,6 +465,8 @@ SUITE ( formats )
   RUN_TEST ( reduce_colors_caps_palette );
   RUN_TEST ( reduce_colors_preserves_few );
   RUN_TEST ( reduce_colors_rejects_bad_handle );
+  RUN_TEST ( dither_diffuses_gradient );
+  RUN_TEST ( dither_rejects_bad_handle );
   RUN_TEST ( gif_write_quantizes );
   RUN_TEST ( optional_codec_write_is_clean );
   RUN_TEST ( webp_roundtrip );

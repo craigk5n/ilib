@@ -200,18 +200,37 @@ static int q_within_limit ( const unsigned char *rgb, int npixels,
   return within;
 }
 
-/* Reduce src (npixels of RGB) to at most max_colors colors, writing the result
-   to dst (which may alias src). When src already has few enough colors it is
-   copied through unchanged. Each output pixel depends only on the matching
-   input pixel, so in-place operation is safe. */
-void _IReduceColorsRGB ( const unsigned char *src, int npixels, int max_colors,
-  unsigned char *dst )
+/* Nearest palette entry to (r, g, b) by squared Euclidean distance. */
+static int q_nearest ( const unsigned char palette[][3], int ncolors, int r,
+  int g, int b )
+{
+  long best = -1;
+  int besti = 0, i;
+  for ( i = 0; i < ncolors; i++ ) {
+    long dr = r - palette[i][0], dg = g - palette[i][1], db = b - palette[i][2];
+    long d = dr * dr + dg * dg + db * db;
+    if ( best < 0 || d < best ) {
+      best = d;
+      besti = i;
+    }
+  }
+  return ( besti );
+}
+
+#define QCLAMP( v ) ( ( v ) < 0 ? 0 : ( ( v ) > 255 ? 255 : ( v ) ) )
+
+/* Core quantizer. Reduce a width*height RGB image (src) to at most max_colors
+   colors, writing to dst (which may alias src). With dither set, error is
+   diffused (Floyd-Steinberg) so gradients keep their shape instead of banding.
+   When src already has few enough colors it is copied through unchanged. */
+static void q_quantize ( const unsigned char *src, int width, int height,
+  int max_colors, int dither, unsigned char *dst )
 {
   int *count = NULL;
   double *sumr = NULL, *sumg = NULL, *sumb = NULL;
-  int *lut = NULL;
+  int *lut = NULL, *ecur = NULL, *enext = NULL;
   QBucket *pop = NULL;
-  int i, npop, ncolors;
+  int i, npop, ncolors, npixels = width * height;
   unsigned char palette[256][3];
 
   if ( npixels <= 0 )
@@ -221,9 +240,8 @@ void _IReduceColorsRGB ( const unsigned char *src, int npixels, int max_colors,
   if ( max_colors > 256 )
     max_colors = 256;
 
-  /* Always materialize the result in dst first, then quantize in place. This
-     guarantees dst is valid even if a later allocation fails (we just leave
-     the unquantized copy). From here on we read and write dst only. */
+  /* Materialize the result in dst first, so it stays valid even if a later
+     allocation fails (we just leave the unquantized copy). */
   if ( dst != src )
     memcpy ( dst, src, (size_t) npixels * 3 );
 
@@ -272,12 +290,66 @@ void _IReduceColorsRGB ( const unsigned char *src, int npixels, int max_colors,
   if ( ncolors < 1 )
     goto done;
 
-  for ( i = 0; i < npixels; i++ ) {
-    int cell = QPACK ( dst[i * 3], dst[i * 3 + 1], dst[i * 3 + 2] );
-    int idx = lut[cell];
-    dst[i * 3] = palette[idx][0];
-    dst[i * 3 + 1] = palette[idx][1];
-    dst[i * 3 + 2] = palette[idx][2];
+  /* Upgrade lut to a complete nearest-color table over every cell (the median
+     cut only filled populated cells); dithering pushes values into empties. */
+  for ( i = 0; i < QCELLS; i++ ) {
+    int r = ( ( ( i >> ( QBITS * 2 ) ) & ( QLEVELS - 1 ) ) << QSHIFT ) +
+            ( 1 << ( QSHIFT - 1 ) );
+    int g = ( ( ( i >> QBITS ) & ( QLEVELS - 1 ) ) << QSHIFT ) +
+            ( 1 << ( QSHIFT - 1 ) );
+    int b =
+      ( ( i & ( QLEVELS - 1 ) ) << QSHIFT ) + ( 1 << ( QSHIFT - 1 ) );
+    lut[i] = q_nearest ( palette, ncolors, r, g, b );
+  }
+
+  if ( !dither ) {
+    for ( i = 0; i < npixels; i++ ) {
+      int idx = lut[QPACK ( dst[i * 3], dst[i * 3 + 1], dst[i * 3 + 2] )];
+      dst[i * 3] = palette[idx][0];
+      dst[i * 3 + 1] = palette[idx][1];
+      dst[i * 3 + 2] = palette[idx][2];
+    }
+    goto done;
+  }
+
+  /* Floyd-Steinberg error diffusion. Error is carried in two int row buffers
+     (current and next) rather than in the image, so each pixel still reads its
+     untouched original. */
+  ecur = calloc ( (size_t) width * 3, sizeof ( int ) );
+  enext = calloc ( (size_t) width * 3, sizeof ( int ) );
+  if ( !ecur || !enext )
+    goto done;
+  {
+    int x, y, c;
+    for ( y = 0; y < height; y++ ) {
+      memset ( enext, 0, (size_t) width * 3 * sizeof ( int ) );
+      for ( x = 0; x < width; x++ ) {
+        int idx = ( y * width + x ) * 3, pi;
+        int oldv[3], newv[3], err[3];
+        for ( c = 0; c < 3; c++ )
+          oldv[c] = QCLAMP ( dst[idx + c] + ecur[x * 3 + c] );
+        pi = lut[QPACK ( oldv[0], oldv[1], oldv[2] )];
+        for ( c = 0; c < 3; c++ ) {
+          newv[c] = palette[pi][c];
+          err[c] = oldv[c] - newv[c];
+          dst[idx + c] = (unsigned char) newv[c];
+        }
+        for ( c = 0; c < 3; c++ ) {
+          if ( x + 1 < width )
+            ecur[( x + 1 ) * 3 + c] += err[c] * 7 / 16;
+          if ( x > 0 )
+            enext[( x - 1 ) * 3 + c] += err[c] * 3 / 16;
+          enext[x * 3 + c] += err[c] * 5 / 16;
+          if ( x + 1 < width )
+            enext[( x + 1 ) * 3 + c] += err[c] * 1 / 16;
+        }
+      }
+      {
+        int *tmp = ecur;
+        ecur = enext;
+        enext = tmp;
+      }
+    }
   }
 
 done:
@@ -287,9 +359,27 @@ done:
   free ( sumb );
   free ( lut );
   free ( pop );
+  free ( ecur );
+  free ( enext );
 }
 
-IError IReduceColors ( IImage image, unsigned int max_colors )
+/* Reduce src (npixels of RGB) to at most max_colors colors, in place-safe. */
+void _IReduceColorsRGB ( const unsigned char *src, int npixels, int max_colors,
+  unsigned char *dst )
+{
+  q_quantize ( src, npixels, 1, max_colors, 0, dst );
+}
+
+/* As above, but Floyd-Steinberg dithered when dither is non-zero (needs the
+   real width/height for error diffusion). */
+void _IReduceColorsRGBDither ( const unsigned char *src, int width, int height,
+  int max_colors, int dither, unsigned char *dst )
+{
+  q_quantize ( src, width, height, max_colors, dither, dst );
+}
+
+static IError q_reduce_image ( IImage image, unsigned int max_colors,
+  int dither )
 {
   IImageP *imagep = (IImageP *) image;
 
@@ -304,7 +394,17 @@ IError IReduceColors ( IImage image, unsigned int max_colors )
   if ( imagep->width <= 0 || imagep->height <= 0 )
     return ( INoError );
 
-  _IReduceColorsRGB ( imagep->data, imagep->width * imagep->height,
-    (int) max_colors, imagep->data );
+  q_quantize ( imagep->data, imagep->width, imagep->height, (int) max_colors,
+    dither, imagep->data );
   return ( INoError );
+}
+
+IError IReduceColors ( IImage image, unsigned int max_colors )
+{
+  return ( q_reduce_image ( image, max_colors, 0 ) );
+}
+
+IError IDither ( IImage image, unsigned int max_colors )
+{
+  return ( q_reduce_image ( image, max_colors, 1 ) );
 }

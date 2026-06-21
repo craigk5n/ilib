@@ -10,6 +10,12 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Floyd-Steinberg dithering for color reduction: `IDither()` (like
+  `IReduceColors()` but error-diffused, so gradients keep their shape instead of
+  banding), plus a full nearest-color lookup so diffused values map correctly.
+  The GIF/animated-GIF writers apply it when passed the new `IOPTION_DITHER`
+  write flag; exposed as `Image.dither()` / `Option.DITHER` in Python and a
+  `--dither` flag on `ilib-convert`, `ilib-mogrify` and `ilib-anim assemble`.
 - Animated (multi-frame) GIF support via a new `IAnimation` type: build a
   sequence of frames with per-frame delays and a loop count
   (`ICreateAnimation`, `IAddAnimationFrame`, `ISetAnimationLoopCount`, the

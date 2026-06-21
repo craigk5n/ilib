@@ -50,6 +50,7 @@ class Option(IntFlag):
     # IWriteImageFile()
     ASCII = 0x0001
     INTERLACED = 0x0002
+    DITHER = 0x0008
 
 
 class LineStyle(IntEnum):

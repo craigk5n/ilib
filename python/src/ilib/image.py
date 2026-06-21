@@ -227,6 +227,11 @@ class Image:
         check(lib.IReduceColors(self._as_parameter_, int(max_colors)))
         return self
 
+    def dither(self, max_colors=256):
+        """Reduce colors with Floyd-Steinberg dithering (less banding)."""
+        check(lib.IDither(self._as_parameter_, int(max_colors)))
+        return self
+
     # -- filters (whole-image point operations) ---------------------------
     def greyscale(self):
         """Desaturate to greyscale (Rec.601 luma), in place."""

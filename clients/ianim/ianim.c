@@ -57,7 +57,7 @@ static IError format_from_name ( const char *name, IFileFormat *out )
 
 static int cmd_assemble ( int argc, char *argv[] )
 {
-  int delay = 100, loop = 0, i, nframes = 0, rc = 1;
+  int delay = 100, loop = 0, i, nframes = 0, rc = 1, dither = 0;
   const char *out = NULL;
   const char **frames;
   IAnimation anim;
@@ -77,6 +77,8 @@ static int cmd_assemble ( int argc, char *argv[] )
                 strcmp ( argv[i], "--output" ) == 0 ) &&
               i + 1 < argc )
       out = argv[++i];
+    else if ( strcmp ( argv[i], "--dither" ) == 0 )
+      dither = 1;
     else if ( argv[i][0] == '-' ) {
       fprintf ( stderr, "ilib-anim: unknown option %s\n", argv[i] );
       free ( frames );
@@ -87,8 +89,8 @@ static int cmd_assemble ( int argc, char *argv[] )
   }
 
   if ( !out || nframes == 0 ) {
-    fprintf ( stderr,
-      "Usage: ilib-anim assemble [--delay MS] [--loop N] -o OUT FRAME...\n" );
+    fprintf ( stderr, "Usage: ilib-anim assemble [--delay MS] [--loop N] "
+                      "[--dither] -o OUT FRAME...\n" );
     free ( frames );
     return ( 1 );
   }
@@ -116,7 +118,8 @@ static int cmd_assemble ( int argc, char *argv[] )
     perror ( out );
     goto done;
   }
-  e = IWriteAnimationFile ( fp, anim, IFORMAT_GIF, IOPTION_NONE );
+  e = IWriteAnimationFile ( fp, anim, IFORMAT_GIF,
+    dither ? IOPTION_DITHER : IOPTION_NONE );
   fclose ( fp );
   if ( e != INoError ) {
     fprintf ( stderr, "ilib-anim: writing %s: %s\n", out, IErrorString ( e ) );
@@ -256,9 +259,10 @@ static void usage ( void )
     "Usage: ilib-anim <command> [options]\n"
     "\n"
     "Commands:\n"
-    "  assemble [--delay MS] [--loop N] -o OUT FRAME...\n"
+    "  assemble [--delay MS] [--loop N] [--dither] -o OUT FRAME...\n"
     "        Combine still images into an animated GIF (delay default 100ms,\n"
-    "        loop default 0 = forever).\n"
+    "        loop default 0 = forever; --dither diffuses color-reduction "
+    "error).\n"
     "  split [--prefix PFX] [--format FMT] IN\n"
     "        Write each frame of IN to PFX-NNNN.FMT (defaults frame / png).\n"
     "  info IN\n"

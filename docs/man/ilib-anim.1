@@ -5,6 +5,7 @@ ilib-anim \- assemble, split and inspect animated GIFs
 .B ilib-anim assemble
 .RI [ --delay " MS]"
 .RI [ --loop " N]"
+.RB [ --dither ]
 .B -o
 .I out.gif
 .I frame
@@ -29,7 +30,9 @@ output. Each frame is shown for
 .B --delay
 milliseconds (default 100) and the animation loops
 .B --loop
-times (default 0, meaning forever).
+times (default 0, meaning forever). With
+.B --dither
+the per-frame color reduction uses Floyd-Steinberg dithering.
 .TP
 .B split
 Write each frame of
