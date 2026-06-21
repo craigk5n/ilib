@@ -10,6 +10,10 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- More image filters (point operations) in `IFilter.c`: `INormalize()`
+  (auto-stretch contrast), `ISepia()` (warm sepia tone, colour images only),
+  and `IOpacity()` (scale an RGBA image's alpha by a factor). Exposed in the
+  Python bindings (`Image.normalize/sepia/opacity`).
 - AVIF read/write support (`IAVIF.c`, format `IFORMAT_AVIF`, extension
   `.avif`) via libavif, auto-detected with pkg-config (`HAVE_AVIFLIB`; toggle
   with `ILIB_WITH_AVIF`). Decoding yields RGB or RGBA (high-bit-depth AVIFs are

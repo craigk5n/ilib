@@ -39,7 +39,10 @@ typedef enum {
   OP_EDGE,
   OP_EMBOSS,
   OP_RESIZE,
-  OP_REDUCE_COLORS
+  OP_REDUCE_COLORS,
+  OP_NORMALIZE,
+  OP_SEPIA,
+  OP_OPACITY
 } OpType;
 
 typedef struct {
@@ -80,6 +83,9 @@ static void usage ( const char *prog )
     "  --emboss                   emboss\n"
     "  --resize WxH               resize to WxH (bilinear)\n"
     "  --reduce-colors N          reduce to at most N colours\n"
+    "  --normalize                auto-stretch contrast\n"
+    "  --sepia                    apply a sepia tone\n"
+    "  --opacity F                scale RGBA alpha by F (e.g. 0.5)\n"
     "  -h, --help                 show this help\n",
     prog );
 }
@@ -171,6 +177,12 @@ static IError apply_op ( IImage image, const Op *op, const char *background )
     return ( IResize ( image, (unsigned int) op->i1, (unsigned int) op->i2 ) );
   case OP_REDUCE_COLORS:
     return ( IReduceColors ( image, (unsigned int) op->i1 ) );
+  case OP_NORMALIZE:
+    return ( INormalize ( image ) );
+  case OP_SEPIA:
+    return ( ISepia ( image ) );
+  case OP_OPACITY:
+    return ( IOpacity ( image, op->d1 ) );
   }
   return ( INoError );
 }
@@ -357,6 +369,16 @@ int main ( int argc, char *argv[] )
       op.type = OP_REDUCE_COLORS;
       op.i1 = atoi ( next_arg ( &loop, argc, argv, "--reduce-colors" ) );
     }
+    else if ( is_flag ( tok, "normalize" ) || is_flag ( tok, "normalise" ) ) {
+      op.type = OP_NORMALIZE;
+    }
+    else if ( is_flag ( tok, "sepia" ) ) {
+      op.type = OP_SEPIA;
+    }
+    else if ( is_flag ( tok, "opacity" ) ) {
+      op.type = OP_OPACITY;
+      op.d1 = atof ( next_arg ( &loop, argc, argv, "--opacity" ) );
+    }
     else if ( tok[0] == '-' && tok[1] != '\0' ) {
       fprintf ( stderr, "Unknown option: %s\n", tok );
       usage ( argv[0] );
@@ -390,7 +412,8 @@ int main ( int argc, char *argv[] )
            is_flag ( tok, "gamma" ) || is_flag ( tok, "threshold" ) ||
            is_flag ( tok, "rotate" ) || is_flag ( tok, "blur" ) ||
            is_flag ( tok, "gaussian-blur" ) || is_flag ( tok, "resize" ) ||
-           is_flag ( tok, "reduce-colors" ) || is_flag ( tok, "reduce-colours" ) )
+           is_flag ( tok, "reduce-colors" ) ||
+           is_flag ( tok, "reduce-colours" ) || is_flag ( tok, "opacity" ) )
         loop++; /* this flag took an argument */
       continue;
     }

@@ -174,6 +174,103 @@ TEST preserves_alpha ( void )
   PASS ();
 }
 
+TEST normalize_stretches_contrast ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_NONE );
+  unsigned int lo, hi;
+
+  /* A low-contrast image (values 100..150) should stretch to 0..255. */
+  fill ( im, 100, 100, 100 );
+  ISetPixel ( im, 1, 0, 150, 150, 150 );
+  ASSERT_EQ ( INoError, INormalize ( im ) );
+  IGetPixel ( im, 0, 0, &lo, NULL, NULL );
+  IGetPixel ( im, 1, 0, &hi, NULL, NULL );
+  ASSERT_EQ ( 0, lo );
+  ASSERT_EQ ( 255, hi );
+
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST normalize_flat_is_noop ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_NONE );
+  unsigned int r;
+
+  fill ( im, 90, 90, 90 );
+  ASSERT_EQ ( INoError, INormalize ( im ) );
+  IGetPixel ( im, 0, 0, &r, NULL, NULL );
+  ASSERT_EQ ( 90, r ); /* flat: unchanged, not divide-by-zero */
+
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST sepia_warms_grey ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_NONE );
+  unsigned int r, g, b;
+
+  fill ( im, 128, 128, 128 );
+  ASSERT_EQ ( INoError, ISepia ( im ) );
+  IGetPixel ( im, 0, 0, &r, &g, &b );
+  /* Sepia of mid-grey is a warm brown: red >= green >= blue. */
+  ASSERT ( r >= g );
+  ASSERT ( g >= b );
+  ASSERT ( r > b );
+
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST opacity_scales_alpha ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_ALPHA );
+  unsigned int a;
+
+  ISetPixelAlpha ( im, 0, 0, 10, 20, 30, 200 );
+  ASSERT_EQ ( INoError, IOpacity ( im, 0.5 ) );
+  IGetPixelAlpha ( im, 0, 0, NULL, NULL, NULL, &a );
+  ASSERT_EQ ( 100, a );
+
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST opacity_clamps_and_rejects ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_ALPHA );
+  unsigned int a;
+
+  ISetPixelAlpha ( im, 0, 0, 0, 0, 0, 200 );
+  ASSERT_EQ ( INoError, IOpacity ( im, 10.0 ) ); /* clamps to 255 */
+  IGetPixelAlpha ( im, 0, 0, NULL, NULL, NULL, &a );
+  ASSERT_EQ ( 255, a );
+  ASSERT_EQ ( IInvalidArgument, IOpacity ( im, -1.0 ) );
+
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST opacity_noop_on_rgb ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_NONE );
+
+  /* No alpha channel: a clean no-op, not an error. */
+  ASSERT_EQ ( INoError, IOpacity ( im, 0.5 ) );
+
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST polish_ops_reject_bad_handle ( void )
+{
+  ASSERT_EQ ( IInvalidImage, INormalize ( NULL ) );
+  ASSERT_EQ ( IInvalidImage, ISepia ( NULL ) );
+  ASSERT_EQ ( IInvalidImage, IOpacity ( NULL, 1.0 ) );
+  PASS ();
+}
+
 TEST greyscale_on_grey_image_ok ( void )
 {
   IImage im = ICreateImage ( W, H, IOPTION_GREYSCALE );
@@ -199,6 +296,13 @@ SUITE ( filter )
   RUN_TEST ( filters_reject_bad_handle );
   RUN_TEST ( preserves_alpha );
   RUN_TEST ( greyscale_on_grey_image_ok );
+  RUN_TEST ( normalize_stretches_contrast );
+  RUN_TEST ( normalize_flat_is_noop );
+  RUN_TEST ( sepia_warms_grey );
+  RUN_TEST ( opacity_scales_alpha );
+  RUN_TEST ( opacity_clamps_and_rejects );
+  RUN_TEST ( opacity_noop_on_rgb );
+  RUN_TEST ( polish_ops_reject_bad_handle );
 }
 
 GREATEST_MAIN_DEFS ();

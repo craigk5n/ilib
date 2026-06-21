@@ -198,3 +198,123 @@ IError IThreshold ( IImage image, unsigned int threshold )
   _IApplyLUT ( imagep, lut );
   return ( INoError );
 }
+
+/* Find the min and max colour-channel value used anywhere in the image. */
+static void _IMinMax ( IImageP *image, int *min_return, int *max_return )
+{
+  size_t npixels = (size_t) image->width * image->height;
+  unsigned char *data = image->data;
+  int lo = 255, hi = 0;
+  size_t i;
+
+  if ( image->greyscale ) {
+    for ( i = 0; i < npixels; i++ ) {
+      int v = data[i];
+      if ( v < lo )
+        lo = v;
+      if ( v > hi )
+        hi = v;
+    }
+  }
+  else {
+    unsigned int ch = image->channels;
+    unsigned int color_ch = ( ch >= 3 ) ? 3 : ch;
+    for ( i = 0; i < npixels; i++ ) {
+      unsigned char *p = data + i * ch;
+      unsigned int c;
+      for ( c = 0; c < color_ch; c++ ) {
+        int v = p[c];
+        if ( v < lo )
+          lo = v;
+        if ( v > hi )
+          hi = v;
+      }
+    }
+  }
+  *min_return = lo;
+  *max_return = hi;
+}
+
+IError INormalize ( IImage image )
+{
+  IImageP *imagep = (IImageP *) image;
+  unsigned char lut[256];
+  int i, lo, hi, range;
+  IError err = _IValidImage ( imagep );
+
+  if ( err != INoError )
+    return ( err );
+
+  _IMinMax ( imagep, &lo, &hi );
+  range = hi - lo;
+  if ( range <= 0 )
+    return ( INoError ); /* flat image: nothing to stretch */
+
+  for ( i = 0; i < 256; i++ ) {
+    int v = ( i - lo ) * 255 / range;
+    lut[i] = _IClampByte ( v );
+  }
+  _IApplyLUT ( imagep, lut );
+  return ( INoError );
+}
+
+IError ISepia ( IImage image )
+{
+  IImageP *imagep = (IImageP *) image;
+  size_t npixels, i;
+  unsigned int ch, color_ch;
+  unsigned char *data;
+  IError err = _IValidImage ( imagep );
+
+  if ( err != INoError )
+    return ( err );
+
+  /* Sepia mixes the three channels, so it needs a colour image. */
+  if ( imagep->greyscale )
+    return ( INoError );
+  ch = imagep->channels;
+  color_ch = ( ch >= 3 ) ? 3 : ch;
+  if ( color_ch < 3 )
+    return ( INoError );
+
+  npixels = (size_t) imagep->width * imagep->height;
+  data = imagep->data;
+  for ( i = 0; i < npixels; i++ ) {
+    unsigned char *p = data + i * ch;
+    int r = p[0], g = p[1], b = p[2];
+    /* Standard sepia matrix (weights x1000). */
+    int tr = ( r * 393 + g * 769 + b * 189 ) / 1000;
+    int tg = ( r * 349 + g * 686 + b * 168 ) / 1000;
+    int tb = ( r * 272 + g * 534 + b * 131 ) / 1000;
+    p[0] = _IClampByte ( tr );
+    p[1] = _IClampByte ( tg );
+    p[2] = _IClampByte ( tb );
+  }
+  return ( INoError );
+}
+
+IError IOpacity ( IImage image, double factor )
+{
+  IImageP *imagep = (IImageP *) image;
+  size_t npixels, i;
+  unsigned char *data;
+  IError err = _IValidImage ( imagep );
+
+  if ( err != INoError )
+    return ( err );
+  if ( !( factor >= 0.0 ) ) /* also rejects NaN */
+    return ( IInvalidArgument );
+
+  /* Only RGBA images have an alpha channel to scale. */
+  if ( !imagep->has_alpha || imagep->channels != 4 )
+    return ( INoError );
+
+  npixels = (size_t) imagep->width * imagep->height;
+  data = imagep->data;
+  for ( i = 0; i < npixels; i++ ) {
+    unsigned char *p = data + i * 4;
+    int a = (int) ( p[3] * factor + 0.5 );
+    p[3] = _IClampByte ( a );
+  }
+  return ( INoError );
+}

@@ -232,6 +232,36 @@ class Filters(unittest.TestCase):
             self.assertEqual(img.get_pixel(0, 0), (0, 0, 0))
             self.assertEqual(img.get_pixel(1, 0), (255, 255, 255))
 
+    def test_normalize(self):
+        with ilib.Image(4, 4) as img:
+            for y in range(4):
+                for x in range(4):
+                    img.set_pixel(x, y, 100, 100, 100)
+            img.set_pixel(1, 0, 150, 150, 150)
+            img.normalize()
+            self.assertEqual(img.get_pixel(0, 0)[0], 0)
+            self.assertEqual(img.get_pixel(1, 0)[0], 255)
+
+    def test_sepia(self):
+        with ilib.Image(4, 4) as img:
+            for y in range(4):
+                for x in range(4):
+                    img.set_pixel(x, y, 128, 128, 128)
+            img.sepia()
+            r, g, b = img.get_pixel(0, 0)
+            self.assertGreaterEqual(r, g)
+            self.assertGreaterEqual(g, b)
+            self.assertGreater(r, b)
+
+    def test_opacity(self):
+        with ilib.Image(4, 4, ilib.Option.ALPHA) as img:
+            img.set_pixel_alpha(0, 0, 10, 20, 30, 200)
+            img.opacity(0.5)
+            self.assertEqual(img.get_pixel_alpha(0, 0)[3], 100)
+            with self.assertRaises(ilib.IlibError) as ctx:
+                img.opacity(-1.0)
+            self.assertEqual(ctx.exception.code, ilib.IError.InvalidArgument)
+
     def test_chaining(self):
         with ilib.Image(4, 4) as img:
             img.set_pixel(0, 0, 100, 150, 200)
