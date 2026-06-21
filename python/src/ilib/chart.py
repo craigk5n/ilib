@@ -90,6 +90,16 @@ class Chart:
         check(lib.IChartSetRange(self._as_parameter_, float(ymin), float(ymax)))
         return self
 
+    def set_stacked(self, stacked=True):
+        """For a bar chart, stack series instead of grouping them."""
+        check(lib.IChartSetStacked(self._as_parameter_, 1 if stacked else 0))
+        return self
+
+    def set_log_scale(self, on=True):
+        """Use a logarithmic (base-10) value axis (positive data only)."""
+        check(lib.IChartSetLogScale(self._as_parameter_, 1 if on else 0))
+        return self
+
     def add_series(self, values, label=None, color=0):
         """Add a data series (a sequence of values) with a legend label/color."""
         values = [float(v) for v in values]

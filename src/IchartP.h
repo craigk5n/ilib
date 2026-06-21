@@ -38,6 +38,8 @@ typedef struct {
   int nseries;
   int auto_range; /* 1 = derive y range from the data */
   double ymin, ymax;
+  int stacked;   /* bar charts: stack series instead of grouping */
+  int log_scale; /* logarithmic value (y) axis */
 } IChartP;
 
 #endif /* _ichartp_h */

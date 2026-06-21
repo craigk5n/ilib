@@ -10,6 +10,11 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Stacked bar charts (`IChartSetStacked`) and a logarithmic value axis
+  (`IChartSetLogScale`, ticks at powers of ten) for the charting library, both
+  exposed in the Python bindings (`Chart.set_stacked` / `Chart.set_log_scale`).
+  The `ilib-chart` demo now renders six charts (line, stacked bar, pie, area,
+  scatter, log-scale line); its output is shown in the README.
 - Two more chart types: **area** (`ICHART_AREA`, a line chart with a
   translucent fill under each line) and **scatter** (`ICHART_SCATTER`, an (x, y)
   point plot with a numeric x-axis). Scatter data is supplied via the new
