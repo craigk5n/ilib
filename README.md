@@ -170,6 +170,14 @@ Supported `ilib-convert` operations: `--greyscale`, `--negate`,
 `--rotate` (with `--background`), `--blur`, `--gaussian-blur`, `--sharpen`,
 `--edge`, `--emboss`, `--resize`, and `--reduce-colors`.
 
+The installed `ilib-mogrify` tool applies the same operations to **many files
+in place** (batch editing), or — with `--format EXT` — writes converted copies:
+
+```bash
+ilib-mogrify --resize 128x128 *.png          # shrink every PNG in place
+ilib-mogrify --format gif --reduce-colors 256 *.png   # PNG -> GIF copies
+```
+
 ### Packaging and releases
 
 Tagged releases (`vX.Y.Z`) publish source and binary tarballs with

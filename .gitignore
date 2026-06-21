@@ -54,6 +54,7 @@ Makefile.in
 /clients/idisplayfont/ilib-displayfont
 /clients/ifraggraph/ilib-fraggraph
 /clients/iindex/ilib-index
+/clients/imogrify/ilib-mogrify
 /clients/iwebreprt/ilib-webreprt
 /examples/iconvert/ilib-convert
 /examples/isample/ilib-sample
