@@ -347,6 +347,94 @@ TEST ttf_text_width_scales ( void )
   PASS ();
 }
 
+/* Count non-white pixels in an image (ink). */
+static int ink_count ( IImage im, int w, int h )
+{
+  int x, y, c = 0;
+  unsigned int r, g, b;
+  for ( y = 0; y < h; y++ )
+    for ( x = 0; x < w; x++ ) {
+      IGetPixel ( im, x, y, &r, &g, &b );
+      if ( r != 255 || g != 255 || b != 255 )
+        c++;
+    }
+  return ( c );
+}
+
+TEST text_box_wraps_to_width ( void )
+{
+  IGC gc = ICreateGC ();
+  IFont font = NULL;
+  char *s = "the quick brown fox jumps over the lazy dog";
+  unsigned int w1 = 0, h1 = 0, wn = 0, hn = 0, fh = 0;
+  int lines1 = 0, linesn = 0;
+
+  ASSERT_EQ ( INoError, ILoadFontFromFile ( "helvR08", FONT_PATH, &font ) );
+  IFontSize ( font, &fh );
+
+  /* No wrap: a single line. */
+  ASSERT_EQ ( INoError, ITextBoxDimensions ( gc, font, s, strlen ( s ), 0, &w1,
+                          &h1, &lines1 ) );
+  ASSERT_EQ ( 1, lines1 );
+  ASSERT_EQ ( fh, h1 );
+
+  /* Wrap to a narrow width: several lines, none wider than the unwrapped one. */
+  ASSERT_EQ ( INoError, ITextBoxDimensions ( gc, font, s, strlen ( s ), 60, &wn,
+                          &hn, &linesn ) );
+  ASSERT ( linesn > 1 );
+  ASSERT ( wn <= w1 );
+  ASSERT_EQ ( fh * (unsigned int) linesn, hn );
+
+  IFreeFont ( font );
+  IFreeGC ( gc );
+  PASS ();
+}
+
+TEST draw_text_honors_newlines ( void )
+{
+  IGC gc = ICreateGC ();
+  IFont font = NULL;
+  IImage im = ICreateImage ( 80, 40, IOPTION_NONE );
+  IColor white = IAllocColor ( 255, 255, 255 );
+  IColor black = IAllocColor ( 0, 0, 0 );
+  int lines = 0;
+  unsigned int h = 0, fh = 0;
+
+  ILoadFontFromFile ( "helvR08", FONT_PATH, &font );
+  ISetForeground ( gc, white );
+  IFillRectangle ( im, gc, 0, 0, 80, 40 );
+  ISetFont ( gc, font );
+  ISetForeground ( gc, black );
+
+  /* Two explicit lines, with no wrapping. */
+  ASSERT_EQ ( INoError,
+    IDrawText ( im, gc, 2, 8, "ab\ncd", 5, 0, IALIGN_LEFT ) );
+  ASSERT ( ink_count ( im, 80, 40 ) > 0 );
+
+  IFontSize ( font, &fh );
+  ITextBoxDimensions ( gc, font, "ab\ncd", 5, 0, NULL, &h, &lines );
+  ASSERT_EQ ( 2, lines );
+  ASSERT_EQ ( fh * 2, h );
+
+  IFreeImage ( im );
+  IFreeFont ( font );
+  IFreeGC ( gc );
+  PASS ();
+}
+
+TEST draw_text_rejects_bad_gc ( void )
+{
+  IImage im = ICreateImage ( 4, 4, IOPTION_NONE );
+  IGC gc = ICreateGC (); /* no font set */
+  ASSERT_EQ ( IInvalidGC,
+    IDrawText ( im, NULL, 0, 0, "x", 1, 0, IALIGN_LEFT ) );
+  ASSERT_EQ ( INoFontSet,
+    IDrawText ( im, gc, 0, 0, "x", 1, 0, IALIGN_LEFT ) );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
 SUITE ( text )
 {
   RUN_TEST ( load_font_succeeds );
@@ -358,6 +446,9 @@ SUITE ( text )
   RUN_TEST ( ttf_text_is_antialiased );
   RUN_TEST ( ttf_text_rotation );
   RUN_TEST ( ttf_text_style_adds_ink );
+  RUN_TEST ( text_box_wraps_to_width );
+  RUN_TEST ( draw_text_honors_newlines );
+  RUN_TEST ( draw_text_rejects_bad_gc );
 }
 
 GREATEST_MAIN_DEFS ();

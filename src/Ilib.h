@@ -1369,6 +1369,46 @@ IError IDrawString (
 );
 
 /**
+ * Draw multi-line text using the GC's font. Existing newlines start a new line;
+ * if max_width > 0 the text is additionally word-wrapped (at spaces) so each
+ * line fits within max_width pixels (a single word wider than max_width
+ * overflows rather than being split). Each line is aligned (left/center/right,
+ * per ::IHAlign) within the box -- the wrap width, or the widest line when
+ * max_width is 0. x,y is the first line's position (as for IDrawString); each
+ * subsequent line drops by the font height.
+ */
+IError IDrawText (
+#ifndef _NO_PROTO
+  IImage image,           /* image */
+  IGC gc,                 /* graphics context (its font is used) */
+  int x,                  /* x coordinate of the first line */
+  int y,                  /* y coordinate of the first line */
+  char *text,             /* pointer to text */
+  unsigned int len,       /* length of text */
+  unsigned int max_width, /* wrap width in pixels (0 = wrap on newlines only) */
+  IHAlign align           /* horizontal alignment of each line */
+#endif
+);
+
+/**
+ * Measure the block produced by IDrawText(): the widest line width, the total
+ * height (line count * font height) and the number of lines. Any of the return
+ * pointers may be NULL.
+ */
+IError ITextBoxDimensions (
+#ifndef _NO_PROTO
+  IGC gc,                      /* graphics context */
+  IFont font,                  /* font */
+  char *text,                  /* text */
+  unsigned int len,            /* length of text */
+  unsigned int max_width,      /* wrap width in pixels (0 = newlines only) */
+  unsigned int *width_return,  /* out: widest line width in pixels */
+  unsigned int *height_return, /* out: total height in pixels */
+  int *lines_return            /* out: number of lines */
+#endif
+);
+
+/**
  * Draws text onto the image at the specified coordinate using one
  * of the angles: ITEXT_LEFT_TO_RIGHT, ITEXT_TOP_TO_BOTTOM, or
  * ITEXT_BOTTOM_TO_TOP.

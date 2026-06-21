@@ -145,6 +145,22 @@ class GC:
         )
         return int(xr[0]), int(yr[0])
 
+    def text_box_dimensions(self, font, text, max_width=0):
+        """Return ``(width, height, lines)`` of ``text`` laid out with
+        :meth:`ilib.image.Image.draw_text` (word-wrapped to ``max_width`` px
+        when > 0)."""
+        data, length = _text_bytes(text)
+        w = ffi.new("unsigned int *")
+        h = ffi.new("unsigned int *")
+        n = ffi.new("int *")
+        check(
+            lib.ITextBoxDimensions(
+                self._as_parameter_, font._as_parameter_, data, length,
+                int(max_width), w, h, n
+            )
+        )
+        return int(w[0]), int(h[0]), int(n[0])
+
     # -- geometry ----------------------------------------------------------
     def arc_properties(self, x, y, r1, r2, a1, a2):
         """Compute the endpoint and midpoint coordinates of an arc.

@@ -735,6 +735,28 @@ class Text(unittest.TestCase):
             font.free()
 
 
+class TextLayout(unittest.TestCase):
+    def test_word_wrap(self):
+        path = find_bdf_font()
+        if not path:
+            self.skipTest("no BDF font found")
+        font = ilib.Font.from_file(path)
+        try:
+            with ilib.GC() as gc:
+                s = "the quick brown fox jumps over the lazy dog"
+                _, _, lines1 = gc.text_box_dimensions(font, s, 0)
+                w_wrap, h_wrap, lines_wrap = gc.text_box_dimensions(font, s, 60)
+                self.assertEqual(lines1, 1)
+                self.assertGreater(lines_wrap, 1)
+                with ilib.Image(80, h_wrap + 4) as img:
+                    gc.set_font(font)
+                    gc.set_foreground(ilib.alloc_color(0, 0, 0))
+                    img.draw_text(gc, 2, 8, s, max_width=60,
+                                  align=ilib.HAlign.LEFT)
+        finally:
+            font.free()
+
+
 class TextAlign(unittest.TestCase):
     def test_text_coordinates(self):
         path = find_bdf_font()
