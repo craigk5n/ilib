@@ -209,6 +209,23 @@ cpack --config CPackSourceConfig.cmake        # source tarball
 Downstream packaging notes (Homebrew, Debian, vcpkg) live in
 [`packaging/README.md`](packaging/README.md).
 
+## Client tools
+
+The bundled `clients/` tools (installed with an `ilib-` prefix) are small,
+self-contained programs built on the library. The images below are real output
+from each, produced by [`docs/samples/generate.sh`](docs/samples/generate.sh):
+
+| | |
+|---|---|
+| **`ilib-index`** — thumbnail contact sheet from a set of images | **`ilib-displayfont`** — render an X11 BDF font's glyph table |
+| ![ilib-index](docs/images/clients/index.png) | ![ilib-displayfont](docs/images/clients/displayfont.png) |
+| **`ilib-webreprt`** — graph web access-log usage (here, hits by hour) | **`ilib-fraggraph`** — graph a player's frag efficiency from game logs |
+| ![ilib-webreprt](docs/images/clients/webreprt.png) | ![ilib-fraggraph](docs/images/clients/fraggraph.png) |
+
+`ilib-font2h` (BDF font → C header) rounds out the set; each tool has a man page
+(`man ilib-index`, …). Regenerate these images with
+`docs/samples/generate.sh` after building.
+
 ## Fonts
 
 Ilib draws text using X11 BDF fonts. A few sample fonts ship in `fonts/` and are
