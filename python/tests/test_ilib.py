@@ -239,6 +239,50 @@ class Filters(unittest.TestCase):
             self.assertIs(img.negate().greyscale(), img)
 
 
+class Transforms(unittest.TestCase):
+    def test_flip(self):
+        with ilib.Image(3, 2) as img:
+            img.set_pixel(0, 0, 10, 0, 0)
+            img.set_pixel(0, 1, 20, 0, 0)
+            img.flip()
+            self.assertEqual(img.get_pixel(0, 0)[0], 20)
+            self.assertEqual(img.get_pixel(0, 1)[0], 10)
+
+    def test_flop(self):
+        with ilib.Image(3, 2) as img:
+            img.set_pixel(0, 0, 10, 0, 0)
+            img.set_pixel(2, 0, 30, 0, 0)
+            img.flop()
+            self.assertEqual(img.get_pixel(0, 0)[0], 30)
+            self.assertEqual(img.get_pixel(2, 0)[0], 10)
+
+    def test_rotate_90_swaps_dims(self):
+        with ilib.Image(3, 2) as img:
+            img.set_pixel(0, 0, 10, 0, 0)
+            img.rotate(90)
+            self.assertEqual(img.size, (2, 3))
+            self.assertEqual(img.get_pixel(1, 0)[0], 10)  # top-left -> top-right
+
+    def test_rotate_rejects_non_multiple(self):
+        with ilib.Image(3, 2) as img:
+            with self.assertRaises(ilib.IlibError) as ctx:
+                img.rotate(45)
+            self.assertEqual(ctx.exception.code, ilib.IError.InvalidArgument)
+
+    def test_crop(self):
+        with ilib.Image(4, 4) as img:
+            img.set_pixel(1, 1, 99, 0, 0)
+            img.crop(1, 1, 2, 2)
+            self.assertEqual(img.size, (2, 2))
+            self.assertEqual(img.get_pixel(0, 0)[0], 99)
+
+    def test_crop_out_of_bounds(self):
+        with ilib.Image(4, 4) as img:
+            with self.assertRaises(ilib.IlibError) as ctx:
+                img.crop(2, 2, 4, 4)
+            self.assertEqual(ctx.exception.code, ilib.IError.InvalidArgument)
+
+
 class FileIO(unittest.TestCase):
     def test_ppm_roundtrip(self):
         with ilib.Image(8, 6) as img, ilib.GC() as gc:

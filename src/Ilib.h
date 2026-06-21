@@ -394,6 +394,59 @@ IError IThreshold (
 );
 
 
+/**
+ * Image transforms (geometric whole-image operations).
+ *
+ * Each operates in place. IFlip, IFlop and a 180-degree IRotate keep the
+ * image dimensions; a 90/270-degree IRotate and ICrop change them.
+ */
+
+/**
+ * Flip an image vertically (top to bottom; mirror about the horizontal axis).
+ */
+IError IFlip (
+#ifndef _NO_PROTO
+  IImage image /* image (modified in place) */
+#endif
+);
+
+/**
+ * Flop an image horizontally (left to right; mirror about the vertical axis).
+ */
+IError IFlop (
+#ifndef _NO_PROTO
+  IImage image /* image (modified in place) */
+#endif
+);
+
+/**
+ * Rotate an image by a multiple of 90 degrees, clockwise. degrees must be a
+ * multiple of 90 (any integer; it is normalized to 0/90/180/270); other values
+ * return IInvalidArgument. A 90 or 270 degree rotation swaps width and height.
+ */
+IError IRotate (
+#ifndef _NO_PROTO
+  IImage image, /* image (modified in place) */
+  int degrees   /* multiple of 90 (clockwise) */
+#endif
+);
+
+/**
+ * Crop an image to the rectangle (x, y, width, height). The rectangle must lie
+ * within the image and have non-zero size, else IInvalidArgument is returned.
+ * On success the image is resized in place to width x height.
+ */
+IError ICrop (
+#ifndef _NO_PROTO
+  IImage image,       /* image (modified in place) */
+  int x,              /* left edge of crop rectangle */
+  int y,              /* top edge of crop rectangle */
+  unsigned int width, /* width of crop rectangle */
+  unsigned int height /* height of crop rectangle */
+#endif
+);
+
+
 #define IFreeImage( i ) \
   _IFreeImage ( i );    \
   ( i ) = NULL;
