@@ -168,6 +168,10 @@ without breaking the public API.
 - `SPDX-License-Identifier` headers across the sources.
 
 ### Changed
+- The `ilib-webreprt` and `ilib-fraggraph` graphs now render their titles and
+  labels with an anti-aliased TrueType font when one is available on the system
+  (DejaVu Sans / Arial), falling back to the compiled-in bitmap fonts
+  otherwise. The committed sample images are regenerated with the AA text.
 - The bundled command-line tools and examples now install with an `ilib-`
   prefix (`iconvert` → `ilib-convert`, `ifont2h` → `ilib-font2h`, `iindex` →
   `ilib-index`, `idisplayfont` → `ilib-displayfont`, `ifraggraph` →

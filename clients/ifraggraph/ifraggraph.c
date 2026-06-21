@@ -67,6 +67,38 @@ static int calc_max (
 #endif
 );
 
+/* Return a usable system TrueType font path, or NULL if none is found. */
+static const char *ttf_font_path ( void )
+{
+  static const char *cands[] = {
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    "/usr/share/fonts/dejavu/DejaVuSans.ttf", "/Library/Fonts/Arial.ttf",
+    "/System/Library/Fonts/Supplemental/Arial.ttf", NULL };
+  int i;
+  for ( i = 0; cands[i]; i++ ) {
+    FILE *f = fopen ( cands[i], "rb" );
+    if ( f ) {
+      fclose ( f );
+      return ( cands[i] );
+    }
+  }
+  return ( NULL );
+}
+
+/* Load an anti-aliased TrueType font at ttf_size px when one is available,
+   otherwise the compiled-in bitmap font. */
+static IError load_font ( const char *name, int ttf_size, char **bdf_fallback,
+  IFont *out )
+{
+  const char *path = ttf_font_path ();
+  if ( path &&
+       ILoadFontFromFileTTF ( (char *) name, (char *) path, ttf_size, out ) ==
+         INoError )
+    return ( INoError );
+  return ( ILoadFontFromData ( (char *) name, bdf_fallback, out ) );
+}
+
 
 /*
 ** Define start and stop times.  Use YYMMDDHHMMSS so that we can just
@@ -238,8 +270,9 @@ static void generate_gif ( void )
 
   /* draw title */
   sprintf ( temp, "Frag Efficiency Graph 1.0: %s", player );
-  ILoadFontFromData ( "courR10", courR10_font, &courR10 );
-  ILoadFontFromData ( "helvB18", helvB18_font, &helvB18 );
+  /* Prefer anti-aliased TrueType, falling back to the compiled-in BDF fonts. */
+  load_font ( "label", 11, courR10_font, &courR10 );
+  load_font ( "title", 18, helvB18_font, &helvB18 );
 
   /* Draw title */
   ISetFont ( gc, helvB18 );
