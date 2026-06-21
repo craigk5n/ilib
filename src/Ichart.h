@@ -77,6 +77,20 @@ IError IChartSetCategories ( IChart chart, const char **labels, int count );
 IError IChartSetRange ( IChart chart, double ymin, double ymax );
 
 /**
+ * For a bar chart, stack the series on top of each other (per category)
+ * instead of drawing them grouped side by side. Non-zero enables stacking.
+ * Intended for non-negative data; not combined with a log scale.
+ */
+IError IChartSetStacked ( IChart chart, int stacked );
+
+/**
+ * Use a logarithmic (base-10) value axis. The data and range must be positive;
+ * tick marks are placed at powers of ten. Applies to line, bar (non-stacked),
+ * area and scatter charts.
+ */
+IError IChartSetLogScale ( IChart chart, int on );
+
+/**
  * Add a data series. values[] holds count values; label and color are used in
  * the legend (and as the line/bar color). The data is copied. For a pie chart
  * the first series' values are the slice sizes.

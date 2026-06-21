@@ -136,6 +136,51 @@ TEST add_xy_series_rejects_bad_args ( void )
   PASS ();
 }
 
+TEST stacked_bar_renders ( void )
+{
+  IChart c = ICreateChart ( ICHART_BAR, 220, 160 );
+  double a[3] = { 2.0, 4.0, 3.0 };
+  double b[3] = { 1.0, 2.0, 5.0 };
+  IImage img;
+
+  ASSERT ( c != NULL );
+  ASSERT_EQ ( INoError, IChartSetStacked ( c, 1 ) );
+  IChartAddSeries ( c, "a", a, 3, IAllocColor ( 50, 100, 200 ) );
+  IChartAddSeries ( c, "b", b, 3, IAllocColor ( 200, 100, 50 ) );
+  img = IChartRender ( c );
+  ASSERT ( img != NULL );
+  ASSERT ( has_drawn_pixel ( img ) );
+
+  IFreeImage ( img );
+  IFreeChart ( c );
+  PASS ();
+}
+
+TEST log_scale_renders ( void )
+{
+  IChart c = ICreateChart ( ICHART_LINE, 220, 160 );
+  double v[4] = { 1.0, 10.0, 100.0, 1000.0 };
+  IImage img;
+
+  ASSERT ( c != NULL );
+  ASSERT_EQ ( INoError, IChartSetLogScale ( c, 1 ) );
+  IChartAddSeries ( c, "exp", v, 4, IAllocColor ( 0, 0, 0 ) );
+  img = IChartRender ( c );
+  ASSERT ( img != NULL );
+  ASSERT ( has_drawn_pixel ( img ) );
+
+  IFreeImage ( img );
+  IFreeChart ( c );
+  PASS ();
+}
+
+TEST chart_setters_reject_bad_handle ( void )
+{
+  ASSERT_EQ ( IInvalidChart, IChartSetStacked ( NULL, 1 ) );
+  ASSERT_EQ ( IInvalidChart, IChartSetLogScale ( NULL, 1 ) );
+  PASS ();
+}
+
 TEST chart_explicit_range ( void )
 {
   IChart c = ICreateChart ( ICHART_LINE, 120, 100 );
@@ -198,6 +243,9 @@ SUITE ( chart )
   RUN_TEST ( area_chart_renders );
   RUN_TEST ( scatter_chart_renders );
   RUN_TEST ( add_xy_series_rejects_bad_args );
+  RUN_TEST ( stacked_bar_renders );
+  RUN_TEST ( log_scale_renders );
+  RUN_TEST ( chart_setters_reject_bad_handle );
   RUN_TEST ( chart_explicit_range );
   RUN_TEST ( chart_setters_and_titles );
   RUN_TEST ( chart_rejects_bad_args );

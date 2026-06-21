@@ -27,6 +27,7 @@ typedef struct {
   int x0, y0, x1, y1;
   double ymin, ymax;
   double xmin, xmax; /* used by scatter charts */
+  int log_scale;     /* logarithmic value (y) axis */
 } IChartLayout;
 
 /* ------------------------------------------------------------------ utils */
@@ -210,6 +211,24 @@ IError IChartSetRange ( IChart chart, double ymin, double ymax )
   return ( INoError );
 }
 
+IError IChartSetStacked ( IChart chart, int stacked )
+{
+  IChartP *c = _chart_valid ( chart );
+  if ( !c )
+    return ( IInvalidChart );
+  c->stacked = stacked ? 1 : 0;
+  return ( INoError );
+}
+
+IError IChartSetLogScale ( IChart chart, int on )
+{
+  IChartP *c = _chart_valid ( chart );
+  if ( !c )
+    return ( IInvalidChart );
+  c->log_scale = on ? 1 : 0;
+  return ( INoError );
+}
+
 IError IChartAddSeries ( IChart chart, const char *label, const double *values,
   int count, IColor color )
 {
@@ -293,8 +312,16 @@ static void _chart_text ( IImage img, IGC gc, int x, int y, const char *s )
 
 static int _val_to_y ( double v, const IChartLayout *l )
 {
-  double range = l->ymax - l->ymin;
-  double t = ( range != 0.0 ) ? ( v - l->ymin ) / range : 0.0;
+  double t;
+  if ( l->log_scale ) {
+    double lo = log10 ( l->ymin ), hi = log10 ( l->ymax );
+    double lv = ( v > 0.0 ) ? log10 ( v ) : lo;
+    t = ( hi > lo ) ? ( lv - lo ) / ( hi - lo ) : 0.0;
+  }
+  else {
+    double range = l->ymax - l->ymin;
+    t = ( range != 0.0 ) ? ( v - l->ymin ) / range : 0.0;
+  }
   return ( (int) ( l->y1 - t * ( l->y1 - l->y0 ) + 0.5 ) );
 }
 
@@ -354,16 +381,56 @@ static void _chart_compute_xrange ( IChartP *c, double *xmin, double *xmax )
   *xmax = hi + pad;
 }
 
+/* Stacked-bar range: per category, sum positive and negative values. */
+static void _chart_stacked_range ( IChartP *c, double *ymin, double *ymax )
+{
+  int ncat = 0, i, s;
+  double maxpos = 0.0, minneg = 0.0;
+
+  for ( s = 0; s < c->nseries; s++ )
+    if ( c->series[s].count > ncat )
+      ncat = c->series[s].count;
+  for ( i = 0; i < ncat; i++ ) {
+    double p = 0.0, n = 0.0;
+    for ( s = 0; s < c->nseries; s++ ) {
+      if ( i < c->series[s].count ) {
+        double v = c->series[s].values[i];
+        if ( v >= 0.0 )
+          p += v;
+        else
+          n += v;
+      }
+    }
+    if ( p > maxpos )
+      maxpos = p;
+    if ( n < minneg )
+      minneg = n;
+  }
+  if ( maxpos <= minneg )
+    maxpos = minneg + 1.0;
+  *ymin = minneg;
+  *ymax = maxpos;
+}
+
 static void _chart_compute_range ( IChartP *c, double *ymin, double *ymax )
 {
-  double lo = 0.0, hi = 0.0;
-  int found = 0, i, j;
+  double lo = 0.0, hi = 0.0, minpos = 0.0;
+  int found = 0, havepos = 0, i, j;
 
   if ( !c->auto_range ) {
-    *ymin = c->ymin;
-    *ymax = c->ymax;
+    lo = c->ymin;
+    hi = c->ymax;
+    if ( c->log_scale && lo <= 0.0 )
+      lo = ( hi > 0.0 ) ? hi / 1000.0 : 1.0;
+    *ymin = lo;
+    *ymax = hi;
     return;
   }
+  if ( c->stacked && c->type == ICHART_BAR ) {
+    _chart_stacked_range ( c, ymin, ymax );
+    return;
+  }
+
   for ( i = 0; i < c->nseries; i++ ) {
     for ( j = 0; j < c->series[i].count; j++ ) {
       double v = c->series[i].values[j];
@@ -377,12 +444,32 @@ static void _chart_compute_range ( IChartP *c, double *ymin, double *ymax )
         if ( v > hi )
           hi = v;
       }
+      if ( v > 0.0 && ( !havepos || v < minpos ) ) {
+        minpos = v;
+        havepos = 1;
+      }
     }
   }
   if ( !found ) {
     lo = 0.0;
     hi = 1.0;
   }
+
+  if ( c->log_scale ) {
+    /* Snap to enclosing powers of ten (positive data only). */
+    if ( !havepos )
+      minpos = 1.0;
+    if ( hi <= 0.0 )
+      hi = minpos * 10.0;
+    lo = pow ( 10.0, floor ( log10 ( minpos ) ) );
+    hi = pow ( 10.0, ceil ( log10 ( hi ) ) );
+    if ( hi <= lo )
+      hi = lo * 10.0;
+    *ymin = lo;
+    *ymax = hi;
+    return;
+  }
+
   if ( c->type == ICHART_BAR || c->type == ICHART_AREA ) {
     if ( lo > 0.0 )
       lo = 0.0; /* bars/areas need a zero baseline */
@@ -451,19 +538,46 @@ static void _chart_axes ( IImage img, IGC gc, IChartP *c,
   int fh = _chart_font_h ( c );
   int i, n;
 
-  /* Horizontal gridlines + y tick labels (5 ticks). */
-  for ( i = 0; i <= 4; i++ ) {
-    double val = lay->ymin + ( lay->ymax - lay->ymin ) * i / 4.0;
-    int y = _val_to_y ( val, lay );
-    ISetForeground ( gc, _chart_grid_color () );
-    IDrawLine ( img, gc, lay->x0, y, lay->x1, y );
-    if ( c->font ) {
-      char buf[32];
-      int tw;
-      snprintf ( buf, sizeof ( buf ), "%g", val );
-      tw = _chart_text_w ( c, gc, buf );
-      ISetForeground ( gc, IBLACK_PIXEL );
-      _chart_text ( img, gc, lay->x0 - tw - 4, y + fh / 2 - 1, buf );
+  /* Horizontal gridlines + y tick labels: powers of ten on a log axis, or 5
+     evenly spaced values on a linear axis. */
+  if ( lay->log_scale ) {
+    int k0 = (int) floor ( log10 ( lay->ymin ) + 1e-9 );
+    int k1 = (int) ceil ( log10 ( lay->ymax ) - 1e-9 );
+    int k;
+    if ( k1 - k0 > 12 )
+      k1 = k0 + 12; /* keep the tick count sane */
+    for ( k = k0; k <= k1; k++ ) {
+      double val = pow ( 10.0, k );
+      int y;
+      if ( val < lay->ymin * 0.999 || val > lay->ymax * 1.001 )
+        continue;
+      y = _val_to_y ( val, lay );
+      ISetForeground ( gc, _chart_grid_color () );
+      IDrawLine ( img, gc, lay->x0, y, lay->x1, y );
+      if ( c->font ) {
+        char buf[32];
+        int tw;
+        snprintf ( buf, sizeof ( buf ), "%g", val );
+        tw = _chart_text_w ( c, gc, buf );
+        ISetForeground ( gc, IBLACK_PIXEL );
+        _chart_text ( img, gc, lay->x0 - tw - 4, y + fh / 2 - 1, buf );
+      }
+    }
+  }
+  else {
+    for ( i = 0; i <= 4; i++ ) {
+      double val = lay->ymin + ( lay->ymax - lay->ymin ) * i / 4.0;
+      int y = _val_to_y ( val, lay );
+      ISetForeground ( gc, _chart_grid_color () );
+      IDrawLine ( img, gc, lay->x0, y, lay->x1, y );
+      if ( c->font ) {
+        char buf[32];
+        int tw;
+        snprintf ( buf, sizeof ( buf ), "%g", val );
+        tw = _chart_text_w ( c, gc, buf );
+        ISetForeground ( gc, IBLACK_PIXEL );
+        _chart_text ( img, gc, lay->x0 - tw - 4, y + fh / 2 - 1, buf );
+      }
     }
   }
 
@@ -615,11 +729,65 @@ static void _chart_plot_scatter ( IImage img, IGC gc, IChartP *c,
   }
 }
 
+/* Stacked bars: per category, stack series above (and below) the baseline. */
+static void _chart_plot_bar_stacked ( IImage img, IGC gc, IChartP *c,
+  const IChartLayout *lay )
+{
+  int ncat = 0, s, i, slot, barw;
+
+  for ( s = 0; s < c->nseries; s++ )
+    if ( c->series[s].count > ncat )
+      ncat = c->series[s].count;
+  if ( ncat <= 0 || c->nseries <= 0 )
+    return;
+
+  slot = ( lay->x1 - lay->x0 ) / ncat;
+  barw = slot * 8 / 10;
+  if ( barw < 1 )
+    barw = 1;
+
+  for ( i = 0; i < ncat; i++ ) {
+    double poscum = 0.0, negcum = 0.0;
+    int bx = lay->x0 + i * slot + ( slot - barw ) / 2;
+    for ( s = 0; s < c->nseries; s++ ) {
+      double v, from, to;
+      int yf, yt, top, h;
+      if ( i >= c->series[s].count )
+        continue;
+      v = c->series[s].values[i];
+      if ( v >= 0.0 ) {
+        from = poscum;
+        to = poscum + v;
+        poscum += v;
+      }
+      else {
+        from = negcum;
+        to = negcum + v;
+        negcum += v;
+      }
+      yf = _val_to_y ( from, lay );
+      yt = _val_to_y ( to, lay );
+      top = ( yt < yf ) ? yt : yf;
+      h = ( yt < yf ) ? ( yf - yt ) : ( yt - yf );
+      if ( h < 1 )
+        h = 1;
+      ISetForeground ( gc, c->series[s].color );
+      IFillRectangle ( img, gc, bx, top, (unsigned int) barw,
+        (unsigned int) h );
+    }
+  }
+}
+
 static void _chart_plot_bar ( IImage img, IGC gc, IChartP *c,
   const IChartLayout *lay )
 {
   int ncat = 0, s, i, slot, groupw, barw, basey;
   double base;
+
+  if ( c->stacked ) {
+    _chart_plot_bar_stacked ( img, gc, c, lay );
+    return;
+  }
 
   for ( s = 0; s < c->nseries; s++ )
     if ( c->series[s].count > ncat )
@@ -753,6 +921,9 @@ IImage IChartRender ( IChart chart )
   lay.ymax = 1.0;
   lay.xmin = 0.0;
   lay.xmax = 1.0;
+  /* Stacking in log space is meaningless, so a stacked bar stays linear. */
+  lay.log_scale =
+    ( c->log_scale && !( c->stacked && c->type == ICHART_BAR ) ) ? 1 : 0;
 
   if ( c->title && c->font ) {
     int tw = _chart_text_w ( c, gc, c->title );
