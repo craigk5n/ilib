@@ -505,6 +505,38 @@ class Charting(unittest.TestCase):
             finally:
                 img.free()
 
+    def test_hbar_chart(self):
+        with ilib.Chart(ilib.ChartType.HBAR, 240, 160) as c:
+            c.set_categories(["x", "y", "z"])
+            c.add_series([2, 4, 3], label="a", color=ilib.alloc_color(50, 100, 200))
+            c.add_series([1, 5, 2], label="b", color=ilib.alloc_color(200, 100, 50))
+            img = c.render()
+            try:
+                self.assertEqual(img.size, (240, 160))
+            finally:
+                img.free()
+
+    def test_donut_chart(self):
+        with ilib.Chart(ilib.ChartType.DONUT, 160, 160) as c:
+            c.set_categories(["x", "y", "z"])
+            c.add_series([30, 50, 20])
+            img = c.render()
+            try:
+                # The centre is the background hole (white).
+                self.assertEqual(img.get_pixel(80, 80), (255, 255, 255))
+            finally:
+                img.free()
+
+    def test_display_options(self):
+        with ilib.Chart(ilib.ChartType.LINE, 160, 120) as c:
+            c.set_markers(False).set_grid(False).set_legend(False)
+            c.add_series([1, 2, 3], label="s", color=ilib.alloc_color(10, 20, 30))
+            img = c.render()
+            try:
+                self.assertEqual(img.size, (160, 120))
+            finally:
+                img.free()
+
     def test_stacked_bar(self):
         with ilib.Chart(ilib.ChartType.BAR, 220, 160) as c:
             c.set_stacked(True)

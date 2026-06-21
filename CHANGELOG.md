@@ -10,6 +10,12 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Charting: two new chart types — **horizontal bar** (`ICHART_HBAR`, grouped or
+  stacked) and **donut** (`ICHART_DONUT`) — plus display toggles
+  `IChartSetMarkers()` (point markers on line/area), `IChartSetGrid()` and
+  `IChartSetLegend()`. All exposed in the Python bindings (`ChartType.HBAR` /
+  `DONUT`, `set_markers`/`set_grid`/`set_legend`) and the `ilib-chart` CLI
+  (`--type hbar|donut`, `--no-markers`, `--no-grid`, `--no-legend`).
 - `ilib-chart` is now a data-driven command-line tool: it reads CSV (first
   column = categories or scatter x, remaining columns = named series) and
   renders a chart to an image, with flags for type (line/bar/pie/area/scatter),

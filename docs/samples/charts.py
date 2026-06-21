@@ -95,8 +95,23 @@ def main():
     logc.add_series([1, 10, 100, 1000, 5000, 20000], "growth", _color(4))
     charts.append(logc.render())
 
+    hbar = _chart(ChartType.HBAR)
+    hbar.set_title("Horizontal bar")
+    hbar.set_categories(months)
+    hbar.set_value_labels(True)
+    hbar.add_series([3, 5, 4, 7, 6, 9], "n", _color(0))
+    hbar.add_series([2, 3, 5, 4, 8, 7], "s", _color(1))
+    charts.append(hbar.render())
+
+    donut = _chart(ChartType.DONUT)
+    donut.set_title("Donut")
+    donut.set_categories(["Apples", "Pears", "Plums", "Cherries"])
+    donut.set_value_labels(True)
+    donut.add_series([30, 22, 15, 8], color=_color(0))
+    charts.append(donut.render())
+
     white = ilib.alloc_color(255, 255, 255)
-    grid = Image.montage(charts, columns=3, spacing=8, background=white)
+    grid = Image.montage(charts, columns=4, spacing=8, background=white)
     grid.save(OUT)
     print("wrote", OUT)
 

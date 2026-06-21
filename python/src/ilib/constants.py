@@ -127,6 +127,8 @@ class ChartType(IntEnum):
     PIE = 2
     SCATTER = 3
     AREA = 4
+    HBAR = 5
+    DONUT = 6
 
 
 # Predefined color handles (indexes into the library's color table).

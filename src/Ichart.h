@@ -9,7 +9,8 @@
  *	Create a chart, set its title/labels/font, add one or more data series,
  *	then render it to an ::IImage you can save or draw onto another image.
  *
- *	Supported chart types: line, bar (grouped), and pie.
+ *	Supported chart types: line, bar (grouped or stacked, vertical or
+ *	horizontal), pie, donut, area and scatter.
  *
  ****************************************************************************/
 
@@ -20,7 +21,7 @@
 
 /**
  * @file Ichart.h
- * @brief Charting API for Ilib (line, bar and pie charts).
+ * @brief Charting API for Ilib (line, bar, hbar, pie, donut, area, scatter).
  */
 
 /** Opaque chart handle. Create with ICreateChart(), free with IFreeChart(). */
@@ -32,7 +33,9 @@ typedef enum {
   ICHART_BAR,      /* grouped vertical bar chart */
   ICHART_PIE,      /* pie chart (uses the first series' values as slices) */
   ICHART_SCATTER,  /* scatter plot of (x, y) points (see IChartAddXYSeries) */
-  ICHART_AREA      /* line chart with the area under each line filled */
+  ICHART_AREA,     /* line chart with the area under each line filled */
+  ICHART_HBAR,     /* grouped horizontal bar chart */
+  ICHART_DONUT     /* pie chart with a hole in the centre */
 } IChartType;
 
 /**
@@ -95,6 +98,18 @@ IError IChartSetLogScale ( IChart chart, int on );
  * stacked bar segments, and on pie slices). Requires a font; off by default.
  */
 IError IChartSetValueLabels ( IChart chart, int on );
+
+/**
+ * Draw a marker (filled dot) at each point of line and area charts. On by
+ * default; pass 0 for clean lines with no point markers.
+ */
+IError IChartSetMarkers ( IChart chart, int on );
+
+/** Show or hide the value/category gridlines (on by default). */
+IError IChartSetGrid ( IChart chart, int on );
+
+/** Show or hide the series/category legend (on by default). */
+IError IChartSetLegend ( IChart chart, int on );
 
 /**
  * Add a data series. values[] holds count values; label and color are used in

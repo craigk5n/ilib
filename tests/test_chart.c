@@ -192,11 +192,87 @@ TEST value_labels_render ( void )
   PASS ();
 }
 
+TEST hbar_chart_renders ( void )
+{
+  IChart c = ICreateChart ( ICHART_HBAR, 240, 160 );
+  double a[3] = { 2.0, 4.0, 3.0 };
+  double b[3] = { 1.0, 5.0, 2.0 };
+  const char *cats[3] = { "x", "y", "z" };
+  IImage img;
+
+  ASSERT ( c != NULL );
+  IChartSetCategories ( c, cats, 3 );
+  IChartAddSeries ( c, "a", a, 3, IAllocColor ( 50, 100, 200 ) );
+  IChartAddSeries ( c, "b", b, 3, IAllocColor ( 200, 100, 50 ) );
+  img = IChartRender ( c );
+  ASSERT ( img != NULL );
+  ASSERT_EQ ( 240, (int) IImageWidth ( img ) );
+  ASSERT ( has_drawn_pixel ( img ) );
+  IFreeImage ( img );
+
+  /* Stacked variant. */
+  ASSERT_EQ ( INoError, IChartSetStacked ( c, 1 ) );
+  img = IChartRender ( c );
+  ASSERT ( img != NULL );
+  ASSERT ( has_drawn_pixel ( img ) );
+  IFreeImage ( img );
+
+  IFreeChart ( c );
+  PASS ();
+}
+
+TEST donut_chart_renders ( void )
+{
+  IChart c = ICreateChart ( ICHART_DONUT, 160, 160 );
+  double v[3] = { 30.0, 50.0, 20.0 };
+  const char *cats[3] = { "x", "y", "z" };
+  IImage img;
+  unsigned int r, g, b;
+
+  ASSERT ( c != NULL );
+  IChartSetCategories ( c, cats, 3 );
+  IChartAddSeries ( c, "s", v, 3, 0 );
+  img = IChartRender ( c );
+  ASSERT ( img != NULL );
+  ASSERT ( has_drawn_pixel ( img ) );
+  /* The centre is the background hole (white). */
+  IGetPixel ( img, 80, 80, &r, &g, &b );
+  ASSERT_EQ ( 255, r );
+  ASSERT_EQ ( 255, g );
+  ASSERT_EQ ( 255, b );
+
+  IFreeImage ( img );
+  IFreeChart ( c );
+  PASS ();
+}
+
+TEST chart_display_options ( void )
+{
+  IChart c = ICreateChart ( ICHART_LINE, 160, 120 );
+  double v[3] = { 1.0, 2.0, 3.0 };
+  IImage img;
+
+  ASSERT_EQ ( INoError, IChartSetMarkers ( c, 0 ) );
+  ASSERT_EQ ( INoError, IChartSetGrid ( c, 0 ) );
+  ASSERT_EQ ( INoError, IChartSetLegend ( c, 0 ) );
+  IChartAddSeries ( c, "s", v, 3, IAllocColor ( 10, 20, 30 ) );
+  img = IChartRender ( c );
+  ASSERT ( img != NULL );
+  ASSERT ( has_drawn_pixel ( img ) ); /* the line still draws */
+
+  IFreeImage ( img );
+  IFreeChart ( c );
+  PASS ();
+}
+
 TEST chart_setters_reject_bad_handle ( void )
 {
   ASSERT_EQ ( IInvalidChart, IChartSetStacked ( NULL, 1 ) );
   ASSERT_EQ ( IInvalidChart, IChartSetLogScale ( NULL, 1 ) );
   ASSERT_EQ ( IInvalidChart, IChartSetValueLabels ( NULL, 1 ) );
+  ASSERT_EQ ( IInvalidChart, IChartSetMarkers ( NULL, 1 ) );
+  ASSERT_EQ ( IInvalidChart, IChartSetGrid ( NULL, 1 ) );
+  ASSERT_EQ ( IInvalidChart, IChartSetLegend ( NULL, 1 ) );
   PASS ();
 }
 
@@ -265,6 +341,9 @@ SUITE ( chart )
   RUN_TEST ( stacked_bar_renders );
   RUN_TEST ( log_scale_renders );
   RUN_TEST ( value_labels_render );
+  RUN_TEST ( hbar_chart_renders );
+  RUN_TEST ( donut_chart_renders );
+  RUN_TEST ( chart_display_options );
   RUN_TEST ( chart_setters_reject_bad_handle );
   RUN_TEST ( chart_explicit_range );
   RUN_TEST ( chart_setters_and_titles );

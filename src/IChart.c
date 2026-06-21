@@ -102,6 +102,9 @@ IChart ICreateChart ( IChartType type, unsigned int width,
   c->height = (int) height;
   c->background = IAllocColor ( 255, 255, 255 );
   c->auto_range = 1;
+  c->markers = 1;
+  c->show_grid = 1;
+  c->show_legend = 1;
   return ( (IChart) c );
 }
 
@@ -238,6 +241,33 @@ IError IChartSetValueLabels ( IChart chart, int on )
   return ( INoError );
 }
 
+IError IChartSetMarkers ( IChart chart, int on )
+{
+  IChartP *c = _chart_valid ( chart );
+  if ( !c )
+    return ( IInvalidChart );
+  c->markers = on ? 1 : 0;
+  return ( INoError );
+}
+
+IError IChartSetGrid ( IChart chart, int on )
+{
+  IChartP *c = _chart_valid ( chart );
+  if ( !c )
+    return ( IInvalidChart );
+  c->show_grid = on ? 1 : 0;
+  return ( INoError );
+}
+
+IError IChartSetLegend ( IChart chart, int on )
+{
+  IChartP *c = _chart_valid ( chart );
+  if ( !c )
+    return ( IInvalidChart );
+  c->show_legend = on ? 1 : 0;
+  return ( INoError );
+}
+
 IError IChartAddSeries ( IChart chart, const char *label, const double *values,
   int count, IColor color )
 {
@@ -354,6 +384,15 @@ static int _val_to_x ( double v, const IChartLayout *l )
   return ( (int) ( l->x0 + t * ( l->x1 - l->x0 ) + 0.5 ) );
 }
 
+/* Map a value to a pixel column on a horizontal value axis (horizontal bars).
+   The value range is carried in ymin/ymax; horizontal bars stay linear. */
+static int _val_to_hx ( double v, const IChartLayout *l )
+{
+  double range = l->ymax - l->ymin;
+  double t = ( range != 0.0 ) ? ( v - l->ymin ) / range : 0.0;
+  return ( (int) ( l->x0 + t * ( l->x1 - l->x0 ) + 0.5 ) );
+}
+
 /* Map a category index (0..n-1) to a pixel column (line/area charts). */
 static int _cat_to_x ( int i, int n, const IChartLayout *l )
 {
@@ -447,7 +486,7 @@ static void _chart_compute_range ( IChartP *c, double *ymin, double *ymax )
     *ymax = hi;
     return;
   }
-  if ( c->stacked && c->type == ICHART_BAR ) {
+  if ( c->stacked && ( c->type == ICHART_BAR || c->type == ICHART_HBAR ) ) {
     _chart_stacked_range ( c, ymin, ymax );
     return;
   }
@@ -491,7 +530,8 @@ static void _chart_compute_range ( IChartP *c, double *ymin, double *ymax )
     return;
   }
 
-  if ( c->type == ICHART_BAR || c->type == ICHART_AREA ) {
+  if ( c->type == ICHART_BAR || c->type == ICHART_HBAR ||
+       c->type == ICHART_AREA ) {
     if ( lo > 0.0 )
       lo = 0.0; /* bars/areas need a zero baseline */
     if ( hi < 0.0 )
@@ -519,7 +559,7 @@ static void _chart_legend ( IImage img, IGC gc, IChartP *c,
   int fh = _chart_font_h ( c );
   int sw, gap = 4, rowh, maxw = 0, boxw, bx, by, i, shown = 0;
 
-  if ( !c->font || count <= 0 )
+  if ( !c->font || count <= 0 || !c->show_legend )
     return;
   for ( i = 0; i < count; i++ )
     if ( labels[i] )
@@ -551,6 +591,28 @@ static void _chart_legend ( IImage img, IGC gc, IChartP *c,
   }
 }
 
+/* Draw the legend from the chart's series labels/colours. */
+static void _chart_series_legend ( IImage img, IGC gc, IChartP *c,
+  const IChartLayout *lay )
+{
+  char **labels;
+  IColor *cols;
+  if ( c->nseries <= 0 )
+    return;
+  labels = (char **) malloc ( (size_t) c->nseries * sizeof ( char * ) );
+  cols = (IColor *) malloc ( (size_t) c->nseries * sizeof ( IColor ) );
+  if ( labels && cols ) {
+    int i;
+    for ( i = 0; i < c->nseries; i++ ) {
+      labels[i] = c->series[i].label;
+      cols[i] = c->series[i].color;
+    }
+    _chart_legend ( img, gc, c, lay, labels, cols, c->nseries );
+  }
+  free ( labels );
+  free ( cols );
+}
+
 /* ------------------------------------------------------------------ axes */
 
 static void _chart_axes ( IImage img, IGC gc, IChartP *c,
@@ -573,8 +635,10 @@ static void _chart_axes ( IImage img, IGC gc, IChartP *c,
       if ( val < lay->ymin * 0.999 || val > lay->ymax * 1.001 )
         continue;
       y = _val_to_y ( val, lay );
-      ISetForeground ( gc, _chart_grid_color () );
-      IDrawLine ( img, gc, lay->x0, y, lay->x1, y );
+      if ( c->show_grid ) {
+        ISetForeground ( gc, _chart_grid_color () );
+        IDrawLine ( img, gc, lay->x0, y, lay->x1, y );
+      }
       if ( c->font ) {
         char buf[32];
         int tw;
@@ -589,8 +653,10 @@ static void _chart_axes ( IImage img, IGC gc, IChartP *c,
     for ( i = 0; i <= 4; i++ ) {
       double val = lay->ymin + ( lay->ymax - lay->ymin ) * i / 4.0;
       int y = _val_to_y ( val, lay );
-      ISetForeground ( gc, _chart_grid_color () );
-      IDrawLine ( img, gc, lay->x0, y, lay->x1, y );
+      if ( c->show_grid ) {
+        ISetForeground ( gc, _chart_grid_color () );
+        IDrawLine ( img, gc, lay->x0, y, lay->x1, y );
+      }
       if ( c->font ) {
         char buf[32];
         int tw;
@@ -612,8 +678,10 @@ static void _chart_axes ( IImage img, IGC gc, IChartP *c,
     for ( i = 0; i <= 4; i++ ) {
       double val = lay->xmin + ( lay->xmax - lay->xmin ) * i / 4.0;
       int x = _val_to_x ( val, lay );
-      ISetForeground ( gc, _chart_grid_color () );
-      IDrawLine ( img, gc, x, lay->y0, x, lay->y1 );
+      if ( c->show_grid ) {
+        ISetForeground ( gc, _chart_grid_color () );
+        IDrawLine ( img, gc, x, lay->y0, x, lay->y1 );
+      }
       if ( c->font ) {
         char buf[32];
         int tw;
@@ -679,7 +747,8 @@ static void _chart_plot_line ( IImage img, IGC gc, IChartP *c,
       ISetForeground ( gc, ser->color );
       if ( i > 0 )
         IDrawLine ( img, gc, px, py, x, y );
-      IFillCircle ( img, gc, x, y, 2 );
+      if ( c->markers )
+        IFillCircle ( img, gc, x, y, 2 );
       if ( labels ) {
         ISetForeground ( gc, IBLACK_PIXEL );
         _chart_draw_value ( img, gc, c, x, y - 4, ser->values[i] );
@@ -732,7 +801,8 @@ static void _chart_plot_area ( IImage img, IGC gc, IChartP *c,
       ISetForeground ( gc, ser->color );
       if ( i > 0 )
         IDrawLine ( img, gc, px, py, x, y );
-      IFillCircle ( img, gc, x, y, 2 );
+      if ( c->markers )
+        IFillCircle ( img, gc, x, y, 2 );
       if ( c->value_labels && c->font ) {
         ISetForeground ( gc, IBLACK_PIXEL );
         _chart_draw_value ( img, gc, c, x, y - 4, ser->values[i] );
@@ -867,12 +937,174 @@ static void _chart_plot_bar ( IImage img, IGC gc, IChartP *c,
   }
 }
 
+/* Axes for a horizontal bar chart: value axis along the bottom (x), category
+   labels down the left (y). Horizontal bars stay linear. */
+static void _chart_axes_h ( IImage img, IGC gc, IChartP *c,
+  const IChartLayout *lay )
+{
+  int fh = _chart_font_h ( c );
+  int i, ncat;
+
+  /* Vertical gridlines + value labels along the bottom. */
+  for ( i = 0; i <= 4; i++ ) {
+    double val = lay->ymin + ( lay->ymax - lay->ymin ) * i / 4.0;
+    int x = _val_to_hx ( val, lay );
+    if ( c->show_grid ) {
+      ISetForeground ( gc, _chart_grid_color () );
+      IDrawLine ( img, gc, x, lay->y0, x, lay->y1 );
+    }
+    if ( c->font ) {
+      char buf[32];
+      int tw;
+      snprintf ( buf, sizeof ( buf ), "%g", val );
+      tw = _chart_text_w ( c, gc, buf );
+      ISetForeground ( gc, IBLACK_PIXEL );
+      _chart_text ( img, gc, x - tw / 2, lay->y1 + fh + 2, buf );
+    }
+  }
+
+  /* Axis frame. */
+  ISetForeground ( gc, IBLACK_PIXEL );
+  IDrawLine ( img, gc, lay->x0, lay->y0, lay->x0, lay->y1 );
+  IDrawLine ( img, gc, lay->x0, lay->y1, lay->x1, lay->y1 );
+
+  /* Category labels down the left (category 0 at the top). */
+  ncat = c->ncategories;
+  if ( c->font && ncat > 0 ) {
+    int slot = ( lay->y1 - lay->y0 ) / ncat;
+    for ( i = 0; i < ncat; i++ ) {
+      int cy = lay->y0 + i * slot + slot / 2;
+      int tw = _chart_text_w ( c, gc, c->categories[i] );
+      _chart_text ( img, gc, lay->x0 - tw - 4, cy + fh / 2 - 1,
+        c->categories[i] );
+    }
+  }
+
+  /* Axis titles: x_label = value axis (bottom), y_label = category (left). */
+  if ( c->font && c->x_label ) {
+    int tw = _chart_text_w ( c, gc, c->x_label );
+    _chart_text ( img, gc, ( lay->x0 + lay->x1 ) / 2 - tw / 2, c->height - 2,
+      c->x_label );
+  }
+  if ( c->font && c->y_label ) {
+    int tw = _chart_text_w ( c, gc, c->y_label );
+    IDrawStringRotated ( img, gc, fh, ( lay->y0 + lay->y1 ) / 2 + tw / 2,
+      (char *) c->y_label, (unsigned int) strlen ( c->y_label ),
+      ITEXT_BOTTOM_TO_TOP );
+  }
+}
+
+/* Horizontal stacked bars: per category, lay series end to end along x. */
+static void _chart_plot_hbar_stacked ( IImage img, IGC gc, IChartP *c,
+  const IChartLayout *lay )
+{
+  int ncat = 0, s, i, slot, barh;
+
+  for ( s = 0; s < c->nseries; s++ )
+    if ( c->series[s].count > ncat )
+      ncat = c->series[s].count;
+  if ( ncat <= 0 || c->nseries <= 0 )
+    return;
+
+  slot = ( lay->y1 - lay->y0 ) / ncat;
+  barh = slot * 8 / 10;
+  if ( barh < 1 )
+    barh = 1;
+
+  for ( i = 0; i < ncat; i++ ) {
+    double poscum = 0.0, negcum = 0.0;
+    int by = lay->y0 + i * slot + ( slot - barh ) / 2;
+    for ( s = 0; s < c->nseries; s++ ) {
+      double v, from, to;
+      int xf, xt, left, w;
+      if ( i >= c->series[s].count )
+        continue;
+      v = c->series[s].values[i];
+      if ( v >= 0.0 ) {
+        from = poscum;
+        to = poscum + v;
+        poscum += v;
+      }
+      else {
+        from = negcum;
+        to = negcum + v;
+        negcum += v;
+      }
+      xf = _val_to_hx ( from, lay );
+      xt = _val_to_hx ( to, lay );
+      left = ( xt < xf ) ? xt : xf;
+      w = ( xt < xf ) ? ( xf - xt ) : ( xt - xf );
+      if ( w < 1 )
+        w = 1;
+      ISetForeground ( gc, c->series[s].color );
+      IFillRectangle ( img, gc, left, by, (unsigned int) w,
+        (unsigned int) barh );
+    }
+  }
+}
+
+static void _chart_plot_hbar ( IImage img, IGC gc, IChartP *c,
+  const IChartLayout *lay )
+{
+  int ncat = 0, s, i, slot, grouph, barh, basex;
+  double base;
+
+  if ( c->stacked ) {
+    _chart_plot_hbar_stacked ( img, gc, c, lay );
+    return;
+  }
+
+  for ( s = 0; s < c->nseries; s++ )
+    if ( c->series[s].count > ncat )
+      ncat = c->series[s].count;
+  if ( ncat <= 0 || c->nseries <= 0 )
+    return;
+
+  slot = ( lay->y1 - lay->y0 ) / ncat;
+  grouph = slot * 8 / 10;
+  if ( grouph < 1 )
+    grouph = 1;
+  barh = grouph / c->nseries;
+  if ( barh < 1 )
+    barh = 1;
+
+  base = ( lay->ymin <= 0.0 && lay->ymax >= 0.0 ) ? 0.0 : lay->ymin;
+  basex = _val_to_hx ( base, lay );
+
+  for ( s = 0; s < c->nseries; s++ ) {
+    IChartSeries *ser = &c->series[s];
+    for ( i = 0; i < ser->count; i++ ) {
+      int sloty = lay->y0 + i * slot + ( slot - grouph ) / 2;
+      int by = sloty + s * barh;
+      int vx = _val_to_hx ( ser->values[i], lay );
+      int left = ( vx < basex ) ? vx : basex;
+      int w = ( vx < basex ) ? ( basex - vx ) : ( vx - basex );
+      int hh = ( barh > 1 ? barh - 1 : 1 );
+      if ( w < 1 )
+        w = 1;
+      ISetForeground ( gc, ser->color );
+      IFillRectangle ( img, gc, left, by, (unsigned int) w,
+        (unsigned int) hh );
+      if ( c->value_labels && c->font ) {
+        char buf[32];
+        int tw, lx;
+        snprintf ( buf, sizeof ( buf ), "%g", ser->values[i] );
+        tw = _chart_text_w ( c, gc, buf );
+        lx = ( vx >= basex ) ? vx + 2 : vx - tw - 2;
+        ISetForeground ( gc, IBLACK_PIXEL );
+        _chart_text ( img, gc, lx, by + hh / 2 + _chart_font_h ( c ) / 2 - 1,
+          buf );
+      }
+    }
+  }
+}
+
 static void _chart_plot_pie ( IImage img, IGC gc, IChartP *c,
   const IChartLayout *lay )
 {
   IChartSeries *ser;
-  double total = 0.0, a0 = 0.0;
-  int i, cx, cy, r, side;
+  double total = 0.0, a0 = 0.0, lblf;
+  int i, cx, cy, r, side, donut, inner;
 
   if ( c->nseries <= 0 )
     return;
@@ -891,6 +1123,10 @@ static void _chart_plot_pie ( IImage img, IGC gc, IChartP *c,
   r = side / 2 - 2;
   if ( r < 1 )
     r = 1;
+  donut = ( c->type == ICHART_DONUT );
+  inner = donut ? r * 55 / 100 : 0;
+  /* Labels sit mid-slice: in the ring for a donut, partway out otherwise. */
+  lblf = donut ? ( ( 1.0 + 0.55 ) / 2.0 ) : 0.6;
 
   for ( i = 0; i < ser->count; i++ ) {
     double a1;
@@ -905,13 +1141,19 @@ static void _chart_plot_pie ( IImage img, IGC gc, IChartP *c,
          IArcProperties / IFillArc. */
       double mid = ( a0 + a1 ) / 2.0;
       double ang = ( 2.0 * PI / 360.0 ) * ( 360.0 - mid );
-      int lx = cx + (int) ( r * 0.6 * cos ( ang ) );
-      int ly = cy + (int) ( r * 0.6 * sin ( ang ) );
+      int lx = cx + (int) ( r * lblf * cos ( ang ) );
+      int ly = cy + (int) ( r * lblf * sin ( ang ) );
       ISetForeground ( gc, IBLACK_PIXEL );
       _chart_draw_value ( img, gc, c, lx, ly + _chart_font_h ( c ) / 2,
         ser->values[i] );
     }
     a0 = a1;
+  }
+
+  /* Punch the donut hole with the background colour. */
+  if ( donut && inner > 0 ) {
+    ISetForeground ( gc, c->background );
+    IFillCircle ( img, gc, cx, cy, inner );
   }
 }
 
@@ -954,7 +1196,25 @@ IImage IChartRender ( IChart chart )
   bottom = 10;
   if ( c->title && c->font )
     top += fh + 6;
-  if ( c->type != ICHART_PIE ) {
+  if ( c->type == ICHART_HBAR ) {
+    /* Value axis along the bottom, category labels down the left. */
+    bottom = 12;
+    if ( c->font ) {
+      int i, maxw = 0;
+      bottom += fh + 4; /* value labels */
+      for ( i = 0; i < c->ncategories; i++ ) {
+        int w = _chart_text_w ( c, gc, c->categories[i] );
+        if ( w > maxw )
+          maxw = w;
+      }
+      left = 15 + maxw + 6;
+      if ( c->x_label )
+        bottom += fh + 2;
+      if ( c->y_label )
+        left += fh + 2;
+    }
+  }
+  else if ( c->type != ICHART_PIE && c->type != ICHART_DONUT ) {
     left = c->font ? 50 : 15;
     bottom = 12;
     if ( c->font )
@@ -987,7 +1247,7 @@ IImage IChartRender ( IChart chart )
     _chart_text ( img, gc, ( c->width - tw ) / 2, fh, c->title );
   }
 
-  if ( c->type == ICHART_PIE ) {
+  if ( c->type == ICHART_PIE || c->type == ICHART_DONUT ) {
     _chart_plot_pie ( img, gc, c, &lay );
     if ( c->ncategories > 0 ) {
       IColor *cols =
@@ -1002,6 +1262,12 @@ IImage IChartRender ( IChart chart )
       }
     }
   }
+  else if ( c->type == ICHART_HBAR ) {
+    _chart_compute_range ( c, &lay.ymin, &lay.ymax );
+    _chart_axes_h ( img, gc, c, &lay );
+    _chart_plot_hbar ( img, gc, c, &lay );
+    _chart_series_legend ( img, gc, c, &lay );
+  }
   else {
     _chart_compute_range ( c, &lay.ymin, &lay.ymax );
     if ( c->type == ICHART_SCATTER )
@@ -1015,22 +1281,7 @@ IImage IChartRender ( IChart chart )
       _chart_plot_area ( img, gc, c, &lay );
     else /* ICHART_SCATTER */
       _chart_plot_scatter ( img, gc, c, &lay );
-    if ( c->nseries > 0 ) {
-      char **labels =
-        (char **) malloc ( (size_t) c->nseries * sizeof ( char * ) );
-      IColor *cols =
-        (IColor *) malloc ( (size_t) c->nseries * sizeof ( IColor ) );
-      if ( labels && cols ) {
-        int i;
-        for ( i = 0; i < c->nseries; i++ ) {
-          labels[i] = c->series[i].label;
-          cols[i] = c->series[i].color;
-        }
-        _chart_legend ( img, gc, c, &lay, labels, cols, c->nseries );
-      }
-      free ( labels );
-      free ( cols );
-    }
+    _chart_series_legend ( img, gc, c, &lay );
   }
 
   IFreeGC ( gc );
