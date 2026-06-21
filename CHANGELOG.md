@@ -177,6 +177,17 @@ without breaking the public API.
 - Fixed the dead `ilib.sourceforge.net` URLs.
 
 ### Fixed
+- `ilib-fraggraph` miscounted events: the frag-log parser left the trailing
+  newline on the second ("killed") field, so deaths and suicides never matched
+  the player name -- every kill the player made (including suicides) was scored
+  as a frag, pinning efficiency at a flat 100% line at the top of the graph.
+  The newline is now stripped, and an out-of-bounds read of the stats array
+  (loop bound `<= num_stats`) was fixed.
+- `ilib-displayfont` refused `-png`/`-gif` whenever it was compiled without the
+  codec macros visible -- but those (`HAVE_PNGLIB`/`HAVE_GIFLIB`) are private to
+  the library and never defined for the client, so the options were effectively
+  unusable. It now requests the format and reports any error from
+  `IWriteImageFile` (so a missing codec gives a clear message and non-zero exit).
 - Text metrics for scalable (TrueType) fonts: `ITextWidth` / `ITextDimensions`
   always measured via the BDF glyph cache and returned ~0 for a TTF font, which
   broke centering and right-anchored layout (e.g. clipped chart legends). They

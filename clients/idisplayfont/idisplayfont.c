@@ -63,22 +63,13 @@ int main ( int argc, char *argv[] )
       format = IFORMAT_PPM;
     else if ( strcmp ( argv[loop], "-pnm" ) == 0 )
       format = IFORMAT_PPM;
-    else if ( strcmp ( argv[loop], "-gif" ) == 0 ) {
-#ifdef HAVE_GIFLIB
+    /* Don't gate formats on compile-time codec macros: those are private to
+       the library, not visible here. Request the format and let
+       IWriteImageFile report if the library was built without that codec. */
+    else if ( strcmp ( argv[loop], "-gif" ) == 0 )
       format = IFORMAT_GIF;
-#else
-      fprintf ( stderr, "GIF not supported (missing giflib).\n" );
-      exit ( 1 );
-#endif
-    }
-    else if ( strcmp ( argv[loop], "-png" ) == 0 ) {
-#ifdef HAVE_PNGLIB
+    else if ( strcmp ( argv[loop], "-png" ) == 0 )
       format = IFORMAT_PNG;
-#else
-      fprintf ( stderr, "PNG not supported (missing libpng).\n" );
-      exit ( 1 );
-#endif
-    }
     else if ( strcmp ( argv[loop], "-hex" ) == 0 )
       usehex = 1;
     else if ( strcmp ( argv[loop], "-dec" ) == 0 )
@@ -159,12 +150,11 @@ int main ( int argc, char *argv[] )
     IDrawString ( image, gc, subx, suby, temp, 1 );
   }
 
-  /*
-  ** Write GIF output file.
-  */
-  IWriteImageFile ( stdout, image, format, IOPTION_INTERLACED );
+  /* Write the glyph table to stdout in the requested format. */
+  ret = IWriteImageFile ( stdout, image, format, IOPTION_INTERLACED );
+  if ( ret != INoError )
+    fprintf ( stderr, "Error writing image: %s\n", IErrorString ( ret ) );
   IFreeImage ( image );
 
-  /* exit */
-  return ( 0 );
+  return ( ret == INoError ? 0 : 1 );
 }
