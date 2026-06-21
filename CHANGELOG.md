@@ -10,6 +10,11 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- `ICalculateTextCoordinates()`: a text-alignment helper that, given a font,
+  text, an anchor point and horizontal/vertical alignment (`IHAlign`/`IVAlign`:
+  left/center/right, top/middle/bottom), returns the coordinate to pass to
+  `IDrawString()` so the text is positioned relative to the anchor. Exposed in
+  the Python bindings as `GC.text_coordinates` (with `HAlign`/`VAlign`).
 - Higher-quality resizing: `IResizeFiltered()` adds a resampling-filter choice
   (`IResizeFilter`: nearest, bilinear, bicubic Catmull-Rom, area-averaging, or
   `IRESIZE_AUTO` = area when shrinking / bicubic when enlarging). `IResize()`

@@ -72,6 +72,41 @@ TEST draw_string_succeeds ( void )
   PASS ();
 }
 
+TEST text_alignment_coordinates ( void )
+{
+  IGC gc = ICreateGC ();
+  IFont font = NULL;
+  unsigned int w = 0, h = 0;
+  int x = -1, y = -1;
+  const char *s = "Hello";
+
+  ASSERT_EQ ( INoError, ILoadFontFromFile ( "helvR08", FONT_PATH, &font ) );
+  ITextDimensions ( gc, font, (char *) s, strlen ( s ), &w, &h );
+
+  /* Left/bottom anchor == the raw draw position. */
+  ASSERT_EQ ( INoError,
+    ICalculateTextCoordinates ( gc, font, (char *) s, strlen ( s ), 100, 100,
+      IALIGN_LEFT, IALIGN_BOTTOM, &x, &y ) );
+  ASSERT_EQ ( 100, x );
+  ASSERT_EQ ( 100, y );
+
+  /* Centred horizontally, middle vertically. */
+  ICalculateTextCoordinates ( gc, font, (char *) s, strlen ( s ), 100, 100,
+    IALIGN_CENTER, IALIGN_MIDDLE, &x, &y );
+  ASSERT_EQ ( 100 - (int) w / 2, x );
+  ASSERT_EQ ( 100 + (int) h / 2, y );
+
+  /* Right-aligned, top anchor. */
+  ICalculateTextCoordinates ( gc, font, (char *) s, strlen ( s ), 100, 100,
+    IALIGN_RIGHT, IALIGN_TOP, &x, &y );
+  ASSERT_EQ ( 100 - (int) w, x );
+  ASSERT_EQ ( 100 + (int) h, y );
+
+  IFreeFont ( font );
+  IFreeGC ( gc );
+  PASS ();
+}
+
 /* Scalable TrueType text via FreeType. Skipped cleanly when the library was
    built without FreeType, or when no system TrueType font can be found. */
 TEST ttf_text_is_antialiased ( void )
@@ -317,6 +352,7 @@ SUITE ( text )
   RUN_TEST ( load_font_succeeds );
   RUN_TEST ( load_missing_font_fails );
   RUN_TEST ( text_dimensions_positive );
+  RUN_TEST ( text_alignment_coordinates );
   RUN_TEST ( ttf_text_width_scales );
   RUN_TEST ( draw_string_succeeds );
   RUN_TEST ( ttf_text_is_antialiased );

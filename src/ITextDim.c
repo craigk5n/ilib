@@ -45,6 +45,41 @@ IError ITextHeight ( IGC gc, IFont font, char *text, unsigned int len, unsigned 
 }
 
 
+IError ICalculateTextCoordinates ( IGC gc, IFont font, char *text,
+  unsigned int len, int anchor_x, int anchor_y, IHAlign halign, IVAlign valign,
+  int *x_return, int *y_return )
+{
+  unsigned int w = 0, h = 0;
+  int x, y;
+  IError ret = ITextDimensions ( gc, font, text, len, &w, &h );
+  if ( ret != INoError )
+    return ( ret );
+
+  /* Horizontal: anchor at left / centre / right of the text box. */
+  if ( halign == IALIGN_CENTER )
+    x = anchor_x - (int) w / 2;
+  else if ( halign == IALIGN_RIGHT )
+    x = anchor_x - (int) w;
+  else
+    x = anchor_x;
+
+  /* IDrawString's y is the bottom of the text, so add the height to put the
+     anchor at the top, half for the middle, nothing for the bottom. */
+  if ( valign == IALIGN_TOP )
+    y = anchor_y + (int) h;
+  else if ( valign == IALIGN_MIDDLE )
+    y = anchor_y + (int) h / 2;
+  else
+    y = anchor_y;
+
+  if ( x_return )
+    *x_return = x;
+  if ( y_return )
+    *y_return = y;
+  return ( INoError );
+}
+
+
 IError ITextDimensions ( IGC gc, IFont font, char *text, unsigned int len, unsigned int *width_return, unsigned int *height_return )
 {
   IGCP *gcp = (IGCP *) gc;

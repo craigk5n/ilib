@@ -35,11 +35,13 @@ from .constants import (
     ChartType,
     FillStyle,
     Format,
+    HAlign,
     LineStyle,
     Option,
     ResizeFilter,
     TextDirection,
     TextStyle,
+    VAlign,
 )
 from .errors import IError, IlibError, error_string
 from .font import Font
@@ -70,6 +72,8 @@ __all__ = [
     "TextDirection",
     "BlendMode",
     "ResizeFilter",
+    "HAlign",
+    "VAlign",
     # errors
     "IError",
     "IlibError",

@@ -177,6 +177,25 @@ typedef enum {
 } ITextDirection;
 
 /**
+ * Horizontal text alignment relative to an anchor point
+ * (see ICalculateTextCoordinates).
+ */
+typedef enum {
+  IALIGN_LEFT = 0, /* anchor at the left of the text (default draw position) */
+  IALIGN_CENTER,   /* anchor at the horizontal centre */
+  IALIGN_RIGHT     /* anchor at the right edge */
+} IHAlign;
+
+/**
+ * Vertical text alignment relative to an anchor point.
+ */
+typedef enum {
+  IALIGN_TOP = 0, /* anchor at the top of the text */
+  IALIGN_MIDDLE,  /* anchor at the vertical centre */
+  IALIGN_BOTTOM   /* anchor at the bottom of the text */
+} IVAlign;
+
+/**
  * Pixel compositing modes (set on a graphics context with ISetBlendMode).
  */
 typedef enum {
@@ -982,6 +1001,28 @@ IError ITextDimensions (
   unsigned int len,           /* length of text */
   unsigned int *width_return, /* out: width in pixels of text */
   unsigned int *height_return /* out: height in pixels of text */
+#endif
+);
+
+/**
+ * Compute the x-y coordinate to pass to IDrawString() so that the given text
+ * is aligned relative to an anchor point. For example, IALIGN_CENTER +
+ * IALIGN_MIDDLE centers the text on (anchor_x, anchor_y); IALIGN_LEFT +
+ * IALIGN_TOP places its top-left corner there. Measures the text in the given
+ * font and returns the draw position via x_return / y_return.
+ */
+IError ICalculateTextCoordinates (
+#ifndef _NO_PROTO
+  IGC gc,           /* graphics context */
+  IFont font,       /* font */
+  char *text,       /* text */
+  unsigned int len, /* length of text */
+  int anchor_x,     /* anchor x coordinate */
+  int anchor_y,     /* anchor y coordinate */
+  IHAlign halign,   /* horizontal alignment about the anchor */
+  IVAlign valign,   /* vertical alignment about the anchor */
+  int *x_return,    /* out: x to pass to IDrawString */
+  int *y_return     /* out: y to pass to IDrawString */
 #endif
 );
 

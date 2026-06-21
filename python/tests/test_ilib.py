@@ -677,6 +677,25 @@ class Text(unittest.TestCase):
             font.free()
 
 
+class TextAlign(unittest.TestCase):
+    def test_text_coordinates(self):
+        path = find_bdf_font()
+        if not path:
+            self.skipTest("no BDF font found")
+        font = ilib.Font.from_file(path)
+        try:
+            with ilib.GC() as gc:
+                w, h = gc.text_dimensions(font, "Hello")
+                x, y = gc.text_coordinates(font, "Hello", 100, 100,
+                                           ilib.HAlign.CENTER, ilib.VAlign.MIDDLE)
+                self.assertEqual(x, 100 - w // 2)
+                self.assertEqual(y, 100 + h // 2)
+                x, y = gc.text_coordinates(font, "Hello", 100, 100)
+                self.assertEqual((x, y), (100, 100))  # left/bottom default
+        finally:
+            font.free()
+
+
 class Geometry(unittest.TestCase):
     def test_arc_properties(self):
         with ilib.GC() as gc:
