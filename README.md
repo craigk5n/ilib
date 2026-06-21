@@ -31,6 +31,9 @@ The drawing API is modeled on a subset of the X11 graphics functions:
   `IBrightnessContrast`, `IGamma`, `IThreshold`).
 - **Transforms:** geometric operations: flip, flop, rotate (multiples of 90°),
   and crop (`IFlip`, `IFlop`, `IRotate`, `ICrop`).
+- **Convolution:** a generic kernel filter (`IConvolve`) plus blur, Gaussian
+  blur, sharpen, edge detect, and emboss (`IBlur`, `IGaussianBlur`, `ISharpen`,
+  `IEdgeDetect`, `IEmboss`).
 
 Note: This code was originally developed in the late 1990s in "classic"
 (K&R) C. It has since been modernized to ISO C (ANSI-style prototypes) and

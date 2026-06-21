@@ -65,6 +65,14 @@ IError IRotate(IImage image, int degrees);
 IError ICrop(IImage image, int x, int y, unsigned int width,
              unsigned int height);
 
+IError IConvolve(IImage image, const double *kernel, unsigned int size,
+                 double divisor, double bias);
+IError IBlur(IImage image, unsigned int radius);
+IError IGaussianBlur(IImage image, double sigma);
+IError ISharpen(IImage image);
+IError IEdgeDetect(IImage image);
+IError IEmboss(IImage image);
+
 IError _IFreeImage(IImage image);
 unsigned int IImageHeight(IImage image);
 unsigned int IImageWidth(IImage image);

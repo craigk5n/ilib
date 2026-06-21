@@ -16,6 +16,9 @@ This changelog tracks the **Python package** (`ilib-graphics`, imported as
   `brightness_contrast()`, `gamma()`, and `threshold()`.
 - Image transform methods mirroring the new C geometric operations:
   `Image.flip()`, `flop()`, `rotate()`, and `crop()`.
+- Convolution / area filter methods: `Image.convolve()` (arbitrary square
+  kernel), `blur()`, `gaussian_blur()`, `sharpen()`, `edge_detect()`, and
+  `emboss()`.
 
 ## [0.1.0] - 2026-06-20
 

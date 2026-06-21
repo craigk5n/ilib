@@ -9,7 +9,7 @@ if(ILIB_BUILD_TESTS)
 
 # Tests that only use the public API.
 set(ILIB_PUBLIC_TESTS test_color test_text test_malformed test_pixel test_filter
-  test_transform)
+  test_transform test_convolve)
 
 # Tests that also read back pixels via the internal layout (pixutil.h ->
 # IlibP.h), so they need the private src/ include directory.

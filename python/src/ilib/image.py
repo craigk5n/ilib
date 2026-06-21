@@ -249,6 +249,48 @@ class Image:
         check(lib.ICrop(self._as_parameter_, int(x), int(y), int(width), int(height)))
         return self
 
+    # -- convolution (area filters) ---------------------------------------
+    def convolve(self, kernel, divisor=0.0, bias=0.0):
+        """Apply a square convolution ``kernel``, in place.
+
+        ``kernel`` is a square 2-D sequence of numbers (e.g. a list of equal-
+        length rows) with an odd side length. ``divisor`` normalizes the result
+        (0 = use the sum of the weights); ``bias`` is added afterward.
+        """
+        rows = [list(r) for r in kernel]
+        size = len(rows)
+        if size == 0 or any(len(r) != size for r in rows):
+            raise ValueError("kernel must be a non-empty square 2-D sequence")
+        flat = [float(v) for r in rows for v in r]
+        cdata = ffi.new("double[]", flat)
+        check(lib.IConvolve(self._as_parameter_, cdata, size, float(divisor), float(bias)))
+        return self
+
+    def blur(self, radius=1):
+        """Box blur with the given ``radius`` (0 = no-op), in place."""
+        check(lib.IBlur(self._as_parameter_, int(radius)))
+        return self
+
+    def gaussian_blur(self, sigma):
+        """Gaussian blur with standard deviation ``sigma`` (> 0), in place."""
+        check(lib.IGaussianBlur(self._as_parameter_, float(sigma)))
+        return self
+
+    def sharpen(self):
+        """Sharpen (3x3 kernel), in place."""
+        check(lib.ISharpen(self._as_parameter_))
+        return self
+
+    def edge_detect(self):
+        """Detect edges (3x3 Laplacian), in place."""
+        check(lib.IEdgeDetect(self._as_parameter_))
+        return self
+
+    def emboss(self):
+        """Emboss (3x3 kernel), in place."""
+        check(lib.IEmboss(self._as_parameter_))
+        return self
+
     # -- transparency / comment -------------------------------------------
     def set_transparent(self, color):
         """Set the transparent color (relevant when writing GIF/XPM)."""

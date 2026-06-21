@@ -447,6 +447,82 @@ IError ICrop (
 );
 
 
+/**
+ * Convolution filters (area operations).
+ *
+ * IConvolve applies an arbitrary N x N kernel; the named helpers build common
+ * kernels for you. Each operates in place on the colour channels (alpha is left
+ * untouched), samples out-of-edge neighbours by clamping to the edge, and
+ * clamps results to 0..255.
+ */
+
+/**
+ * Apply an N x N convolution kernel to the image. size must be odd (1, 3, 5,
+ * ...); kernel points to size*size weights in row-major order. The result is
+ * (sum(kernel * neighbours) / divisor) + bias. A divisor of 0 means "use the
+ * sum of the kernel weights" (or 1 if that sum is 0). Returns IInvalidArgument
+ * for a NULL kernel or a non-odd size.
+ */
+IError IConvolve (
+#ifndef _NO_PROTO
+  IImage image,         /* image (modified in place) */
+  const double *kernel, /* size*size weights, row-major */
+  unsigned int size,    /* kernel dimension (odd) */
+  double divisor,       /* normalizer (0 = sum of weights) */
+  double bias           /* added after dividing */
+#endif
+);
+
+/**
+ * Box blur with the given radius (kernel size 2*radius+1). A radius of 0 is a
+ * no-op.
+ */
+IError IBlur (
+#ifndef _NO_PROTO
+  IImage image,       /* image (modified in place) */
+  unsigned int radius /* blur radius in pixels */
+#endif
+);
+
+/**
+ * Gaussian blur with the given standard deviation (sigma > 0; the kernel radius
+ * is derived from sigma). Returns IInvalidArgument for sigma <= 0.
+ */
+IError IGaussianBlur (
+#ifndef _NO_PROTO
+  IImage image, /* image (modified in place) */
+  double sigma  /* Gaussian standard deviation (> 0) */
+#endif
+);
+
+/**
+ * Sharpen the image (3x3 sharpening kernel).
+ */
+IError ISharpen (
+#ifndef _NO_PROTO
+  IImage image /* image (modified in place) */
+#endif
+);
+
+/**
+ * Detect edges (3x3 Laplacian); flat areas become black, edges bright.
+ */
+IError IEdgeDetect (
+#ifndef _NO_PROTO
+  IImage image /* image (modified in place) */
+#endif
+);
+
+/**
+ * Emboss the image (3x3 emboss kernel; flat areas become mid-grey).
+ */
+IError IEmboss (
+#ifndef _NO_PROTO
+  IImage image /* image (modified in place) */
+#endif
+);
+
+
 #define IFreeImage( i ) \
   _IFreeImage ( i );    \
   ( i ) = NULL;

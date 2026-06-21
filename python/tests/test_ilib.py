@@ -283,6 +283,57 @@ class Transforms(unittest.TestCase):
             self.assertEqual(ctx.exception.code, ilib.IError.InvalidArgument)
 
 
+class Convolution(unittest.TestCase):
+    def _grey(self, w, h, v):
+        img = ilib.Image(w, h)
+        for y in range(h):
+            for x in range(w):
+                img.set_pixel(x, y, v, v, v)
+        return img
+
+    def test_blur_spreads(self):
+        with ilib.Image(5, 5) as img:
+            for y in range(5):
+                for x in range(5):
+                    img.set_pixel(x, y, 0, 0, 0)
+            img.set_pixel(2, 2, 255, 255, 255)
+            img.blur(1)
+            self.assertTrue(20 < img.get_pixel(2, 2)[0] < 40)
+            self.assertGreater(img.get_pixel(2, 1)[0], 0)
+
+    def test_gaussian_blur_rejects_bad_sigma(self):
+        with ilib.Image(5, 5) as img:
+            with self.assertRaises(ilib.IlibError) as ctx:
+                img.gaussian_blur(0.0)
+            self.assertEqual(ctx.exception.code, ilib.IError.InvalidArgument)
+
+    def test_sharpen_flat_unchanged(self):
+        with self._grey(5, 5, 120) as img:
+            img.sharpen()
+            self.assertEqual(img.get_pixel(2, 2)[0], 120)
+
+    def test_edge_detect_flat_black(self):
+        with self._grey(5, 5, 130) as img:
+            img.edge_detect()
+            self.assertEqual(img.get_pixel(2, 2)[0], 0)
+
+    def test_emboss_flat_mid_grey(self):
+        with self._grey(5, 5, 90) as img:
+            img.emboss()
+            self.assertEqual(img.get_pixel(2, 2)[0], 128)
+
+    def test_convolve_identity(self):
+        with ilib.Image(4, 4) as img:
+            img.set_pixel(1, 2, 77, 0, 0)
+            img.convolve([[0, 0, 0], [0, 1, 0], [0, 0, 0]], divisor=1.0)
+            self.assertEqual(img.get_pixel(1, 2)[0], 77)
+
+    def test_convolve_rejects_non_square(self):
+        with ilib.Image(4, 4) as img:
+            with self.assertRaises(ValueError):
+                img.convolve([[1, 0], [0, 1, 0]])
+
+
 class FileIO(unittest.TestCase):
     def test_ppm_roundtrip(self):
         with ilib.Image(8, 6) as img, ilib.GC() as gc:
