@@ -100,6 +100,18 @@ class Chart:
                                   len(values), int(color)))
         return self
 
+    def add_xy_series(self, xvalues, yvalues, label=None, color=0):
+        """Add an (x, y) series for a scatter chart (both sequences copied)."""
+        xs = [float(v) for v in xvalues]
+        ys = [float(v) for v in yvalues]
+        if not xs or len(xs) != len(ys):
+            raise ValueError("xvalues and yvalues must be non-empty and equal length")
+        xa = ffi.new("double[]", xs)
+        ya = ffi.new("double[]", ys)
+        check(lib.IChartAddXYSeries(self._as_parameter_, _opt_str(label), xa, ya,
+                                    len(xs), int(color)))
+        return self
+
     # -- render ------------------------------------------------------------
     def render(self):
         """Render the chart to a new :class:`~ilib.image.Image`."""

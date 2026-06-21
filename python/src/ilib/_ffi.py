@@ -190,6 +190,9 @@ IError IChartSetCategories(IChart chart, const char **labels, int count);
 IError IChartSetRange(IChart chart, double ymin, double ymax);
 IError IChartAddSeries(IChart chart, const char *label, const double *values,
                        int count, IColor color);
+IError IChartAddXYSeries(IChart chart, const char *label,
+                         const double *xvalues, const double *yvalues,
+                         int count, IColor color);
 IImage IChartRender(IChart chart);
 """
 

@@ -30,7 +30,9 @@ typedef void *IChart;
 typedef enum {
   ICHART_LINE = 0, /* connected line chart (one line per series) */
   ICHART_BAR,      /* grouped vertical bar chart */
-  ICHART_PIE       /* pie chart (uses the first series' values as slices) */
+  ICHART_PIE,      /* pie chart (uses the first series' values as slices) */
+  ICHART_SCATTER,  /* scatter plot of (x, y) points (see IChartAddXYSeries) */
+  ICHART_AREA      /* line chart with the area under each line filled */
 } IChartType;
 
 /**
@@ -81,6 +83,15 @@ IError IChartSetRange ( IChart chart, double ymin, double ymax );
  */
 IError IChartAddSeries ( IChart chart, const char *label, const double *values,
   int count, IColor color );
+
+/**
+ * Add a series with explicit x and y values, for a scatter chart. xvalues[]
+ * and yvalues[] each hold count values; both are copied. (Line/bar/area charts
+ * ignore the x values and use the category index; scatter charts require
+ * them.)
+ */
+IError IChartAddXYSeries ( IChart chart, const char *label,
+  const double *xvalues, const double *yvalues, int count, IColor color );
 
 /**
  * Render the chart to a newly created image (free it with IFreeImage()).

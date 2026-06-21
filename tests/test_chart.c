@@ -85,6 +85,57 @@ TEST pie_chart_renders ( void )
   PASS ();
 }
 
+TEST area_chart_renders ( void )
+{
+  IChart c = ICreateChart ( ICHART_AREA, 200, 150 );
+  double v[5] = { 1.0, 3.0, 2.0, 5.0, 4.0 };
+  IImage img;
+
+  ASSERT ( c != NULL );
+  IChartAddSeries ( c, "a", v, 5, IAllocColor ( 80, 140, 200 ) );
+  img = IChartRender ( c );
+  ASSERT ( img != NULL );
+  ASSERT_EQ ( 200, (int) IImageWidth ( img ) );
+  ASSERT ( has_drawn_pixel ( img ) );
+
+  IFreeImage ( img );
+  IFreeChart ( c );
+  PASS ();
+}
+
+TEST scatter_chart_renders ( void )
+{
+  IChart c = ICreateChart ( ICHART_SCATTER, 200, 150 );
+  double x[4] = { 1.0, 4.0, 2.0, 8.0 };
+  double y[4] = { 2.0, 5.0, 3.0, 7.0 };
+  IImage img;
+
+  ASSERT ( c != NULL );
+  ASSERT_EQ ( INoError,
+    IChartAddXYSeries ( c, "pts", x, y, 4, IAllocColor ( 200, 0, 0 ) ) );
+  img = IChartRender ( c );
+  ASSERT ( img != NULL );
+  ASSERT_EQ ( 200, (int) IImageWidth ( img ) );
+  ASSERT ( has_drawn_pixel ( img ) );
+
+  IFreeImage ( img );
+  IFreeChart ( c );
+  PASS ();
+}
+
+TEST add_xy_series_rejects_bad_args ( void )
+{
+  IChart c = ICreateChart ( ICHART_SCATTER, 100, 100 );
+  double x[2] = { 1.0, 2.0 }, y[2] = { 1.0, 2.0 };
+
+  ASSERT_EQ ( IInvalidChart, IChartAddXYSeries ( NULL, "a", x, y, 2, 0 ) );
+  ASSERT_EQ ( IInvalidArgument, IChartAddXYSeries ( c, "a", NULL, y, 2, 0 ) );
+  ASSERT_EQ ( IInvalidArgument, IChartAddXYSeries ( c, "a", x, y, 0, 0 ) );
+
+  IFreeChart ( c );
+  PASS ();
+}
+
 TEST chart_explicit_range ( void )
 {
   IChart c = ICreateChart ( ICHART_LINE, 120, 100 );
@@ -144,6 +195,9 @@ SUITE ( chart )
   RUN_TEST ( line_chart_renders );
   RUN_TEST ( bar_chart_renders );
   RUN_TEST ( pie_chart_renders );
+  RUN_TEST ( area_chart_renders );
+  RUN_TEST ( scatter_chart_renders );
+  RUN_TEST ( add_xy_series_rejects_bad_args );
   RUN_TEST ( chart_explicit_range );
   RUN_TEST ( chart_setters_and_titles );
   RUN_TEST ( chart_rejects_bad_args );

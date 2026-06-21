@@ -475,6 +475,26 @@ class Charting(unittest.TestCase):
             finally:
                 img.free()
 
+    def test_area_chart(self):
+        with ilib.Chart(ilib.ChartType.AREA, 200, 150) as c:
+            c.add_series([1, 3, 2, 5, 4], label="a",
+                         color=ilib.alloc_color(80, 140, 200))
+            img = c.render()
+            try:
+                self.assertEqual(img.size, (200, 150))
+            finally:
+                img.free()
+
+    def test_scatter_chart(self):
+        with ilib.Chart(ilib.ChartType.SCATTER, 200, 150) as c:
+            c.add_xy_series([1, 4, 2, 8], [2, 5, 3, 7], label="pts",
+                            color=ilib.alloc_color(200, 0, 0))
+            img = c.render()
+            try:
+                self.assertEqual(img.size, (200, 150))
+            finally:
+                img.free()
+
     def test_bar_chart_and_config(self):
         with ilib.Chart(ilib.ChartType.BAR, 220, 160) as c:
             c.set_title("T").set_categories(["Q1", "Q2", "Q3"]).set_range(0, 10)
