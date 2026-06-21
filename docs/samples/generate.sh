@@ -4,7 +4,8 @@
 # Usage:  docs/samples/generate.sh [build-dir]
 #
 # Run from the repository root after building (default build dir: ./build).
-# Outputs PNGs into docs/images/clients/.
+# Outputs PNGs into docs/images/clients/. Needs libpng (the tools now write
+# PNG directly via their -png option).
 set -e
 
 BUILD="${1:-build}"
@@ -19,18 +20,13 @@ trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$OUT"
 
 echo "ilib-displayfont -> glyph table"
-# idisplayfont only enables -png/-gif when built with those codecs visible to
-# the client; its default PPM output always works, so convert that to PNG.
-"$CLIENTS/ilib-displayfont" fonts/helvB18.bdf > "$TMP/font.ppm"
-"$CONVERT" "$TMP/font.ppm" "$OUT/displayfont.png"
+"$CLIENTS/ilib-displayfont" -png fonts/helvB18.bdf > "$OUT/displayfont.png"
 
 echo "ilib-fraggraph -> frag efficiency graph"
-"$CLIENTS/ilib-fraggraph" Ace "$SAMPLES/frags.log" > "$TMP/frags.gif"
-"$CONVERT" "$TMP/frags.gif" "$OUT/fraggraph.png"
+"$CLIENTS/ilib-fraggraph" -png Ace "$SAMPLES/frags.log" > "$OUT/fraggraph.png"
 
 echo "ilib-webreprt -> web traffic by hour"
-"$CLIENTS/ilib-webreprt" -tod -bar "$SAMPLES/access.log" > "$TMP/web.gif"
-"$CONVERT" "$TMP/web.gif" "$OUT/webreprt.png"
+"$CLIENTS/ilib-webreprt" -tod -bar -png "$SAMPLES/access.log" > "$OUT/webreprt.png"
 
 echo "ilib-index -> thumbnail contact sheet"
 # Build a few varied thumbnails (also a quick ilib-convert showcase).

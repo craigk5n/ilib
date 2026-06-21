@@ -10,6 +10,10 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Output-format options for `ilib-webreprt` and `ilib-fraggraph`: both
+  previously wrote GIF only; they now accept `-png`, `-ppm`, `-jpeg` and `-bmp`
+  (GIF remains the default) and report a clear error if the library lacks the
+  chosen codec. The sample-image script writes PNG directly as a result.
 - Sample output images for the bundled client tools (`ilib-index`,
   `ilib-displayfont`, `ilib-webreprt`, `ilib-fraggraph`) under
   `docs/images/clients/`, shown in a new README "Client tools" section, with

@@ -153,7 +153,8 @@ typedef enum {
 static OutputType output_type = DAY_OF_MONTH;
 static GraphType graph_type = LINE;
 static int display_header = TRUE;
-static int line_width = 2; /* for line graphs (can use 1-3) */
+static int line_width = 2;              /* for line graphs (can use 1-3) */
+static int output_format = IFORMAT_GIF; /* output image format */
 
 /* String to use in place of "Retrievals" */
 static char *retrievals = "Retrievals";
@@ -215,6 +216,18 @@ int main ( int argc, char *argv[] )
       }
       retrievals = argv[loop];
     }
+    else if ( strcmp ( argv[loop], "-png" ) == 0 )
+      output_format = IFORMAT_PNG;
+    else if ( strcmp ( argv[loop], "-ppm" ) == 0 ||
+              strcmp ( argv[loop], "-pnm" ) == 0 )
+      output_format = IFORMAT_PPM;
+    else if ( strcmp ( argv[loop], "-jpeg" ) == 0 ||
+              strcmp ( argv[loop], "-jpg" ) == 0 )
+      output_format = IFORMAT_JPEG;
+    else if ( strcmp ( argv[loop], "-bmp" ) == 0 )
+      output_format = IFORMAT_BMP;
+    else if ( strcmp ( argv[loop], "-gif" ) == 0 )
+      output_format = IFORMAT_GIF;
     else if ( *argv[loop] == '-' ) {
       fprintf ( stderr, "%s: unrecognized argument \"%s\"\n",
         argv[0], argv[loop] );
@@ -959,14 +972,13 @@ static void generate_gif ( void )
     IDrawString ( im_out, gc, 5, height - 23, temp, strlen ( temp ) );
   }
 
-  /*
-  ** make output interlaced
-  */
-
-  /*
-  ** Write GIF output file.
-  */
-  IWriteImageFile ( stdout, im_out, IFORMAT_GIF, IOPTION_INTERLACED );
+  /* Write the report to stdout in the chosen format. */
+  {
+    IError ret =
+      IWriteImageFile ( stdout, im_out, output_format, IOPTION_INTERLACED );
+    if ( ret != INoError )
+      fprintf ( stderr, "Error writing image: %s\n", IErrorString ( ret ) );
+  }
   IFreeImage ( im_out );
 }
 

@@ -78,7 +78,8 @@ static int num_stats = 0; /* total number of frags counted */
 
 
 static int display_header = TRUE;
-static int line_width = 2; /* for line graphs (can use 1-3) */
+static int line_width = 2;              /* for line graphs (can use 1-3) */
+static int output_format = IFORMAT_GIF; /* output image format */
 
 
 /*
@@ -91,7 +92,20 @@ int main ( int argc, char *argv[] )
   stats = (int *) malloc ( 1 );
 
   for ( loop = 1; loop < argc; loop++ ) {
-    if ( *argv[loop] == '-' ) {
+    /* Output format flags (the format codec is resolved by the library). */
+    if ( strcmp ( argv[loop], "-gif" ) == 0 )
+      output_format = IFORMAT_GIF;
+    else if ( strcmp ( argv[loop], "-png" ) == 0 )
+      output_format = IFORMAT_PNG;
+    else if ( strcmp ( argv[loop], "-ppm" ) == 0 ||
+              strcmp ( argv[loop], "-pnm" ) == 0 )
+      output_format = IFORMAT_PPM;
+    else if ( strcmp ( argv[loop], "-jpeg" ) == 0 ||
+              strcmp ( argv[loop], "-jpg" ) == 0 )
+      output_format = IFORMAT_JPEG;
+    else if ( strcmp ( argv[loop], "-bmp" ) == 0 )
+      output_format = IFORMAT_BMP;
+    else if ( *argv[loop] == '-' ) {
       fprintf ( stderr, "%s: unrecognized argument \"%s\"\n",
         argv[0], argv[loop] );
       exit ( 1 );
@@ -197,6 +211,7 @@ static void generate_gif ( void )
   int frags = 0;
   int r_frags = 0;
   double eff;
+  IError ret;
 
   max_gibs = calc_max ( num_stats );
   gib_step = max_gibs / 20;
@@ -323,14 +338,10 @@ static void generate_gif ( void )
   sprintf ( temp, "Efficiency over last %d gibs", gib_step );
   IDrawString ( im_out, gc, 20, height - 10, temp, strlen ( temp ) );
 
-  /*
-  ** make output interlaced
-  */
-
-  /*
-  ** Write GIF output file.
-  */
-  IWriteImageFile ( stdout, im_out, IFORMAT_GIF, IOPTION_INTERLACED );
+  /* Write the graph to stdout in the chosen format. */
+  ret = IWriteImageFile ( stdout, im_out, output_format, IOPTION_INTERLACED );
+  if ( ret != INoError )
+    fprintf ( stderr, "Error writing image: %s\n", IErrorString ( ret ) );
   IFreeImage ( im_out );
 }
 

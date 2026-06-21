@@ -3,11 +3,12 @@
 ilib-fraggraph \- graph a player's frags from QuakeWorld frag logs
 .SH SYNOPSIS
 .B ilib-fraggraph
+.RI [ -gif | -png | -ppm | -jpeg | -bmp ]
 .I player
 .I fraglog
 .RI [ fraglog ...]
 .B >
-.I out.gif
+.I out.img
 .SH DESCRIPTION
 .B ilib-fraggraph
 parses one or more QuakeWorld frag log files and writes an image graphing the
@@ -19,10 +20,14 @@ The
 .I player
 name is matched case-sensitively. If the player is not found in the logs the
 tool reports the problem rather than crashing.
+.PP
+The output format defaults to GIF; pass
+.BR -png ", " -ppm ", " -jpeg " or " -bmp
+to choose another (whichever codecs the library was built with).
 .SH EXAMPLES
 .RS
 .nf
-ilib-fraggraph "Player1" frag.log > player1.gif
+ilib-fraggraph -png "Player1" frag.log > player1.png
 .fi
 .RE
 .SH NOTES
