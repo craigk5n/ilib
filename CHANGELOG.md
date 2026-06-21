@@ -18,7 +18,9 @@ without breaking the public API.
   image honoring the GIF disposal methods and reads the NETSCAPE2.0 loop count;
   the writer emits per-frame delays, local palettes and the loop extension.
   Exposed in the Python bindings as the `Animation` class (`add_frame`,
-  `frame`, `delay`, `loop_count`, `save`, `open`).
+  `frame`, `delay`, `loop_count`, `save`, `open`) and a command-line tool
+  `ilib-anim` with `assemble` (stills → animated GIF), `split` (frames → image
+  files) and `info` subcommands.
 - Charting: two new chart types — **horizontal bar** (`ICHART_HBAR`, grouped or
   stacked) and **donut** (`ICHART_DONUT`) — plus display toggles
   `IChartSetMarkers()` (point markers on line/area), `IChartSetGrid()` and

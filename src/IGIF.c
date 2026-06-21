@@ -655,6 +655,7 @@ IError _IWriteAnimGIF ( FILE *fp, IAnimation anim, IOptions options )
 #endif
   if ( !gft )
     return ( IGIFError );
+  EGifSetGifVersion ( gft, true ); /* animation needs the GIF89a extensions */
 
   for ( i = 0; i < nframes; i++ ) {
     IImageP *frame = (IImageP *) IAnimationFrame ( anim, i );

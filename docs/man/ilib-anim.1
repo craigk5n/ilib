@@ -1,0 +1,63 @@
+.TH ILIB-ANIM 1 "June 2026" "ilib @ILIB_VERSION@" "Ilib Manual"
+.SH NAME
+ilib-anim \- assemble, split and inspect animated GIFs
+.SH SYNOPSIS
+.B ilib-anim assemble
+.RI [ --delay " MS]"
+.RI [ --loop " N]"
+.B -o
+.I out.gif
+.I frame
+.RI [ frame ...]
+.br
+.B ilib-anim split
+.RI [ --prefix " PFX]"
+.RI [ --format " FMT]"
+.I in.gif
+.br
+.B ilib-anim info
+.I in.gif
+.SH DESCRIPTION
+.B ilib-anim
+works with multi-frame (animated) GIFs.
+.TP
+.B assemble
+Combine still images (any format Ilib can read) into an animated GIF written
+to the
+.B -o
+output. Each frame is shown for
+.B --delay
+milliseconds (default 100) and the animation loops
+.B --loop
+times (default 0, meaning forever).
+.TP
+.B split
+Write each frame of
+.I in.gif
+to a separate file named
+.IB PFX - NNNN . FMT
+(defaults:
+.B --prefix
+.IR frame ,
+.B --format
+.IR png ).
+.TP
+.B info
+Print the frame count, image size, loop count and the per-frame delays.
+.SH EXAMPLES
+.RS
+.nf
+ilib-anim assemble --delay 80 --loop 0 -o spin.gif f*.png
+ilib-anim split --prefix out --format png spin.gif
+ilib-anim info spin.gif
+.fi
+.RE
+.SH NOTES
+Reading and writing animated GIFs requires the library to have been built with
+giflib.
+.SH "SEE ALSO"
+.BR ilib-convert (1)
+.PP
+Full API documentation: https://craigk5n.github.io/ilib/
+.SH AUTHOR
+Craig Knudsen <craigk5n@gmail.com>
