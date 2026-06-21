@@ -238,9 +238,17 @@ from each, produced by [`docs/samples/generate.sh`](docs/samples/generate.sh):
 | **`ilib-webreprt`** — graph web access-log usage (here, hits by hour) | **`ilib-fraggraph`** — graph a player's frag efficiency from game logs |
 | ![ilib-webreprt](docs/images/clients/webreprt.png) | ![ilib-fraggraph](docs/images/clients/fraggraph.png) |
 
-`ilib-font2h` (BDF font → C header) rounds out the set; each tool has a man page
-(`man ilib-index`, …). Regenerate these images with
+`ilib-chart` (CSV → chart, shown above), `ilib-anim` (assemble/split/inspect
+animated GIFs) and `ilib-font2h` (BDF font → C header) round out the set; each
+tool has a man page (`man ilib-index`, …). Regenerate these images with
 `docs/samples/generate.sh` after building.
+
+```sh
+# Build an animated GIF from frames, inspect it, then split it back out
+ilib-anim assemble --delay 80 --loop 0 -o spin.gif frame-*.png
+ilib-anim info spin.gif
+ilib-anim split --prefix out --format png spin.gif
+```
 
 ## Fonts
 
