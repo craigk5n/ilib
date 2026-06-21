@@ -145,6 +145,11 @@ IError ICalculateTextCoordinates(IGC gc, IFont font, char *text,
                                  unsigned int len, int anchor_x, int anchor_y,
                                  int halign, int valign, int *x_return,
                                  int *y_return);
+IError IDrawText(IImage image, IGC gc, int x, int y, char *text,
+                 unsigned int len, unsigned int max_width, int align);
+IError ITextBoxDimensions(IGC gc, IFont font, char *text, unsigned int len,
+                          unsigned int max_width, unsigned int *width_return,
+                          unsigned int *height_return, int *lines_return);
 
 IError IArcProperties(IGC gc, int x, int y, int r1, int r2, double a1,
                       double a2, int *a1_x, int *a1_y, int *a2_x, int *a2_y,

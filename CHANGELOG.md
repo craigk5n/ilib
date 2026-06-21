@@ -10,6 +10,11 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Multi-line text layout: `IDrawText()` word-wraps a string to a pixel width
+  (breaking at spaces; over-long words overflow) and honors existing newlines,
+  drawing each line with left/center/right alignment (`IHAlign`);
+  `ITextBoxDimensions()` measures the wrapped block. Works for BDF and TrueType
+  fonts. Exposed in Python as `Image.draw_text()` and `GC.text_box_dimensions()`.
 - Floyd-Steinberg dithering for color reduction: `IDither()` (like
   `IReduceColors()` but error-diffused, so gradients keep their shape instead of
   banding), plus a full nearest-color lookup so diffused values map correctly.

@@ -26,9 +26,10 @@ The drawing API is modeled on a subset of the X11 graphics functions:
   for translucent drawing.
 - **Text:** X11 BDF bitmap fonts (208 ship in the distribution), and — when
   built with FreeType — scalable, anti-aliased TrueType/OpenType fonts
-  (`ILoadFontFromFileTTF`). Both support text styles and rotation, plus a
+  (`ILoadFontFromFileTTF`). Both support text styles and rotation, a
   text-alignment helper (`ICalculateTextCoordinates`) for left/center/right and
-  top/middle/bottom placement about an anchor point.
+  top/middle/bottom placement about an anchor point, and multi-line layout with
+  word wrapping and per-line alignment (`IDrawText` / `ITextBoxDimensions`).
 - **Filters:** whole-image point operations (ImageMagick-style): greyscale,
   negate, brightness/contrast, gamma, threshold, normalize (auto-contrast),
   sepia, and opacity (`IGreyscale`, `INegate`, `IBrightnessContrast`, `IGamma`,

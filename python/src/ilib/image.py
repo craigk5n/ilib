@@ -8,6 +8,7 @@ from ._ffi import ffi, lib, libc
 from .constants import (
     EXTENSION_FORMATS,
     Format,
+    HAlign,
     Option,
     ResizeFilter,
     TextDirection,
@@ -509,6 +510,19 @@ class Image:
         """Draw ``text`` with its lower-left corner at ``(x, y)``."""
         data, length = _text_bytes(text)
         check(lib.IDrawString(self._as_parameter_, gc._as_parameter_, int(x), int(y), data, length))
+        return self
+
+    def draw_text(self, gc, x, y, text, max_width=0, align=HAlign.LEFT):
+        """Draw multi-line text using the GC's font.
+
+        Newlines start a new line; ``max_width > 0`` also word-wraps each line
+        to that many pixels. Lines are aligned (``align``, an
+        :class:`~ilib.constants.HAlign`) within the wrap box.
+        """
+        data, length = _text_bytes(text)
+        check(lib.IDrawText(self._as_parameter_, gc._as_parameter_, int(x),
+                            int(y), data, length, int(max_width),
+                            int(HAlign(align))))
         return self
 
     def draw_string_rotated(self, gc, x, y, text, direction=TextDirection.LEFT_TO_RIGHT):
