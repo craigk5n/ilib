@@ -34,6 +34,8 @@ The drawing API is modeled on a subset of the X11 graphics functions:
 - **Convolution:** a generic kernel filter (`IConvolve`) plus blur, Gaussian
   blur, sharpen, edge detect, and emboss (`IBlur`, `IGaussianBlur`, `ISharpen`,
   `IEdgeDetect`, `IEmboss`).
+- **Resampling:** bilinear resize to any dimensions (`IResize`) and
+  arbitrary-angle rotation with a background fill (`IRotateAngle`).
 
 Note: This code was originally developed in the late 1990s in "classic"
 (K&R) C. It has since been modernized to ISO C (ANSI-style prototypes) and

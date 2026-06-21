@@ -523,6 +523,41 @@ IError IEmboss (
 );
 
 
+/**
+ * Resampling transforms (with interpolation).
+ *
+ * These resize and rotate using bilinear (4-tap) sampling, operating in place
+ * (the image is given new pixel data and dimensions).
+ */
+
+/**
+ * Resize the image to width x height using bilinear interpolation. width and
+ * height must be non-zero, else IInvalidArgument is returned. This is a
+ * higher-quality alternative to the nearest-neighbour ICopyImageScaled.
+ */
+IError IResize (
+#ifndef _NO_PROTO
+  IImage image,       /* image (modified in place) */
+  unsigned int width, /* new width (> 0) */
+  unsigned int height /* new height (> 0) */
+#endif
+);
+
+/**
+ * Rotate the image clockwise by an arbitrary angle (in degrees) using bilinear
+ * interpolation. The canvas grows to the rotated bounding box; pixels that fall
+ * outside the original image are filled with the background color. For exact
+ * 90/180/270-degree rotations use IRotate() (faster, no interpolation).
+ */
+IError IRotateAngle (
+#ifndef _NO_PROTO
+  IImage image,     /* image (modified in place) */
+  double degrees,   /* rotation angle, clockwise */
+  IColor background /* fill color for revealed corners */
+#endif
+);
+
+
 #define IFreeImage( i ) \
   _IFreeImage ( i );    \
   ( i ) = NULL;
