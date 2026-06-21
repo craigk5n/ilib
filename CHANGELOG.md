@@ -10,6 +10,13 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Composition operations (`ICompose.c`): `ITrim()` (autocrop a uniform border,
+  matched to the top-left pixel within a tolerance), `IBorder()` (add a solid
+  frame), `IAppend()` (combine images side-by-side or stacked), and `IMontage()`
+  (grid / contact-sheet layout with spacing and centered cells). `IAppend` /
+  `IMontage` return a new image. Exposed in the Python bindings
+  (`Image.trim/border` and `Image.append/montage` classmethods); `--trim` and
+  `--border` added to both CLIs (border uses the `--background` color).
 - More image filters (point operations) in `IFilter.c`: `INormalize()`
   (auto-stretch contrast), `ISepia()` (warm sepia tone, colour images only),
   and `IOpacity()` (scale an RGBA image's alpha by a factor). Exposed in the

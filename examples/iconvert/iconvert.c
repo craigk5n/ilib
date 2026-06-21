@@ -43,7 +43,9 @@ typedef enum {
   OP_REDUCE_COLORS,
   OP_NORMALIZE,
   OP_SEPIA,
-  OP_OPACITY
+  OP_OPACITY,
+  OP_TRIM,
+  OP_BORDER
 } OpType;
 
 typedef struct {
@@ -84,6 +86,8 @@ static void usage ( const char *prog )
     "  --normalize                auto-stretch contrast\n"
     "  --sepia                    apply a sepia tone\n"
     "  --opacity F                scale RGBA alpha by F (e.g. 0.5)\n"
+    "  --trim                     autocrop a uniform border\n"
+    "  --border N                 add an N-pixel border (uses --background)\n"
     "  -h, --help                 show this help\n",
     prog );
 }
@@ -184,6 +188,16 @@ static void apply_op ( IImage image, const Op *op, const char *background )
   case OP_OPACITY:
     ret = IOpacity ( image, op->d1 );
     break;
+  case OP_TRIM:
+    ret = ITrim ( image, (unsigned int) op->i1 );
+    break;
+  case OP_BORDER: {
+    IColor bg;
+    if ( IAllocNamedColor ( (char *) background, &bg ) != INoError )
+      bg = IAllocColor ( 255, 255, 255 );
+    ret = IBorder ( image, (unsigned int) op->i1, bg );
+    break;
+  }
   }
 
   if ( ret != INoError ) {
@@ -293,6 +307,13 @@ int main ( int argc, char *argv[] )
     else if ( is_flag ( tok, "opacity" ) ) {
       op.type = OP_OPACITY;
       op.d1 = atof ( next_arg ( &loop, argc, argv, "--opacity" ) );
+    }
+    else if ( is_flag ( tok, "trim" ) ) {
+      op.type = OP_TRIM;
+    }
+    else if ( is_flag ( tok, "border" ) ) {
+      op.type = OP_BORDER;
+      op.i1 = atoi ( next_arg ( &loop, argc, argv, "--border" ) );
     }
     else if ( tok[0] == '-' && tok[1] != '\0' ) {
       fprintf ( stderr, "Unknown option: %s\n", tok );

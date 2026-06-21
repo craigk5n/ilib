@@ -399,6 +399,54 @@ class Resampling(unittest.TestCase):
             self.assertEqual(img.get_pixel(0, 0), (0, 255, 0))
 
 
+class Composition(unittest.TestCase):
+    def test_trim(self):
+        with ilib.Image(10, 10) as img:  # white background
+            for y in range(3, 7):
+                for x in range(3, 7):
+                    img.set_pixel(x, y, 255, 0, 0)
+            img.trim()
+            self.assertEqual(img.size, (4, 4))
+            self.assertEqual(img.get_pixel(0, 0), (255, 0, 0))
+
+    def test_border(self):
+        with ilib.Image(4, 4) as img:
+            for y in range(4):
+                for x in range(4):
+                    img.set_pixel(x, y, 200, 0, 0)
+            img.border(2, ilib.named_color("black"))
+            self.assertEqual(img.size, (8, 8))
+            self.assertEqual(img.get_pixel(0, 0), (0, 0, 0))
+            self.assertEqual(img.get_pixel(2, 2), (200, 0, 0))
+
+    def test_append(self):
+        a = ilib.Image(3, 2)
+        b = ilib.Image(2, 4)
+        try:
+            out = ilib.Image.append([a, b], horizontal=True,
+                                    background=ilib.named_color("green"))
+            try:
+                self.assertEqual(out.size, (5, 4))
+            finally:
+                out.free()
+        finally:
+            a.free()
+            b.free()
+
+    def test_montage(self):
+        imgs = [ilib.Image(2, 2) for _ in range(3)]
+        try:
+            out = ilib.Image.montage(imgs, columns=2, spacing=1,
+                                     background=ilib.named_color("green"))
+            try:
+                self.assertEqual(out.size, (7, 7))
+            finally:
+                out.free()
+        finally:
+            for im in imgs:
+                im.free()
+
+
 class FileIO(unittest.TestCase):
     def test_ppm_roundtrip(self):
         with ilib.Image(8, 6) as img, ilib.GC() as gc:
