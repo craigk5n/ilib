@@ -133,6 +133,11 @@ static void read_file ( char *filename )
     return;
   }
   while ( fgets ( text, sizeof ( text ), fp ) ) {
+    size_t tlen = strlen ( text );
+    /* Strip the trailing newline/CR, otherwise the "killed" token keeps it and
+       never matches the player name -- so deaths/suicides go uncounted. */
+    while ( tlen && ( text[tlen - 1] == '\n' || text[tlen - 1] == '\r' ) )
+      text[--tlen] = '\0';
     ptr = strtok ( text, "\\" );
     if ( !ptr )
       continue;
@@ -257,7 +262,7 @@ static void generate_gif ( void )
     "Frags + Deaths + Suicides", strlen ( "Frags + Deaths + Suicides" ) );
 
   column = 0;
-  for ( loop = 0; loop <= num_stats; loop++ ) {
+  for ( loop = 0; loop < num_stats; loop++ ) {
     switch ( stats[loop] ) {
     case FRAG:
       frags++;
