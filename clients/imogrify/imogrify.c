@@ -85,6 +85,7 @@ static void usage ( const char *prog )
     "  --emboss                   emboss\n"
     "  --resize WxH               resize to WxH (bilinear)\n"
     "  --reduce-colors N          reduce to at most N colours\n"
+    "  --dither                   Floyd-Steinberg dither on GIF color reduction\n"
     "  --normalize                auto-stretch contrast\n"
     "  --sepia                    apply a sepia tone\n"
     "  --opacity F                scale RGBA alpha by F (e.g. 0.5)\n"
@@ -202,7 +203,7 @@ static IError apply_op ( IImage image, const Op *op, const char *background )
 
 /* Process a single file. Returns 0 on success, non-zero on error. */
 static int mogrify_file ( const char *path, const Op *ops, int nops,
-  const char *format_ext, const char *background )
+  const char *format_ext, const char *background, int dither )
 {
   IImage image;
   IFileFormat input_format, output_format;
@@ -273,7 +274,8 @@ static int mogrify_file ( const char *path, const Op *ops, int nops,
     rc = 1;
   }
   else {
-    ret = IWriteImageFile ( fp, image, output_format, IOPTION_INTERLACED );
+    ret = IWriteImageFile ( fp, image, output_format,
+      IOPTION_INTERLACED | ( dither ? IOPTION_DITHER : 0 ) );
     fclose ( fp );
     if ( ret != INoError ) {
       fprintf ( stderr, "%s: write error: %s\n", outpath,
@@ -297,6 +299,7 @@ int main ( int argc, char *argv[] )
   int nfiles = 0;
   int loop;
   int exit_code = 0;
+  int dither = 0;
 
   /* First pass: collect options and count files. Files are processed in a
      second pass so that all the (order-sensitive) operations are known. */
@@ -399,6 +402,10 @@ int main ( int argc, char *argv[] )
       op.type = OP_BORDER;
       op.i1 = atoi ( next_arg ( &loop, argc, argv, "--border" ) );
     }
+    else if ( is_flag ( tok, "dither" ) ) {
+      dither = 1; /* a write option, not a pipeline op */
+      continue;
+    }
     else if ( tok[0] == '-' && tok[1] != '\0' ) {
       fprintf ( stderr, "Unknown option: %s\n", tok );
       usage ( argv[0] );
@@ -438,7 +445,7 @@ int main ( int argc, char *argv[] )
         loop++; /* this flag took an argument */
       continue;
     }
-    if ( mogrify_file ( tok, ops, nops, format_ext, background ) != 0 )
+    if ( mogrify_file ( tok, ops, nops, format_ext, background, dither ) != 0 )
       exit_code = 1;
   }
 

@@ -109,8 +109,9 @@ static int color_compare ( unsigned int r, unsigned int g, unsigned int b, IColo
    free()), *map_out (GifMakeMapObject, free with GifFreeMapObject), *bpp_out,
    and *transparent_out (palette index of the image's transparent color, or
    -1). Shared by the single-frame and animated GIF writers. */
-static IError _gif_index_image ( IImageP *image, unsigned char **data_out,
-  ColorMapObject **map_out, int *bpp_out, int *transparent_out )
+static IError _gif_index_image ( IImageP *image, int dither,
+  unsigned char **data_out, ColorMapObject **map_out, int *bpp_out,
+  int *transparent_out )
 {
   int r, c, offset, loop;
   unsigned char *ptr;
@@ -129,7 +130,8 @@ static IError _gif_index_image ( IImageP *image, unsigned char **data_out,
 
   /* GIF allows at most 256 colors. Reduce a color image to a 256-color palette
      up front (a no-op when it already fits) so the palette-building loop below
-     captures every color exactly instead of dropping the overflow. */
+     captures every color exactly instead of dropping the overflow. With
+     dither, error is diffused so gradients do not band. */
   if ( !image->greyscale ) {
     reduced =
       (unsigned char *) malloc ( (size_t) image->width * image->height * 3 );
@@ -137,8 +139,8 @@ static IError _gif_index_image ( IImageP *image, unsigned char **data_out,
       free ( data );
       return ( IGIFError );
     }
-    _IReduceColorsRGB ( image->data, image->width * image->height,
-      MAX_COLORMAP_SIZE, reduced );
+    _IReduceColorsRGBDither ( image->data, image->width, image->height,
+      MAX_COLORMAP_SIZE, dither, reduced );
     src = reduced;
   }
 
@@ -244,8 +246,8 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
   ColorMapObject *GIFcolormap = NULL;
   IError ret;
 
-  ret = _gif_index_image ( image, &data, &GIFcolormap, &bits_per_pixel,
-    &transparent );
+  ret = _gif_index_image ( image, ( options & IOPTION_DITHER ) ? 1 : 0, &data,
+    &GIFcolormap, &bits_per_pixel, &transparent );
   if ( ret != INoError )
     return ( ret );
 
@@ -666,7 +668,8 @@ IError _IWriteAnimGIF ( FILE *fp, IAnimation anim, IOptions options )
     GifByteType ext[4];
     int rows;
 
-    if ( _gif_index_image ( frame, &data, &cmap, &bpp, &transp ) != INoError )
+    if ( _gif_index_image ( frame, ( options & IOPTION_DITHER ) ? 1 : 0, &data,
+           &cmap, &bpp, &transp ) != INoError )
       goto done;
 
     if ( i == 0 ) {

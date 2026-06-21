@@ -83,6 +83,7 @@ static void usage ( const char *prog )
     "  --emboss                   emboss\n"
     "  --resize WxH               resize to WxH (bilinear)\n"
     "  --reduce-colors N          reduce to at most N colours\n"
+    "  --dither                   Floyd-Steinberg dither on GIF color reduction\n"
     "  --normalize                auto-stretch contrast\n"
     "  --sepia                    apply a sepia tone\n"
     "  --opacity F                scale RGBA alpha by F (e.g. 0.5)\n"
@@ -220,6 +221,7 @@ int main ( int argc, char *argv[] )
   FILE *fp;
   IError ret;
   int loop;
+  int dither = 0;
 
   for ( loop = 1; loop < argc; loop++ ) {
     char *tok = argv[loop];
@@ -316,6 +318,10 @@ int main ( int argc, char *argv[] )
       op.type = OP_BORDER;
       op.i1 = atoi ( next_arg ( &loop, argc, argv, "--border" ) );
     }
+    else if ( is_flag ( tok, "dither" ) ) {
+      dither = 1; /* a write option, not a pipeline op */
+      continue;
+    }
     else if ( tok[0] == '-' && tok[1] != '\0' ) {
       fprintf ( stderr, "Unknown option: %s\n", tok );
       usage ( argv[0] );
@@ -394,7 +400,8 @@ int main ( int argc, char *argv[] )
   else
     fp = stdout;
 
-  ret = IWriteImageFile ( fp, image, output_format, IOPTION_INTERLACED );
+  ret = IWriteImageFile ( fp, image, output_format,
+    IOPTION_INTERLACED | ( dither ? IOPTION_DITHER : 0 ) );
   if ( ret != INoError )
     fprintf ( stderr, "Error writing image: %s\n", IErrorString ( ret ) );
 

@@ -191,6 +191,32 @@ class Drawing(unittest.TestCase):
 
 
 class Filters(unittest.TestCase):
+    @staticmethod
+    def _row_transitions(img, w, y):
+        t = 0
+        prev = img.get_pixel(0, y)
+        for x in range(1, w):
+            cur = img.get_pixel(x, y)
+            if cur != prev:
+                t += 1
+            prev = cur
+        return t
+
+    def test_dither_diffuses_more_than_reduce(self):
+        w, h = 64, 8
+        plain = ilib.Image(w, h)
+        dith = ilib.Image(w, h)
+        with plain, dith:
+            for y in range(h):
+                for x in range(w):
+                    v = x * 255 // (w - 1)
+                    plain.set_pixel(x, y, v, v, v)
+                    dith.set_pixel(x, y, v, v, v)
+            plain.reduce_colors(2)
+            dith.dither(2)
+            self.assertGreater(self._row_transitions(dith, w, h // 2),
+                               self._row_transitions(plain, w, h // 2) + 3)
+
     def test_greyscale(self):
         with ilib.Image(4, 4) as img:
             for y in range(4):

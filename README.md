@@ -201,8 +201,8 @@ ilib-convert --help          # full list of operations
 Supported `ilib-convert` operations: `--greyscale`, `--negate`,
 `--brightness`, `--contrast`, `--gamma`, `--threshold`, `--flip`, `--flop`,
 `--rotate` (with `--background`), `--blur`, `--gaussian-blur`, `--sharpen`,
-`--edge`, `--emboss`, `--resize`, `--reduce-colors`, `--normalize`, `--sepia`,
-`--opacity`, `--trim`, and `--border`.
+`--edge`, `--emboss`, `--resize`, `--reduce-colors`, `--dither`, `--normalize`,
+`--sepia`, `--opacity`, `--trim`, and `--border`.
 
 The installed `ilib-mogrify` tool applies the same operations to **many files
 in place** (batch editing), or — with `--format EXT` — writes converted copies:

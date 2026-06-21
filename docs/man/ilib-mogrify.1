@@ -86,6 +86,10 @@ Resize to \fIW\fRx\fIH\fR using bilinear interpolation.
 .BI --reduce-colors " N"
 Reduce the image to at most \fIN\fR colours.
 .TP
+.B --dither
+Use Floyd-Steinberg dithering when reducing colours for GIF output, so smooth
+gradients keep their shape instead of banding.
+.TP
 .B -h ", " --help
 Show a usage summary.
 .SH EXAMPLES

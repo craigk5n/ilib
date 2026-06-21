@@ -285,6 +285,17 @@ void _IReduceColorsRGB (
 #endif
 );
 
+void _IReduceColorsRGBDither (
+#ifndef _NO_PROTO
+  const unsigned char *src,
+  int width,
+  int height,
+  int max_colors,
+  int dither,
+  unsigned char *dst
+#endif
+);
+
 /* Composite the GC foreground over pixel (x,y) using source-over, scaled by
    cover (0-255 edge coverage; 255 = fully covered). Bounds-checked. */
 void _IBlendPoint (
