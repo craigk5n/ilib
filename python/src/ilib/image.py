@@ -224,6 +224,21 @@ class Image:
         check(lib.IThreshold(self._as_parameter_, int(threshold)))
         return self
 
+    def normalize(self):
+        """Auto-stretch contrast so the darkest/brightest values hit 0/255."""
+        check(lib.INormalize(self._as_parameter_))
+        return self
+
+    def sepia(self):
+        """Apply a sepia tone (colour images only), in place."""
+        check(lib.ISepia(self._as_parameter_))
+        return self
+
+    def opacity(self, factor):
+        """Scale the alpha channel of an RGBA image by ``factor`` (>= 0)."""
+        check(lib.IOpacity(self._as_parameter_, float(factor)))
+        return self
+
     # -- transforms (geometric whole-image operations) --------------------
     def flip(self):
         """Flip vertically (top to bottom), in place."""

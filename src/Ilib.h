@@ -399,6 +399,39 @@ IError IThreshold (
 #endif
 );
 
+/**
+ * Auto-stretch contrast (normalize): linearly remap the colour channels so the
+ * darkest value present becomes 0 and the brightest becomes 255. A flat image
+ * is left unchanged.
+ */
+IError INormalize (
+#ifndef _NO_PROTO
+  IImage image /* image (modified in place) */
+#endif
+);
+
+/**
+ * Apply a sepia (warm brown) tone to a colour image. Greyscale images are left
+ * unchanged (sepia needs three channels).
+ */
+IError ISepia (
+#ifndef _NO_PROTO
+  IImage image /* image (modified in place) */
+#endif
+);
+
+/**
+ * Scale the alpha channel of an RGBA image by factor (0 = fully transparent,
+ * 1 = unchanged; values > 1 are clamped). Non-alpha images are left unchanged.
+ * factor must be >= 0, else IInvalidArgument is returned.
+ */
+IError IOpacity (
+#ifndef _NO_PROTO
+  IImage image, /* image (modified in place) */
+  double factor /* alpha multiplier (>= 0) */
+#endif
+);
+
 
 /**
  * Image transforms (geometric whole-image operations).

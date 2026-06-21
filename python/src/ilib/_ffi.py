@@ -58,6 +58,9 @@ IError INegate(IImage image);
 IError IBrightnessContrast(IImage image, int brightness, int contrast);
 IError IGamma(IImage image, double gamma);
 IError IThreshold(IImage image, unsigned int threshold);
+IError INormalize(IImage image);
+IError ISepia(IImage image);
+IError IOpacity(IImage image, double factor);
 
 IError IFlip(IImage image);
 IError IFlop(IImage image);

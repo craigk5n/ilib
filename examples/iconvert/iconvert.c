@@ -40,7 +40,10 @@ typedef enum {
   OP_EDGE,
   OP_EMBOSS,
   OP_RESIZE,
-  OP_REDUCE_COLORS
+  OP_REDUCE_COLORS,
+  OP_NORMALIZE,
+  OP_SEPIA,
+  OP_OPACITY
 } OpType;
 
 typedef struct {
@@ -78,6 +81,9 @@ static void usage ( const char *prog )
     "  --emboss                   emboss\n"
     "  --resize WxH               resize to WxH (bilinear)\n"
     "  --reduce-colors N          reduce to at most N colours\n"
+    "  --normalize                auto-stretch contrast\n"
+    "  --sepia                    apply a sepia tone\n"
+    "  --opacity F                scale RGBA alpha by F (e.g. 0.5)\n"
     "  -h, --help                 show this help\n",
     prog );
 }
@@ -168,6 +174,15 @@ static void apply_op ( IImage image, const Op *op, const char *background )
     break;
   case OP_REDUCE_COLORS:
     ret = IReduceColors ( image, (unsigned int) op->i1 );
+    break;
+  case OP_NORMALIZE:
+    ret = INormalize ( image );
+    break;
+  case OP_SEPIA:
+    ret = ISepia ( image );
+    break;
+  case OP_OPACITY:
+    ret = IOpacity ( image, op->d1 );
     break;
   }
 
@@ -268,6 +283,16 @@ int main ( int argc, char *argv[] )
               is_flag ( tok, "reduce-colours" ) ) {
       op.type = OP_REDUCE_COLORS;
       op.i1 = atoi ( next_arg ( &loop, argc, argv, "--reduce-colors" ) );
+    }
+    else if ( is_flag ( tok, "normalize" ) || is_flag ( tok, "normalise" ) ) {
+      op.type = OP_NORMALIZE;
+    }
+    else if ( is_flag ( tok, "sepia" ) ) {
+      op.type = OP_SEPIA;
+    }
+    else if ( is_flag ( tok, "opacity" ) ) {
+      op.type = OP_OPACITY;
+      op.d1 = atof ( next_arg ( &loop, argc, argv, "--opacity" ) );
     }
     else if ( tok[0] == '-' && tok[1] != '\0' ) {
       fprintf ( stderr, "Unknown option: %s\n", tok );

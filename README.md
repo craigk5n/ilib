@@ -27,8 +27,9 @@ The drawing API is modeled on a subset of the X11 graphics functions:
   built with FreeType — scalable, anti-aliased TrueType/OpenType fonts
   (`ILoadFontFromFileTTF`). Both support text styles and rotation.
 - **Filters:** whole-image point operations (ImageMagick-style): greyscale,
-  negate, brightness/contrast, gamma, and threshold (`IGreyscale`, `INegate`,
-  `IBrightnessContrast`, `IGamma`, `IThreshold`).
+  negate, brightness/contrast, gamma, threshold, normalize (auto-contrast),
+  sepia, and opacity (`IGreyscale`, `INegate`, `IBrightnessContrast`, `IGamma`,
+  `IThreshold`, `INormalize`, `ISepia`, `IOpacity`).
 - **Transforms:** geometric operations: flip, flop, rotate (multiples of 90°),
   and crop (`IFlip`, `IFlop`, `IRotate`, `ICrop`).
 - **Convolution:** a generic kernel filter (`IConvolve`) plus blur, Gaussian
