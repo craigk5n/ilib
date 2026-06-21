@@ -20,11 +20,13 @@
 #include "Ichart.h"
 #include "IchartP.h"
 #include "Ilib.h"
+#include "IlibP.h" /* _IGetColor, to derive translucent area-fill colors */
 
-/* Plot-area rectangle (inclusive pixel bounds) and value range. */
+/* Plot-area rectangle (inclusive pixel bounds) and value/x ranges. */
 typedef struct {
   int x0, y0, x1, y1;
   double ymin, ymax;
+  double xmin, xmax; /* used by scatter charts */
 } IChartLayout;
 
 /* ------------------------------------------------------------------ utils */
@@ -118,6 +120,7 @@ IError _IFreeChart ( IChart chart )
   for ( i = 0; i < c->nseries; i++ ) {
     free ( c->series[i].label );
     free ( c->series[i].values );
+    free ( c->series[i].xvalues );
   }
   free ( c->series );
   c->magic = 0;
@@ -231,9 +234,35 @@ IError IChartAddSeries ( IChart chart, const char *label, const double *values,
     return ( IInvalidArgument );
   }
   memcpy ( s->values, values, (size_t) count * sizeof ( double ) );
+  s->xvalues = NULL;
   s->count = count;
   s->color = color;
   c->nseries++;
+  return ( INoError );
+}
+
+IError IChartAddXYSeries ( IChart chart, const char *label,
+  const double *xvalues, const double *yvalues, int count, IColor color )
+{
+  IChartP *c = _chart_valid ( chart );
+  IError ret;
+  IChartSeries *s;
+
+  if ( !c )
+    return ( IInvalidChart );
+  if ( !xvalues || !yvalues || count <= 0 )
+    return ( IInvalidArgument );
+
+  /* Reuse IChartAddSeries to store the y values + label + color, then attach
+     a copy of the x values to the series it appended. */
+  ret = IChartAddSeries ( chart, label, yvalues, count, color );
+  if ( ret != INoError )
+    return ( ret );
+  s = &c->series[c->nseries - 1];
+  s->xvalues = (double *) malloc ( (size_t) count * sizeof ( double ) );
+  if ( !s->xvalues )
+    return ( IInvalidArgument );
+  memcpy ( s->xvalues, xvalues, (size_t) count * sizeof ( double ) );
   return ( INoError );
 }
 
@@ -269,6 +298,62 @@ static int _val_to_y ( double v, const IChartLayout *l )
   return ( (int) ( l->y1 - t * ( l->y1 - l->y0 ) + 0.5 ) );
 }
 
+/* Map a scatter x value to a pixel column. */
+static int _val_to_x ( double v, const IChartLayout *l )
+{
+  double range = l->xmax - l->xmin;
+  double t = ( range != 0.0 ) ? ( v - l->xmin ) / range : 0.5;
+  return ( (int) ( l->x0 + t * ( l->x1 - l->x0 ) + 0.5 ) );
+}
+
+/* Map a category index (0..n-1) to a pixel column (line/area charts). */
+static int _cat_to_x ( int i, int n, const IChartLayout *l )
+{
+  if ( n <= 1 )
+    return ( ( l->x0 + l->x1 ) / 2 );
+  return ( l->x0 + i * ( l->x1 - l->x0 ) / ( n - 1 ) );
+}
+
+/* A translucent variant of a colour, for area fills. */
+static IColor _chart_translucent ( IColor color, unsigned int alpha )
+{
+  IColorP *p = _IGetColor ( (int) color );
+  if ( !p )
+    return ( color );
+  return ( IAllocColorAlpha ( p->red, p->green, p->blue, alpha ) );
+}
+
+static void _chart_compute_xrange ( IChartP *c, double *xmin, double *xmax )
+{
+  double lo = 0.0, hi = 0.0, pad;
+  int found = 0, i, j;
+
+  for ( i = 0; i < c->nseries; i++ ) {
+    for ( j = 0; j < c->series[i].count; j++ ) {
+      double v = c->series[i].xvalues ? c->series[i].xvalues[j] : (double) j;
+      if ( !found ) {
+        lo = hi = v;
+        found = 1;
+      }
+      else {
+        if ( v < lo )
+          lo = v;
+        if ( v > hi )
+          hi = v;
+      }
+    }
+  }
+  if ( !found ) {
+    lo = 0.0;
+    hi = 1.0;
+  }
+  if ( hi <= lo )
+    hi = lo + 1.0;
+  pad = ( hi - lo ) * 0.05;
+  *xmin = lo - pad;
+  *xmax = hi + pad;
+}
+
 static void _chart_compute_range ( IChartP *c, double *ymin, double *ymax )
 {
   double lo = 0.0, hi = 0.0;
@@ -298,18 +383,21 @@ static void _chart_compute_range ( IChartP *c, double *ymin, double *ymax )
     lo = 0.0;
     hi = 1.0;
   }
-  if ( c->type == ICHART_BAR ) {
+  if ( c->type == ICHART_BAR || c->type == ICHART_AREA ) {
     if ( lo > 0.0 )
-      lo = 0.0; /* bars need a zero baseline */
+      lo = 0.0; /* bars/areas need a zero baseline */
     if ( hi < 0.0 )
       hi = 0.0;
   }
   if ( hi <= lo )
     hi = lo + 1.0;
-  if ( c->type == ICHART_LINE ) {
+  if ( c->type == ICHART_LINE || c->type == ICHART_SCATTER ) {
     double pad = ( hi - lo ) * 0.05;
     lo -= pad;
     hi += pad;
+  }
+  else if ( c->type == ICHART_AREA ) {
+    hi += ( hi - lo ) * 0.05; /* a little headroom above the filled area */
   }
   *ymin = lo;
   *ymax = hi;
@@ -384,20 +472,43 @@ static void _chart_axes ( IImage img, IGC gc, IChartP *c,
   IDrawLine ( img, gc, lay->x0, lay->y0, lay->x0, lay->y1 );
   IDrawLine ( img, gc, lay->x0, lay->y1, lay->x1, lay->y1 );
 
-  /* X category labels. */
-  n = c->ncategories;
-  if ( c->font && n > 0 ) {
-    for ( i = 0; i < n; i++ ) {
-      int x, tw;
-      if ( c->type == ICHART_LINE )
-        x = ( n == 1 ) ? ( lay->x0 + lay->x1 ) / 2
-                       : lay->x0 + i * ( lay->x1 - lay->x0 ) / ( n - 1 );
-      else {
-        int slot = ( lay->x1 - lay->x0 ) / n;
-        x = lay->x0 + i * slot + slot / 2;
+  if ( c->type == ICHART_SCATTER ) {
+    /* Numeric x axis: vertical gridlines + value labels. */
+    for ( i = 0; i <= 4; i++ ) {
+      double val = lay->xmin + ( lay->xmax - lay->xmin ) * i / 4.0;
+      int x = _val_to_x ( val, lay );
+      ISetForeground ( gc, _chart_grid_color () );
+      IDrawLine ( img, gc, x, lay->y0, x, lay->y1 );
+      if ( c->font ) {
+        char buf[32];
+        int tw;
+        snprintf ( buf, sizeof ( buf ), "%g", val );
+        tw = _chart_text_w ( c, gc, buf );
+        ISetForeground ( gc, IBLACK_PIXEL );
+        _chart_text ( img, gc, x - tw / 2, lay->y1 + fh + 2, buf );
       }
-      tw = _chart_text_w ( c, gc, c->categories[i] );
-      _chart_text ( img, gc, x - tw / 2, lay->y1 + fh + 2, c->categories[i] );
+    }
+    /* Redraw the axis lines over the gridlines. */
+    ISetForeground ( gc, IBLACK_PIXEL );
+    IDrawLine ( img, gc, lay->x0, lay->y0, lay->x0, lay->y1 );
+    IDrawLine ( img, gc, lay->x0, lay->y1, lay->x1, lay->y1 );
+  }
+  else {
+    /* X category labels (line/area use point positions; bar uses slots). */
+    n = c->ncategories;
+    if ( c->font && n > 0 ) {
+      for ( i = 0; i < n; i++ ) {
+        int x, tw;
+        if ( c->type == ICHART_BAR ) {
+          int slot = ( lay->x1 - lay->x0 ) / n;
+          x = lay->x0 + i * slot + slot / 2;
+        }
+        else {
+          x = _cat_to_x ( i, n, lay );
+        }
+        tw = _chart_text_w ( c, gc, c->categories[i] );
+        _chart_text ( img, gc, x - tw / 2, lay->y1 + fh + 2, c->categories[i] );
+      }
     }
   }
 
@@ -428,14 +539,78 @@ static void _chart_plot_line ( IImage img, IGC gc, IChartP *c,
       continue;
     ISetForeground ( gc, ser->color );
     for ( i = 0; i < n; i++ ) {
-      int x = ( n == 1 ) ? ( lay->x0 + lay->x1 ) / 2
-                         : lay->x0 + i * ( lay->x1 - lay->x0 ) / ( n - 1 );
+      int x = _cat_to_x ( i, n, lay );
       int y = _val_to_y ( ser->values[i], lay );
       if ( i > 0 )
         IDrawLine ( img, gc, px, py, x, y );
       IFillCircle ( img, gc, x, y, 2 );
       px = x;
       py = y;
+    }
+  }
+}
+
+static void _chart_plot_area ( IImage img, IGC gc, IChartP *c,
+  const IChartLayout *lay )
+{
+  double base = ( lay->ymin <= 0.0 && lay->ymax >= 0.0 ) ? 0.0 : lay->ymin;
+  int basey = _val_to_y ( base, lay );
+  int s, i;
+
+  for ( s = 0; s < c->nseries; s++ ) {
+    IChartSeries *ser = &c->series[s];
+    int n = ser->count, px = 0, py = 0;
+    IColor fill;
+    if ( n <= 0 )
+      continue;
+
+    /* Translucent fill under the line, built from convex per-segment quads
+       (the whole area under a zig-zag line is not convex). */
+    fill = _chart_translucent ( ser->color, 90 );
+    ISetForeground ( gc, fill );
+    ISetBlendMode ( gc, IBLEND_OVER );
+    for ( i = 0; i + 1 < n; i++ ) {
+      int x0 = _cat_to_x ( i, n, lay );
+      int x1 = _cat_to_x ( i + 1, n, lay );
+      IPoint quad[4];
+      quad[0].x = x0;
+      quad[0].y = basey;
+      quad[1].x = x0;
+      quad[1].y = _val_to_y ( ser->values[i], lay );
+      quad[2].x = x1;
+      quad[2].y = _val_to_y ( ser->values[i + 1], lay );
+      quad[3].x = x1;
+      quad[3].y = basey;
+      IFillPolygon ( img, gc, quad, 4 );
+    }
+    ISetBlendMode ( gc, IBLEND_REPLACE );
+
+    /* Opaque line + markers on top. */
+    ISetForeground ( gc, ser->color );
+    for ( i = 0; i < n; i++ ) {
+      int x = _cat_to_x ( i, n, lay );
+      int y = _val_to_y ( ser->values[i], lay );
+      if ( i > 0 )
+        IDrawLine ( img, gc, px, py, x, y );
+      IFillCircle ( img, gc, x, y, 2 );
+      px = x;
+      py = y;
+    }
+  }
+}
+
+static void _chart_plot_scatter ( IImage img, IGC gc, IChartP *c,
+  const IChartLayout *lay )
+{
+  int s, i;
+  for ( s = 0; s < c->nseries; s++ ) {
+    IChartSeries *ser = &c->series[s];
+    ISetForeground ( gc, ser->color );
+    for ( i = 0; i < ser->count; i++ ) {
+      double xv = ser->xvalues ? ser->xvalues[i] : (double) i;
+      int x = _val_to_x ( xv, lay );
+      int y = _val_to_y ( ser->values[i], lay );
+      IFillCircle ( img, gc, x, y, 3 );
     }
   }
 }
@@ -576,6 +751,8 @@ IImage IChartRender ( IChart chart )
     lay.y1 = lay.y0 + 1;
   lay.ymin = 0.0;
   lay.ymax = 1.0;
+  lay.xmin = 0.0;
+  lay.xmax = 1.0;
 
   if ( c->title && c->font ) {
     int tw = _chart_text_w ( c, gc, c->title );
@@ -600,11 +777,17 @@ IImage IChartRender ( IChart chart )
   }
   else {
     _chart_compute_range ( c, &lay.ymin, &lay.ymax );
+    if ( c->type == ICHART_SCATTER )
+      _chart_compute_xrange ( c, &lay.xmin, &lay.xmax );
     _chart_axes ( img, gc, c, &lay );
     if ( c->type == ICHART_LINE )
       _chart_plot_line ( img, gc, c, &lay );
-    else
+    else if ( c->type == ICHART_BAR )
       _chart_plot_bar ( img, gc, c, &lay );
+    else if ( c->type == ICHART_AREA )
+      _chart_plot_area ( img, gc, c, &lay );
+    else /* ICHART_SCATTER */
+      _chart_plot_scatter ( img, gc, c, &lay );
     if ( c->nseries > 0 ) {
       char **labels =
         (char **) malloc ( (size_t) c->nseries * sizeof ( char * ) );

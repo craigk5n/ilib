@@ -33,10 +33,14 @@ int main ( int argc, char *argv[] )
   double region[4] = { 12, 19, 8, 15 };
   double share[3] = { 45, 30, 25 };
   const char *quarters[4] = { "Q1", "Q2", "Q3", "Q4" };
+  double area_y[6] = { 2, 4, 3, 6, 5, 7 };
+  const char *days[6] = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+  double sx[8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+  double sy[8] = { 2.1, 3.4, 2.9, 5.1, 4.2, 6.3, 5.5, 7.8 };
   IFont font;
-  IChart lc, bc, pc;
-  IImage line_img, bar_img, pie_img, montage;
-  IImage list[3];
+  IChart lc, bc, pc, ac, sc;
+  IImage line_img, bar_img, pie_img, area_img, scatter_img, montage;
+  IImage list[5];
   IFileFormat fmt = IFORMAT_PNG;
   FILE *fp;
   IError ret;
@@ -72,16 +76,35 @@ int main ( int argc, char *argv[] )
   IChartAddSeries ( pc, NULL, share, 3, IAllocColor ( 0, 0, 0 ) );
   pie_img = IChartRender ( pc );
 
-  if ( !line_img || !bar_img || !pie_img ) {
+  /* Area chart. */
+  ac = ICreateChart ( ICHART_AREA, 320, 240 );
+  IChartSetFont ( ac, font );
+  IChartSetTitle ( ac, "Daily Visitors" );
+  IChartSetCategories ( ac, days, 6 );
+  IChartAddSeries ( ac, "visits", area_y, 6, IAllocColor ( 0x76, 0xb7, 0xb2 ) );
+  area_img = IChartRender ( ac );
+
+  /* Scatter chart. */
+  sc = ICreateChart ( ICHART_SCATTER, 320, 240 );
+  IChartSetFont ( sc, font );
+  IChartSetTitle ( sc, "Height vs Weight" );
+  IChartSetAxisLabels ( sc, "x", "y" );
+  IChartAddXYSeries ( sc, "samples", sx, sy, 8,
+    IAllocColor ( 0xb0, 0x7a, 0xa1 ) );
+  scatter_img = IChartRender ( sc );
+
+  if ( !line_img || !bar_img || !pie_img || !area_img || !scatter_img ) {
     fprintf ( stderr, "Chart rendering failed.\n" );
     return ( 1 );
   }
 
-  /* Combine the three charts into one image. */
+  /* Combine all five charts into one image. */
   list[0] = line_img;
   list[1] = bar_img;
   list[2] = pie_img;
-  montage = IMontage ( list, 3, 2, 8, IAllocColor ( 245, 245, 245 ) );
+  list[3] = area_img;
+  list[4] = scatter_img;
+  montage = IMontage ( list, 5, 3, 8, IAllocColor ( 245, 245, 245 ) );
   if ( !montage ) {
     fprintf ( stderr, "Montage failed.\n" );
     return ( 1 );
@@ -105,9 +128,13 @@ int main ( int argc, char *argv[] )
   IFreeImage ( line_img );
   IFreeImage ( bar_img );
   IFreeImage ( pie_img );
+  IFreeImage ( area_img );
+  IFreeImage ( scatter_img );
   IFreeChart ( lc );
   IFreeChart ( bc );
   IFreeChart ( pc );
+  IFreeChart ( ac );
+  IFreeChart ( sc );
   IFreeFont ( font );
   return ( 0 );
 }

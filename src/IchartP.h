@@ -16,8 +16,9 @@
 
 /** One data series. */
 typedef struct {
-  char *label;    /* owned copy, or NULL */
-  double *values; /* owned array */
+  char *label;     /* owned copy, or NULL */
+  double *values;  /* owned array (y values) */
+  double *xvalues; /* owned array (x values for scatter), or NULL */
   int count;
   IColor color;
 } IChartSeries;

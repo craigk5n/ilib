@@ -10,6 +10,12 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Two more chart types: **area** (`ICHART_AREA`, a line chart with a
+  translucent fill under each line) and **scatter** (`ICHART_SCATTER`, an (x, y)
+  point plot with a numeric x-axis). Scatter data is supplied via the new
+  `IChartAddXYSeries()` (x + y values). Both are exposed in the Python bindings
+  (`ChartType.AREA` / `ChartType.SCATTER`, `Chart.add_xy_series`) and shown in
+  the `ilib-chart` demo (now all five types).
 - Charting layer (`Ichart.h` / `IChart.c`), built on the public drawing API: an
   `IChart` object with title, axis labels, categories, an optional font, and one
   or more data series, rendered to a new image by `IChartRender()`. Three chart

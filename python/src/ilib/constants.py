@@ -99,6 +99,8 @@ class ChartType(IntEnum):
     LINE = 0
     BAR = 1
     PIE = 2
+    SCATTER = 3
+    AREA = 4
 
 
 # Predefined color handles (indexes into the library's color table).
