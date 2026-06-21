@@ -140,8 +140,9 @@ IError IBlur ( IImage image, unsigned int radius )
 IError IGaussianBlur ( IImage image, double sigma )
 {
   IImageP *imagep = (IImageP *) image;
-  int radius, size, ky, kx;
-  double *kernel, twoSigmaSq;
+  int radius, size, i, w, h, bpp, color_ch, x, y, c, k;
+  double *kernel, sum, twoSigmaSq;
+  unsigned char *tmp, *data;
   IError err = _IValidImage ( imagep );
 
   if ( err != INoError )
@@ -155,19 +156,80 @@ IError IGaussianBlur ( IImage image, double sigma )
   size = 2 * radius + 1;
   twoSigmaSq = 2.0 * sigma * sigma;
 
-  kernel = (double *) malloc ( (size_t) size * size * sizeof ( double ) );
+  /* A 2-D Gaussian is separable, so use one normalized 1-D kernel in two
+     passes (horizontal then vertical): O(w*h*size) instead of O(w*h*size^2). */
+  kernel = (double *) malloc ( (size_t) size * sizeof ( double ) );
   if ( !kernel )
     return ( IInvalidImage );
-  for ( ky = 0; ky < size; ky++ ) {
-    for ( kx = 0; kx < size; kx++ ) {
-      int dx = kx - radius, dy = ky - radius;
-      kernel[ky * size + kx] = exp ( -( dx * dx + dy * dy ) / twoSigmaSq );
+  sum = 0.0;
+  for ( i = 0; i < size; i++ ) {
+    int d = i - radius;
+    kernel[i] = exp ( -(double) ( d * d ) / twoSigmaSq );
+    sum += kernel[i];
+  }
+  for ( i = 0; i < size; i++ )
+    kernel[i] /= sum;
+
+  w = imagep->width;
+  h = imagep->height;
+  bpp = (int) imagep->channels;
+  color_ch = ( bpp >= 3 ) ? 3 : bpp;
+  data = imagep->data;
+
+  tmp = (unsigned char *) malloc ( (size_t) w * h * bpp );
+  if ( !tmp ) {
+    free ( kernel );
+    return ( IInvalidImage );
+  }
+
+  /* Horizontal pass: data -> tmp (alpha copied through). */
+  for ( y = 0; y < h; y++ ) {
+    const unsigned char *rowbase = data + (size_t) y * w * bpp;
+    for ( x = 0; x < w; x++ ) {
+      unsigned char *out = tmp + ( (size_t) y * w + x ) * bpp;
+      for ( c = 0; c < color_ch; c++ ) {
+        double acc = 0.0;
+        int v;
+        for ( k = 0; k < size; k++ ) {
+          int sx = x + k - radius;
+          if ( sx < 0 )
+            sx = 0;
+          else if ( sx > w - 1 )
+            sx = w - 1;
+          acc += kernel[k] * rowbase[(size_t) sx * bpp + c];
+        }
+        v = (int) ( acc + 0.5 );
+        out[c] = (unsigned char) ( v < 0 ? 0 : ( v > 255 ? 255 : v ) );
+      }
+      if ( bpp == 4 )
+        out[3] = rowbase[(size_t) x * bpp + 3];
     }
   }
 
-  err = _IConvolveKernel ( imagep, kernel, size, 0.0, 0.0 );
+  /* Vertical pass: tmp -> data (color channels only; alpha already in data). */
+  for ( y = 0; y < h; y++ ) {
+    for ( x = 0; x < w; x++ ) {
+      unsigned char *out = data + ( (size_t) y * w + x ) * bpp;
+      for ( c = 0; c < color_ch; c++ ) {
+        double acc = 0.0;
+        int v;
+        for ( k = 0; k < size; k++ ) {
+          int sy = y + k - radius;
+          if ( sy < 0 )
+            sy = 0;
+          else if ( sy > h - 1 )
+            sy = h - 1;
+          acc += kernel[k] * tmp[( (size_t) sy * w + x ) * bpp + c];
+        }
+        v = (int) ( acc + 0.5 );
+        out[c] = (unsigned char) ( v < 0 ? 0 : ( v > 255 ? 255 : v ) );
+      }
+    }
+  }
+
+  free ( tmp );
   free ( kernel );
-  return ( err );
+  return ( INoError );
 }
 
 IError ISharpen ( IImage image )

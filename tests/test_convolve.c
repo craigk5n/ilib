@@ -69,6 +69,27 @@ TEST gaussian_blur_spreads_and_rejects_bad_sigma ( void )
   PASS ();
 }
 
+TEST gaussian_blur_preserves_flat_and_alpha ( void )
+{
+  IImage im = ICreateImage ( 8, 8, IOPTION_ALPHA );
+  int x, y;
+  unsigned int r, g, b, a;
+
+  for ( y = 0; y < 8; y++ )
+    for ( x = 0; x < 8; x++ )
+      ISetPixelAlpha ( im, x, y, 90, 90, 90, 123 );
+  /* A normalized Gaussian of a flat region is unchanged; alpha is untouched. */
+  ASSERT_EQ ( INoError, IGaussianBlur ( im, 2.0 ) );
+  IGetPixelAlpha ( im, 4, 4, &r, &g, &b, &a );
+  ASSERT_EQ ( 90, r );
+  ASSERT_EQ ( 90, g );
+  ASSERT_EQ ( 90, b );
+  ASSERT_EQ ( 123, a );
+
+  IFreeImage ( im );
+  PASS ();
+}
+
 TEST sharpen_leaves_flat_unchanged ( void )
 {
   IImage im = ICreateImage ( 5, 5, IOPTION_NONE );
@@ -172,6 +193,7 @@ SUITE ( convolve )
   RUN_TEST ( blur_spreads_a_bright_pixel );
   RUN_TEST ( blur_radius_zero_is_noop );
   RUN_TEST ( gaussian_blur_spreads_and_rejects_bad_sigma );
+  RUN_TEST ( gaussian_blur_preserves_flat_and_alpha );
   RUN_TEST ( sharpen_leaves_flat_unchanged );
   RUN_TEST ( edge_detect_blacks_out_flat );
   RUN_TEST ( emboss_flattens_to_mid_grey );
