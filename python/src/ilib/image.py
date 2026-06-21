@@ -9,6 +9,7 @@ from .constants import (
     EXTENSION_FORMATS,
     Format,
     Option,
+    ResizeFilter,
     TextDirection,
 )
 from .errors import IError, IlibError, check
@@ -347,9 +348,15 @@ class Image:
         return self
 
     # -- resampling (with interpolation) ----------------------------------
-    def resize(self, width, height):
-        """Resize to ``width`` x ``height`` using bilinear interpolation, in place."""
-        check(lib.IResize(self._as_parameter_, int(width), int(height)))
+    def resize(self, width, height, filter=ResizeFilter.AUTO):
+        """Resize to ``width`` x ``height`` with a resampling ``filter``, in place.
+
+        Defaults to :attr:`~ilib.constants.ResizeFilter.AUTO` (area-averaging
+        when shrinking, bicubic when enlarging). Pass another
+        :class:`~ilib.constants.ResizeFilter` to force a method.
+        """
+        check(lib.IResizeFiltered(self._as_parameter_, int(width), int(height),
+                                  int(ResizeFilter(filter))))
         return self
 
     def rotate_angle(self, degrees, background=0):

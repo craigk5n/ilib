@@ -178,7 +178,8 @@ static IError apply_op ( IImage image, const Op *op, const char *background )
   case OP_EMBOSS:
     return ( IEmboss ( image ) );
   case OP_RESIZE:
-    return ( IResize ( image, (unsigned int) op->i1, (unsigned int) op->i2 ) );
+    return ( IResizeFiltered ( image, (unsigned int) op->i1,
+      (unsigned int) op->i2, IRESIZE_AUTO ) );
   case OP_REDUCE_COLORS:
     return ( IReduceColors ( image, (unsigned int) op->i1 ) );
   case OP_NORMALIZE:

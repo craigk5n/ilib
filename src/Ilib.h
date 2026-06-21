@@ -185,6 +185,17 @@ typedef enum {
 } IBlendMode;
 
 /**
+ * Resampling filters for IResizeFiltered().
+ */
+typedef enum {
+  IRESIZE_NEAREST = 0, /* nearest neighbour (fastest, blocky) */
+  IRESIZE_BILINEAR,    /* 2x2 linear (the IResize() default) */
+  IRESIZE_BICUBIC,     /* 4x4 Catmull-Rom (smooth upscaling) */
+  IRESIZE_AREA,        /* box average (anti-aliased downscaling) */
+  IRESIZE_AUTO         /* area when shrinking, bicubic when enlarging */
+} IResizeFilter;
+
+/**
  * Defines a structure for specifying a point.
  */
 typedef struct {
@@ -580,6 +591,20 @@ IError IResize (
   IImage image,       /* image (modified in place) */
   unsigned int width, /* new width (> 0) */
   unsigned int height /* new height (> 0) */
+#endif
+);
+
+/**
+ * Resize the image to width x height with a chosen resampling filter (see
+ * ::IResizeFilter). IRESIZE_AUTO picks area-averaging when shrinking (smooth,
+ * no aliasing) and bicubic when enlarging. width and height must be non-zero.
+ */
+IError IResizeFiltered (
+#ifndef _NO_PROTO
+  IImage image,        /* image (modified in place) */
+  unsigned int width,  /* new width (> 0) */
+  unsigned int height, /* new height (> 0) */
+  IResizeFilter filter /* resampling filter */
 #endif
 );
 

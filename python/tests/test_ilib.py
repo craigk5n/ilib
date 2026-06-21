@@ -378,6 +378,16 @@ class Resampling(unittest.TestCase):
             img.resize(7, 5)
             self.assertEqual(img.get_pixel(3, 2), (10, 20, 30))
 
+    def test_resize_area_averages_checkerboard(self):
+        with ilib.Image(8, 8) as img:
+            for y in range(8):
+                for x in range(8):
+                    v = 255 if (x + y) % 2 == 0 else 0
+                    img.set_pixel(x, y, v, v, v)
+            img.resize(1, 1, ilib.ResizeFilter.AREA)
+            r, _, _ = img.get_pixel(0, 0)
+            self.assertTrue(118 < r < 138)  # mid-grey, not an extreme
+
     def test_resize_rejects_zero(self):
         with ilib.Image(4, 4) as img:
             with self.assertRaises(ilib.IlibError) as ctx:
