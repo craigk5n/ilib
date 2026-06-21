@@ -7,7 +7,7 @@ set(ILIB_SOURCES
   IFillArc.c IFillCir.c IFillEll.c IFillPol.c IFillRec.c IFilter.c IFlood.c
   IFont.c IFontBDF.c IFontTTF.c IGC.c IGIF.c IImage.c IJPEG.c
   IPGM.c IPixel.c IPNG.c IPPM.c IQuantize.c IResample.c ITextDim.c ITransform.c
-  IXPM.c)
+  IWEBP.c IXPM.c)
 # NOTE: IXBM.c is intentionally excluded. It has never compiled (an
 # unterminated string literal since the initial checkin), its only unique
 # symbol _IWriteXBM is dead (XBM is NULL/NULL in the format dispatch table),
@@ -73,6 +73,25 @@ if(ILIB_WITH_GIF)
   endif()
 endif()
 
+# libwebp has no CMake config / Find module on most systems, so locate it via
+# pkg-config (libwebp ships a libwebp.pc).
+set(_webp_enabled OFF)
+if(ILIB_WITH_WEBP)
+  find_package(PkgConfig QUIET)
+  if(PkgConfig_FOUND)
+    pkg_check_modules(WEBP IMPORTED_TARGET libwebp)
+    if(WEBP_FOUND)
+      target_link_libraries(ilib PRIVATE PkgConfig::WEBP)
+      target_compile_definitions(ilib PRIVATE HAVE_WEBPLIB)
+      set(_webp_enabled ON)
+    else()
+      message(STATUS "libwebp not found -- WebP support disabled")
+    endif()
+  else()
+    message(STATUS "pkg-config not found -- WebP support disabled")
+  endif()
+endif()
+
 set(_freetype_enabled OFF)
 if(ILIB_WITH_FREETYPE)
   find_package(Freetype)
@@ -95,6 +114,7 @@ endif()
 set(ILIB_PNG_ENABLED  ${_png_enabled}  PARENT_SCOPE)
 set(ILIB_JPEG_ENABLED ${_jpeg_enabled} PARENT_SCOPE)
 set(ILIB_GIF_ENABLED  ${_gif_enabled}  PARENT_SCOPE)
+set(ILIB_WEBP_ENABLED ${_webp_enabled} PARENT_SCOPE)
 set(ILIB_FREETYPE_ENABLED ${_freetype_enabled} PARENT_SCOPE)
 
 # --- Install ----------------------------------------------------------------

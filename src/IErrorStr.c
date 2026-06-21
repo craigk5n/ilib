@@ -77,6 +77,10 @@ char *IErrorString ( IError err )
     return ( "Unknown PNG error" );
   case IInvalidPolygon:
     return ( "Invalid polygon (only convex non-intersecting are supported)" );
+  case INoWEBPSupport:
+    return ( "WebP support not available" );
+  case IWEBPError:
+    return ( "Unknown WebP error" );
   case INoError:
   default:
     return ( "error" );

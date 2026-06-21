@@ -389,6 +389,33 @@ class FileIO(unittest.TestCase):
                     img.save(os.path.join(d, "x.bogus"))
                 self.assertEqual(ctx.exception.code, ilib.IError.InvalidFormat)
 
+    def test_webp_roundtrip_or_skip(self):
+        unsupported = {
+            ilib.IError.NoWEBPSupport,
+            ilib.IError.WEBPError,
+            ilib.IError.InvalidFormat,
+            ilib.IError.FunctionNotImplemented,
+        }
+        with ilib.Image(16, 16) as img:
+            for y in range(16):
+                for x in range(16):
+                    img.set_pixel(x, y, 200, 100, 50)
+            with tempfile.TemporaryDirectory() as d:
+                path = os.path.join(d, "x.webp")
+                try:
+                    img.save(path)
+                except ilib.IlibError as exc:
+                    if exc.code in unsupported:
+                        self.skipTest("library built without WebP")
+                    raise
+                with ilib.Image.open(path) as back:
+                    self.assertEqual(back.size, (16, 16))
+                    r, g, b = back.get_pixel(8, 8)
+                    # lossy, but a solid colour comes back close
+                    self.assertLess(abs(r - 200), 12)
+                    self.assertLess(abs(g - 100), 12)
+                    self.assertLess(abs(b - 50), 12)
+
     def test_explicit_format(self):
         with ilib.Image(4, 4) as img:
             with tempfile.TemporaryDirectory() as d:

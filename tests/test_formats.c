@@ -4,6 +4,7 @@
    codecs whether or not they were compiled in. */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <Ilib.h>
 #include "pixutil.h"
 #include "greatest.h"
@@ -282,6 +283,67 @@ TEST optional_codec_write_is_clean ( void )
   PASS ();
 }
 
+/* WebP round-trip (when libwebp is compiled in). WebP is lossy, so a solid
+   colour is checked with tolerance; alpha is preserved (encoded losslessly). */
+TEST webp_roundtrip ( void )
+{
+  IImage im = ICreateImage ( 16, 16, IOPTION_NONE );
+  IError wr, rd;
+  IImage back;
+  int x, y;
+
+  for ( y = 0; y < 16; y++ )
+    for ( x = 0; x < 16; x++ )
+      ISetPixel ( im, x, y, 200, 100, 50 );
+
+  back = roundtrip ( im, IFORMAT_WEBP, &wr, &rd );
+  if ( wr == INoError ) {
+    unsigned int r, g, b;
+    ASSERT_EQ ( INoError, rd );
+    ASSERT ( back != NULL );
+    ASSERT_EQ ( 16, px_width ( back ) );
+    ASSERT_EQ ( 16, px_height ( back ) );
+    IGetPixel ( back, 8, 8, &r, &g, &b );
+    ASSERT ( abs ( (int) r - 200 ) <= 12 );
+    ASSERT ( abs ( (int) g - 100 ) <= 12 );
+    ASSERT ( abs ( (int) b - 50 ) <= 12 );
+    IFreeImage ( back );
+  }
+  else {
+    /* not compiled in: a clean error, and no image produced */
+    ASSERT ( back == NULL );
+  }
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST webp_alpha_roundtrip ( void )
+{
+  IImage im = ICreateImage ( 16, 16, IOPTION_ALPHA );
+  IError wr, rd;
+  IImage back;
+  int x, y;
+
+  for ( y = 0; y < 16; y++ )
+    for ( x = 0; x < 16; x++ )
+      ISetPixelAlpha ( im, x, y, 10, 20, 30, 128 );
+
+  back = roundtrip ( im, IFORMAT_WEBP, &wr, &rd );
+  if ( wr == INoError ) {
+    unsigned int a = 0;
+    ASSERT_EQ ( INoError, rd );
+    ASSERT ( back != NULL );
+    IGetPixelAlpha ( back, 8, 8, NULL, NULL, NULL, &a );
+    ASSERT ( abs ( (int) a - 128 ) <= 12 );
+    IFreeImage ( back );
+  }
+  else {
+    ASSERT ( back == NULL );
+  }
+  IFreeImage ( im );
+  PASS ();
+}
+
 SUITE ( formats )
 {
   RUN_TEST ( ppm_roundtrip );
@@ -294,6 +356,8 @@ SUITE ( formats )
   RUN_TEST ( reduce_colors_rejects_bad_handle );
   RUN_TEST ( gif_write_quantizes );
   RUN_TEST ( optional_codec_write_is_clean );
+  RUN_TEST ( webp_roundtrip );
+  RUN_TEST ( webp_alpha_roundtrip );
 }
 
 GREATEST_MAIN_DEFS ();
