@@ -45,8 +45,10 @@ target_link_libraries(myprog PRIVATE Ilib::ilib)
 
 ## Example 1: converting between formats
 
-Reading an image, then writing it back in another format, is the whole job of
-`ilib-convert`. The format is discovered from the filename with `IFileType()`:
+Reading an image, then writing it back in another format, is the core of
+`ilib-convert` (which can also apply operations like `--resize` or `--greyscale`
+in between; run it with `--help`). The format is discovered from the filename
+with `IFileType()`:
 
 ```c
 #include <stdio.h>

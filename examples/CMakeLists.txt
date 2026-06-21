@@ -3,10 +3,15 @@
 # Installed binaries are prefixed "ilib-" (see clients/CMakeLists.txt); the
 # CMake target names keep their historical spelling.
 
-# iconvert: format-conversion tool, links the library directly.
+# iconvert: format-conversion + image-operation tool, links the library
+# directly. It calls fmod() for the --rotate option, so it needs libm too.
 add_executable(iconvert iconvert/iconvert.c)
 set_target_properties(iconvert PROPERTIES OUTPUT_NAME ilib-convert)
 target_link_libraries(iconvert PRIVATE Ilib::ilib)
+find_library(ILIB_EXAMPLE_MATH_LIBRARY m)
+if(ILIB_EXAMPLE_MATH_LIBRARY)
+  target_link_libraries(iconvert PRIVATE "${ILIB_EXAMPLE_MATH_LIBRARY}")
+endif()
 ilib_set_warnings(iconvert)
 
 # isample: drawing demo. It compiles in two fonts via headers generated from
