@@ -1,0 +1,159 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
+/* Charting (IChart.c). Rendered without a font (text is skipped), so these
+   check structure: a chart image of the right size with data drawn on it. */
+
+#include <Ichart.h>
+#include <Ilib.h>
+#include "greatest.h"
+
+/* Is there any non-white pixel (i.e. something was drawn)? */
+static int has_drawn_pixel ( IImage im )
+{
+  int w = (int) IImageWidth ( im ), h = (int) IImageHeight ( im ), x, y;
+  for ( y = 0; y < h; y++ ) {
+    for ( x = 0; x < w; x++ ) {
+      unsigned int r, g, b;
+      IGetPixel ( im, x, y, &r, &g, &b );
+      if ( !( r == 255 && g == 255 && b == 255 ) )
+        return ( 1 );
+    }
+  }
+  return ( 0 );
+}
+
+TEST line_chart_renders ( void )
+{
+  IChart c = ICreateChart ( ICHART_LINE, 200, 150 );
+  double v[5] = { 1.0, 3.0, 2.0, 5.0, 4.0 };
+  IImage img;
+
+  ASSERT ( c != NULL );
+  ASSERT_EQ ( INoError, IChartAddSeries ( c, "a", v, 5, IAllocColor ( 200, 0, 0 ) ) );
+  img = IChartRender ( c );
+  ASSERT ( img != NULL );
+  ASSERT_EQ ( 200, (int) IImageWidth ( img ) );
+  ASSERT_EQ ( 150, (int) IImageHeight ( img ) );
+  ASSERT ( has_drawn_pixel ( img ) );
+
+  IFreeImage ( img );
+  IFreeChart ( c );
+  PASS ();
+}
+
+TEST bar_chart_renders ( void )
+{
+  IChart c = ICreateChart ( ICHART_BAR, 220, 160 );
+  double a[4] = { 2.0, 4.0, 3.0, 6.0 };
+  double b[4] = { 1.0, 2.0, 5.0, 2.0 };
+  IImage img;
+
+  ASSERT ( c != NULL );
+  IChartAddSeries ( c, "a", a, 4, IAllocColor ( 50, 100, 200 ) );
+  IChartAddSeries ( c, "b", b, 4, IAllocColor ( 200, 100, 50 ) );
+  img = IChartRender ( c );
+  ASSERT ( img != NULL );
+  ASSERT_EQ ( 220, (int) IImageWidth ( img ) );
+  ASSERT ( has_drawn_pixel ( img ) );
+
+  IFreeImage ( img );
+  IFreeChart ( c );
+  PASS ();
+}
+
+TEST pie_chart_renders ( void )
+{
+  IChart c = ICreateChart ( ICHART_PIE, 160, 160 );
+  double v[3] = { 30.0, 50.0, 20.0 };
+  const char *cats[3] = { "x", "y", "z" };
+  IImage img;
+
+  ASSERT ( c != NULL );
+  IChartSetCategories ( c, cats, 3 );
+  IChartAddSeries ( c, NULL, v, 3, IAllocColor ( 0, 0, 0 ) );
+  img = IChartRender ( c );
+  ASSERT ( img != NULL );
+  ASSERT_EQ ( 160, (int) IImageWidth ( img ) );
+  /* The pie's centre should be a coloured (non-white) slice. */
+  {
+    unsigned int r, g, b;
+    IGetPixel ( img, 80, 80, &r, &g, &b );
+    ASSERT ( !( r == 255 && g == 255 && b == 255 ) );
+  }
+
+  IFreeImage ( img );
+  IFreeChart ( c );
+  PASS ();
+}
+
+TEST chart_explicit_range ( void )
+{
+  IChart c = ICreateChart ( ICHART_LINE, 120, 100 );
+  double v[3] = { 1.0, 2.0, 3.0 };
+  IImage img;
+
+  ASSERT_EQ ( INoError, IChartSetRange ( c, 0.0, 10.0 ) );
+  ASSERT_EQ ( IInvalidArgument, IChartSetRange ( c, 5.0, 5.0 ) );
+  IChartAddSeries ( c, "a", v, 3, IAllocColor ( 0, 0, 0 ) );
+  img = IChartRender ( c );
+  ASSERT ( img != NULL );
+
+  IFreeImage ( img );
+  IFreeChart ( c );
+  PASS ();
+}
+
+TEST chart_setters_and_titles ( void )
+{
+  IChart c = ICreateChart ( ICHART_LINE, 100, 100 );
+  double v[2] = { 1.0, 2.0 };
+
+  ASSERT_EQ ( INoError, IChartSetTitle ( c, "T" ) );
+  ASSERT_EQ ( INoError, IChartSetAxisLabels ( c, "x", "y" ) );
+  ASSERT_EQ ( INoError, IChartSetBackground ( c, IAllocColor ( 240, 240, 240 ) ) );
+  ASSERT_EQ ( INoError, IChartSetFont ( c, NULL ) );
+  IChartAddSeries ( c, "a", v, 2, IAllocColor ( 0, 0, 0 ) );
+  /* A grey background means every pixel is non-white; just ensure it renders. */
+  {
+    IImage img = IChartRender ( c );
+    ASSERT ( img != NULL );
+    IFreeImage ( img );
+  }
+
+  IFreeChart ( c );
+  PASS ();
+}
+
+TEST chart_rejects_bad_args ( void )
+{
+  IChart c = ICreateChart ( ICHART_LINE, 100, 100 );
+  double v[2] = { 1.0, 2.0 };
+
+  ASSERT ( ICreateChart ( ICHART_LINE, 0, 100 ) == NULL );
+  ASSERT_EQ ( IInvalidChart, IChartSetTitle ( NULL, "x" ) );
+  ASSERT_EQ ( IInvalidChart, IChartAddSeries ( NULL, "a", v, 2, 0 ) );
+  ASSERT_EQ ( IInvalidArgument, IChartAddSeries ( c, "a", v, 0, 0 ) );
+  ASSERT ( IChartRender ( NULL ) == NULL );
+  ASSERT_EQ ( IInvalidChart, _IFreeChart ( NULL ) );
+
+  IFreeChart ( c );
+  PASS ();
+}
+
+SUITE ( chart )
+{
+  RUN_TEST ( line_chart_renders );
+  RUN_TEST ( bar_chart_renders );
+  RUN_TEST ( pie_chart_renders );
+  RUN_TEST ( chart_explicit_range );
+  RUN_TEST ( chart_setters_and_titles );
+  RUN_TEST ( chart_rejects_bad_args );
+}
+
+GREATEST_MAIN_DEFS ();
+
+int main ( int argc, char **argv )
+{
+  GREATEST_MAIN_BEGIN ();
+  RUN_SUITE ( chart );
+  GREATEST_MAIN_END ();
+}

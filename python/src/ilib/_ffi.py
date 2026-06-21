@@ -177,6 +177,20 @@ IError IFillArc(IImage image, IGC gc, int x, int y, int r1, int r2, double a1,
 IError IFillEllipse(IImage image, IGC gc, int x, int y, int r1, int r2);
 IError IFillCircle(IImage image, IGC gc, int x, int y, int r);
 IError IFloodFill(IImage image, IGC gc, int x, int y);
+
+typedef void *IChart;
+IChart ICreateChart(int type, unsigned int width, unsigned int height);
+IError _IFreeChart(IChart chart);
+IError IChartSetTitle(IChart chart, const char *title);
+IError IChartSetAxisLabels(IChart chart, const char *x_label,
+                           const char *y_label);
+IError IChartSetFont(IChart chart, IFont font);
+IError IChartSetBackground(IChart chart, IColor color);
+IError IChartSetCategories(IChart chart, const char **labels, int count);
+IError IChartSetRange(IChart chart, double ymin, double ymax);
+IError IChartAddSeries(IChart chart, const char *label, const double *values,
+                       int count, IColor color);
+IImage IChartRender(IChart chart);
 """
 
 # Candidate shared-library names tried (in order) when ILIB_LIBRARY is unset

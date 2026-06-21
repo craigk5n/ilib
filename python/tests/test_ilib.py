@@ -447,6 +447,45 @@ class Composition(unittest.TestCase):
                 im.free()
 
 
+class Charting(unittest.TestCase):
+    def test_line_chart(self):
+        with ilib.Chart(ilib.ChartType.LINE, 200, 150) as c:
+            c.add_series([1, 3, 2, 5, 4], label="a",
+                         color=ilib.alloc_color(200, 0, 0))
+            img = c.render()
+            try:
+                self.assertEqual(img.size, (200, 150))
+                # something was drawn (not all white)
+                drawn = any(
+                    img.get_pixel(x, y) != (255, 255, 255)
+                    for y in range(0, 150, 7)
+                    for x in range(0, 200, 7)
+                )
+                self.assertTrue(drawn)
+            finally:
+                img.free()
+
+    def test_pie_chart(self):
+        with ilib.Chart(ilib.ChartType.PIE, 160, 160) as c:
+            c.set_categories(["x", "y", "z"])
+            c.add_series([30, 50, 20])
+            img = c.render()
+            try:
+                self.assertNotEqual(img.get_pixel(80, 80), (255, 255, 255))
+            finally:
+                img.free()
+
+    def test_bar_chart_and_config(self):
+        with ilib.Chart(ilib.ChartType.BAR, 220, 160) as c:
+            c.set_title("T").set_categories(["Q1", "Q2", "Q3"]).set_range(0, 10)
+            c.add_series([2, 4, 3], label="u", color=ilib.named_color("green"))
+            img = c.render()
+            try:
+                self.assertEqual(img.size, (220, 160))
+            finally:
+                img.free()
+
+
 class FileIO(unittest.TestCase):
     def test_ppm_roundtrip(self):
         with ilib.Image(8, 6) as img, ilib.GC() as gc:

@@ -85,6 +85,8 @@ char *IErrorString ( IError err )
     return ( "AVIF support not available" );
   case IAVIFError:
     return ( "Unknown AVIF error" );
+  case IInvalidChart:
+    return ( "Invalid chart" );
   case INoError:
   default:
     return ( "error" );

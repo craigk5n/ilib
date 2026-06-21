@@ -1,7 +1,7 @@
 # Ilib core library
 
 set(ILIB_SOURCES
-  IArcProp.c IAVIF.c IBMP.c IColor.c ICompose.c IConvolve.c ICopyImg.c
+  IArcProp.c IAVIF.c IBMP.c IChart.c IColor.c ICompose.c IConvolve.c ICopyImg.c
   IDrawArc.c IDrawCir.c IDrawCurve.c IDrawEll.c IDrawLin.c IDrawPol.c IDrawPt.c
   IDrawRec.c IDrawStr.c IErrorStr.c IFileType.c
   IFillArc.c IFillCir.c IFillEll.c IFillPol.c IFillRec.c IFilter.c IFlood.c
@@ -143,3 +143,8 @@ install(TARGETS ilib
   ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
   RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}"
   PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+
+# The charting API ships as a second public header (the PUBLIC_HEADER property
+# carries only Ilib.h).
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/Ichart.h"
+  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")

@@ -36,6 +36,7 @@ class IError(IntEnum):
     NoWEBPSupport = 23
     AVIFError = 24
     NoAVIFSupport = 25
+    InvalidChart = 26
 
 
 def error_string(code):

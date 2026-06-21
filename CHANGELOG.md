@@ -10,6 +10,13 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Charting layer (`Ichart.h` / `IChart.c`), built on the public drawing API: an
+  `IChart` object with title, axis labels, categories, an optional font, and one
+  or more data series, rendered to a new image by `IChartRender()`. Three chart
+  types — line (multi-series with markers), grouped bar, and pie — with axes,
+  gridlines, numeric tick labels, category labels, a legend, and a default
+  color palette. Exposed in the Python bindings (`ilib.Chart`) and demoed by the
+  new `ilib-chart` example (which also showcases `IMontage`).
 - Composition operations (`ICompose.c`): `ITrim()` (autocrop a uniform border,
   matched to the top-left pixel within a tolerance), `IBorder()` (add a solid
   frame), `IAppend()` (combine images side-by-side or stacked), and `IMontage()`

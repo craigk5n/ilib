@@ -40,6 +40,9 @@ The drawing API is modeled on a subset of the X11 graphics functions:
 - **Composition:** autocrop a uniform border (`ITrim`), add a solid frame
   (`IBorder`), and combine images — side-by-side/stacked (`IAppend`) or in a
   grid / contact sheet (`IMontage`).
+- **Charting:** a small charting layer (`Ichart.h`) builds line, bar and pie
+  charts — with title, axes, gridlines, tick/category labels and a legend — and
+  renders them to an image. See the `ilib-chart` demo.
 
 Note: This code was originally developed in the late 1990s in "classic"
 (K&R) C. It has since been modernized to ISO C (ANSI-style prototypes) and
