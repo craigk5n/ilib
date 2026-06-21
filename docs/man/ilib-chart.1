@@ -1,0 +1,84 @@
+.TH ILIB-CHART 1 "June 2026" "ilib @ILIB_VERSION@" "Ilib Manual"
+.SH NAME
+ilib-chart \- render a chart from CSV data
+.SH SYNOPSIS
+.B ilib-chart
+.RI [ options ]
+.RI [ datafile ]
+.I outfile
+.SH DESCRIPTION
+.B ilib-chart
+reads comma-separated data and writes a chart image to
+.IR outfile
+(the format is chosen from its extension). With no
+.I datafile
+(or with \fB-\fR) the data is read from standard input.
+.PP
+The first column holds the category labels \(em or, for a scatter chart, the
+x values. Each remaining column is a data series; the first row is a header
+naming the series (unless
+.BR --no-header
+is given). Blank lines and lines beginning with
+.B #
+are ignored.
+.SH OPTIONS
+.TP
+.BI --type " T"
+Chart type: \fBline\fR (default), \fBbar\fR, \fBpie\fR, \fBarea\fR or
+\fBscatter\fR.
+.TP
+.BI --title " TEXT"
+Chart title.
+.TP
+.BI --xlabel " TEXT"
+.TQ
+.BI --ylabel " TEXT"
+Axis labels.
+.TP
+.BI --width " N"
+.TQ
+.BI --height " N"
+Image size in pixels (default 640x400).
+.TP
+.B --stacked
+Stack the series of a bar chart instead of grouping them.
+.TP
+.B --log
+Use a logarithmic value axis.
+.TP
+.B --values
+Draw each data value as a label.
+.TP
+.BI --background " NAME"
+Background color (default white).
+.TP
+.B --no-header
+Treat the first row as data, not series names.
+.TP
+.B -h ", " --help
+Show a usage summary.
+.SH EXAMPLES
+.PP
+A bar chart from a CSV with a header row:
+.PP
+.RS
+.nf
+printf 'month,sales\\nJan,3\\nFeb,5\\nMar,4\\n' \\
+    | ilib-chart --type bar --title Sales sales.png
+.fi
+.RE
+.PP
+A two-series line chart with value labels:
+.PP
+.RS
+.nf
+ilib-chart --type line --values data.csv out.png
+.fi
+.RE
+.SH "SEE ALSO"
+.BR ilib-convert (1),
+.BR ilib-index (1)
+.PP
+Full API documentation: https://craigk5n.github.io/ilib/
+.SH AUTHOR
+Craig Knudsen <craigk5n@gmail.com>

@@ -47,10 +47,15 @@ The drawing API is modeled on a subset of the X11 graphics functions:
 - **Charting:** a small charting layer (`Ichart.h`) builds line, bar (grouped
   or stacked), pie, area and scatter charts — with title, axes, gridlines
   (linear or log scale), tick/category labels and a legend — and renders them
-  to an image. See the `ilib-chart` demo.
+  to an image. The `ilib-chart` tool drives it from the command line:
 
-The six charts below are the actual output of the `ilib-chart` demo (line,
-stacked bar, pie, area, scatter, and a log-scale line):
+  ```sh
+  printf 'month,2023,2024\nJan,3,2\nFeb,5,3\nMar,4,5\n' \
+      | ilib-chart --type bar --title Sales --values sales.png
+  ```
+
+The six charts below were rendered with the charting layer (line, stacked bar,
+pie, area, scatter, and a log-scale line):
 
 ![Charts rendered by ilib-chart](docs/images/charts.png)
 

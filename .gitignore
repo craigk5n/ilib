@@ -51,6 +51,7 @@ Makefile.in
 # Built client/example binaries (installed names are ilib-*)
 /ilib-font2h
 /clients/ifont2h/ilib-font2h
+/clients/ichart/ilib-chart
 /clients/idisplayfont/ilib-displayfont
 /clients/ifraggraph/ilib-fraggraph
 /clients/iindex/ilib-index
