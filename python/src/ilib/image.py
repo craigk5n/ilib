@@ -291,6 +291,22 @@ class Image:
         check(lib.IEmboss(self._as_parameter_))
         return self
 
+    # -- resampling (with interpolation) ----------------------------------
+    def resize(self, width, height):
+        """Resize to ``width`` x ``height`` using bilinear interpolation, in place."""
+        check(lib.IResize(self._as_parameter_, int(width), int(height)))
+        return self
+
+    def rotate_angle(self, degrees, background=0):
+        """Rotate clockwise by an arbitrary angle (degrees), in place.
+
+        The canvas grows to the rotated bounding box; revealed corners are
+        filled with ``background`` (a color handle from :mod:`ilib.color`;
+        defaults to black). Use :meth:`rotate` for exact 90/270 turns.
+        """
+        check(lib.IRotateAngle(self._as_parameter_, float(degrees), int(background)))
+        return self
+
     # -- transparency / comment -------------------------------------------
     def set_transparent(self, color):
         """Set the transparent color (relevant when writing GIF/XPM)."""

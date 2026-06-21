@@ -10,6 +10,13 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Resampling transforms (with interpolation), the fourth batch of
+  ImageMagick-style transforms (`IResample.c`): `IResize()` (bilinear scaling to
+  arbitrary dimensions, a higher-quality alternative to the nearest-neighbour
+  `ICopyImageScaled`) and `IRotateAngle()` (rotation by an arbitrary angle, with
+  the canvas grown to the rotated bounding box and revealed corners filled with
+  a background color). Both interpolate all channels and are exposed in the
+  Python bindings (`Image.resize`, `Image.rotate_angle`).
 - Convolution / area filters, the third batch of ImageMagick-style transforms
   (`IConvolve.c`): a generic `IConvolve()` (arbitrary odd N x N kernel, with
   divisor and bias) plus `IBlur()` (box), `IGaussianBlur()`, `ISharpen()`,

@@ -73,6 +73,9 @@ IError ISharpen(IImage image);
 IError IEdgeDetect(IImage image);
 IError IEmboss(IImage image);
 
+IError IResize(IImage image, unsigned int width, unsigned int height);
+IError IRotateAngle(IImage image, double degrees, IColor background);
+
 IError _IFreeImage(IImage image);
 unsigned int IImageHeight(IImage image);
 unsigned int IImageWidth(IImage image);

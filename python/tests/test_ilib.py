@@ -334,6 +334,41 @@ class Convolution(unittest.TestCase):
                 img.convolve([[1, 0], [0, 1, 0]])
 
 
+class Resampling(unittest.TestCase):
+    def test_resize_dims(self):
+        with ilib.Image(4, 4) as img:
+            img.resize(8, 2)
+            self.assertEqual(img.size, (8, 2))
+
+    def test_resize_preserves_solid(self):
+        with ilib.Image(3, 3) as img:
+            for y in range(3):
+                for x in range(3):
+                    img.set_pixel(x, y, 10, 20, 30)
+            img.resize(7, 5)
+            self.assertEqual(img.get_pixel(3, 2), (10, 20, 30))
+
+    def test_resize_rejects_zero(self):
+        with ilib.Image(4, 4) as img:
+            with self.assertRaises(ilib.IlibError) as ctx:
+                img.resize(0, 4)
+            self.assertEqual(ctx.exception.code, ilib.IError.InvalidArgument)
+
+    def test_rotate_angle_zero_identity(self):
+        with ilib.Image(4, 3) as img:
+            img.set_pixel(1, 1, 123, 0, 0)
+            img.rotate_angle(0, ilib.named_color("black"))
+            self.assertEqual(img.size, (4, 3))
+            self.assertEqual(img.get_pixel(1, 1)[0], 123)
+
+    def test_rotate_angle_45_grows_and_fills(self):
+        with ilib.Image(3, 3) as img:
+            green = ilib.named_color("green")
+            img.rotate_angle(45, green)
+            self.assertGreater(img.size[0], 3)
+            self.assertEqual(img.get_pixel(0, 0), (0, 255, 0))
+
+
 class FileIO(unittest.TestCase):
     def test_ppm_roundtrip(self):
         with ilib.Image(8, 6) as img, ilib.GC() as gc:

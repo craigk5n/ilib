@@ -19,6 +19,8 @@ This changelog tracks the **Python package** (`ilib-graphics`, imported as
 - Convolution / area filter methods: `Image.convolve()` (arbitrary square
   kernel), `blur()`, `gaussian_blur()`, `sharpen()`, `edge_detect()`, and
   `emboss()`.
+- Resampling methods: `Image.resize()` (bilinear) and `Image.rotate_angle()`
+  (arbitrary-angle rotation with a background fill).
 
 ## [0.1.0] - 2026-06-20
 
