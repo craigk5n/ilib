@@ -40,6 +40,7 @@
 #define IMAGIC_GC 333
 #define IMAGIC_COLOR 847
 #define IMAGIC_FONT 104
+#define IMAGIC_ANIM 555
 
 #ifndef PI
 #define PI 3.14159265358979323846
@@ -178,6 +179,24 @@ IError _IWriteGIF (
 #ifndef _NO_PROTO
   FILE *fp,
   IImageP *image,
+  IOptions options
+#endif
+);
+#endif /* HAVE_GIFLIB */
+
+#ifdef HAVE_GIFLIB
+/* Animated (multi-frame) GIF read/write. The animation object is built and
+   consumed through the public IAnimation API, so these stay format-private. */
+IError _IReadAnimGIF (
+#ifndef _NO_PROTO
+  FILE *fp,
+  IAnimation *anim_return
+#endif
+);
+IError _IWriteAnimGIF (
+#ifndef _NO_PROTO
+  FILE *fp,
+  IAnimation anim,
   IOptions options
 #endif
 );

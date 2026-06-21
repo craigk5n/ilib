@@ -114,6 +114,7 @@
  * Structures
  */
 typedef void *IImage;          /* image */
+typedef void *IAnimation;      /* multi-frame animation (e.g. animated GIF) */
 typedef void *IFont;           /* font */
 typedef void *IGC;             /* graphics context */
 typedef unsigned int IColor;   /* color */
@@ -274,7 +275,8 @@ typedef enum {
   INoWEBPSupport,
   IAVIFError,
   INoAVIFSupport,
-  IInvalidChart
+  IInvalidChart,
+  IInvalidAnimation
 } IError;
 
 
@@ -869,6 +871,103 @@ IError IWriteImageFile (
   IOptions options    /* options (e.g. IOPTION_INTERLACED) */
 #endif
 );
+
+/**
+ * @name Animations (multi-frame images)
+ * An ::IAnimation is an ordered list of frames, each an ::IImage with a display
+ * delay in milliseconds, plus a loop count. It reads and writes animated GIFs.
+ * @{
+ */
+
+/** Create an empty animation. Returns a handle or NULL. */
+IAnimation ICreateAnimation ();
+
+#define IFreeAnimation( a ) \
+  _IFreeAnimation ( a );    \
+  ( a ) = NULL;
+
+/** Free an animation and all its frames (use the IFreeAnimation() macro). */
+IError _IFreeAnimation (
+#ifndef _NO_PROTO
+  IAnimation anim
+#endif
+);
+
+/**
+ * Append a copy of an image as the next frame, shown for delay_ms milliseconds.
+ * The caller keeps ownership of the passed image.
+ */
+IError IAddAnimationFrame (
+#ifndef _NO_PROTO
+  IAnimation anim, /* animation */
+  IImage frame,    /* frame image (copied) */
+  int delay_ms     /* display time in milliseconds */
+#endif
+);
+
+/** Number of frames in the animation. */
+int IAnimationFrameCount (
+#ifndef _NO_PROTO
+  IAnimation anim
+#endif
+);
+
+/** Borrow frame index (0-based); returns NULL if out of range. Do not free. */
+IImage IAnimationFrame (
+#ifndef _NO_PROTO
+  IAnimation anim,
+  int index
+#endif
+);
+
+/** Display delay, in milliseconds, of frame index (0 if out of range). */
+int IAnimationFrameDelay (
+#ifndef _NO_PROTO
+  IAnimation anim,
+  int index
+#endif
+);
+
+/** Set the loop count (0 = loop forever, the default). */
+IError ISetAnimationLoopCount (
+#ifndef _NO_PROTO
+  IAnimation anim,
+  int loops
+#endif
+);
+
+/** Get the loop count (0 = forever). */
+int IAnimationLoopCount (
+#ifndef _NO_PROTO
+  IAnimation anim
+#endif
+);
+
+/**
+ * Read a multi-frame animation from a file (currently IFORMAT_GIF only). Each
+ * frame is composited to a full-size RGB image honoring the GIF disposal
+ * methods. Returns NULL on error. The file is left open for the caller.
+ */
+IAnimation IReadAnimationFile (
+#ifndef _NO_PROTO
+  FILE *fp,
+  IFileFormat format
+#endif
+);
+
+/**
+ * Write an animation to a file (currently IFORMAT_GIF only). Each frame is
+ * reduced to a 256-color palette with its delay and the loop count recorded.
+ */
+IError IWriteAnimationFile (
+#ifndef _NO_PROTO
+  FILE *fp,
+  IAnimation anim,
+  IFileFormat format,
+  IOptions options
+#endif
+);
+/** @} */
 
 /**
  * Creates a graphic context for drawing on an image.

@@ -48,9 +48,11 @@ from .font import Font
 from .gc import GC, ArcPoints
 from ._version import __version__
 from .image import Image
+from .animation import Animation
 
 __all__ = [
     "Image",
+    "Animation",
     "GC",
     "Font",
     "Chart",

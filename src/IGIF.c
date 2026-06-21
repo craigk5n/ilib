@@ -104,26 +104,22 @@ static int color_compare ( unsigned int r, unsigned int g, unsigned int b, IColo
   return ( diff1 > diff2 );
 }
 
-IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
+/* Build an 8-bit indexed (palettized) version of `image`. On success returns
+   INoError and sets *data_out (malloc'd width*height indices, free with
+   free()), *map_out (GifMakeMapObject, free with GifFreeMapObject), *bpp_out,
+   and *transparent_out (palette index of the image's transparent color, or
+   -1). Shared by the single-frame and animated GIF writers. */
+static IError _gif_index_image ( IImageP *image, unsigned char **data_out,
+  ColorMapObject **map_out, int *bpp_out, int *transparent_out )
 {
-  int r, c, offset;
+  int r, c, offset, loop;
   unsigned char *ptr;
   unsigned int red, green, blue;
   IColorP *colormap[MAX_COLORMAP_SIZE];
   ColorMapObject *GIFcolormap;
-  int num_colors = 0, color_ceil, loop, loop2, closest, bits_per_pixel;
-  int color_found;
-  int transparent = -1, interlaced = 0;
-  int fd;
-  int gif_err = 0;
-  GifFileType *gft = NULL;
-  GifByteType ext[4];
-  unsigned char *data;
-  unsigned char *reduced = NULL;
-  unsigned char *src = image->data;
-  IError ret = INoError;
-
-  GIFcolormap = NULL;
+  int num_colors = 0, color_ceil, closest, bits_per_pixel, color_found;
+  int transparent = -1;
+  unsigned char *data, *reduced = NULL, *src = image->data;
 
   /* first make an 8-bit version of the image (calloc zero-fills) */
   data = (unsigned char *) calloc ( image->width * image->height,
@@ -138,21 +134,15 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
     reduced =
       (unsigned char *) malloc ( (size_t) image->width * image->height * 3 );
     if ( !reduced ) {
-      ret = IGIFError;
-      goto cleanup;
+      free ( data );
+      return ( IGIFError );
     }
     _IReduceColorsRGB ( image->data, image->width * image->height,
       MAX_COLORMAP_SIZE, reduced );
     src = reduced;
   }
 
-  /* Reduce to 256 colors
-  ** This is a god-awful hack of an algorithm.  Should really use a
-  ** better one.
-  ** The first 256 colors found will be used, the rest will be converted
-  ** to closest.
-  ** NOTE: we should change this to call QuantizeBuffer in GIFLIB.
-  */
+  /* The first 256 colors found are used; any overflow maps to the closest. */
   for ( r = 0; r < image->height; r++ ) {
     for ( c = 0; c < image->width; c++ ) {
       offset = ( r * image->width ) + c;
@@ -186,13 +176,13 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
           num_colors++;
         }
         else {
-          // find closest!
           closest = 0;
           for ( loop = 0; loop < num_colors; loop++ ) {
             if ( color_compare ( red, green, blue, colormap[closest],
                    colormap[loop] ) < 0 )
               closest = loop;
           }
+          data[offset] = closest;
         }
       }
     }
@@ -203,12 +193,13 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
         color_ceil *= 2, bits_per_pixel++ )
     ;
 
-  fd = fileno ( fp );
-
   GIFcolormap = GifMakeMapObject ( color_ceil, NULL );
   if ( !GIFcolormap ) {
-    ret = IGIFError;
-    goto cleanup;
+    free ( data );
+    free ( reduced );
+    for ( loop = 0; loop < num_colors; loop++ )
+      free ( colormap[loop] );
+    return ( IGIFError );
   }
   for ( loop = 0; loop < color_ceil; loop++ ) {
     if ( loop < num_colors ) {
@@ -222,6 +213,43 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
     }
   }
 
+  if ( image->transparent ) {
+    for ( loop = 0; loop < num_colors; loop++ ) {
+      if ( colors_match ( colormap[loop], image->transparent->red,
+             image->transparent->green, image->transparent->blue ) ) {
+        transparent = loop;
+        break;
+      }
+    }
+  }
+
+  for ( loop = 0; loop < num_colors; loop++ )
+    free ( colormap[loop] );
+  free ( reduced );
+
+  *data_out = data;
+  *map_out = GIFcolormap;
+  *bpp_out = bits_per_pixel;
+  *transparent_out = transparent;
+  return ( INoError );
+}
+
+IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
+{
+  int loop, loop2, bits_per_pixel, transparent, interlaced = 0;
+  int fd, gif_err = 0;
+  GifFileType *gft = NULL;
+  GifByteType ext[4];
+  unsigned char *data = NULL;
+  ColorMapObject *GIFcolormap = NULL;
+  IError ret;
+
+  ret = _gif_index_image ( image, &data, &GIFcolormap, &bits_per_pixel,
+    &transparent );
+  if ( ret != INoError )
+    return ( ret );
+
+  fd = fileno ( fp );
 #if ILIB_GIF_OPEN_HAS_ERR
   gft = EGifOpenFileHandle ( fd, &gif_err );
 #else
@@ -232,26 +260,11 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
     goto cleanup;
   }
 
-  /* causes seg fault...
-  EGifSetGifVersion ( "89a" );
-  */
   if ( options & IOPTION_INTERLACED )
     interlaced = 1;
 
-  if ( image->transparent ) {
-    for ( loop = 0; loop < num_colors; loop++ ) {
-      if ( colors_match ( colormap[loop], image->transparent->red,
-             image->transparent->green, image->transparent->blue ) ) {
-        transparent = loop;
-        break;
-      }
-    }
-  }
-  else
-    transparent = -1;
-
-  if ( EGifPutScreenDesc ( gft, image->width, image->height,
-         bits_per_pixel, 0, GIFcolormap ) == GIF_ERROR ) {
+  if ( EGifPutScreenDesc ( gft, image->width, image->height, bits_per_pixel, 0,
+         GIFcolormap ) == GIF_ERROR ) {
     ret = IGIFError;
     goto cleanup;
   }
@@ -267,8 +280,8 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
     EGifPutExtension ( gft, GRAPHICS_EXT_FUNC_CODE, 4, ext );
   }
 
-  if ( EGifPutImageDesc ( gft, 0, 0, image->width, image->height,
-         interlaced, NULL ) == GIF_ERROR ) {
+  if ( EGifPutImageDesc ( gft, 0, 0, image->width, image->height, interlaced,
+         NULL ) == GIF_ERROR ) {
     ret = IGIFError;
     goto cleanup;
   }
@@ -278,7 +291,8 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
     for ( loop = 0; loop < 4; loop++ ) {
       for ( loop2 = InterlacedOffset[loop]; loop2 < image->height;
             loop2 += InterlacedJumps[loop] ) {
-        if ( EGifPutLine ( gft, data + ( loop2 * image->width ), image->width ) == GIF_ERROR ) {
+        if ( EGifPutLine ( gft, data + ( loop2 * image->width ),
+               image->width ) == GIF_ERROR ) {
           ret = IGIFError;
           goto cleanup;
         }
@@ -286,8 +300,8 @@ IError _IWriteGIF ( FILE *fp, IImageP *image, IOptions options )
     }
   }
   else {
-    /* Write the data all at once */
-    if ( EGifPutLine ( gft, data, image->width * image->height ) == GIF_ERROR ) {
+    if ( EGifPutLine ( gft, data, image->width * image->height ) ==
+         GIF_ERROR ) {
       ret = IGIFError;
       goto cleanup;
     }
@@ -301,16 +315,9 @@ cleanup:
     EGifCloseFile ( gft );
 #endif
   }
-
-  /* free up allocated resources */
   free ( data );
-  free ( reduced );
-  for ( loop = 0; loop < num_colors; loop++ ) {
-    free ( colormap[loop] );
-  }
   if ( GIFcolormap )
     GifFreeMapObject ( GIFcolormap );
-
   return ( ret );
 }
 
@@ -466,5 +473,290 @@ fail:
   return ( IGIFError );
 }
 
+
+/* ---------------------------------------------------------- animated GIF */
+
+/* The animated read/write paths need giflib 5.x (DGifSlurp, the
+   GraphicsControlBlock helpers and the streaming extension API). On older
+   giflib these report no support rather than failing to build. */
+#if defined( GIFLIB_MAJOR ) && GIFLIB_MAJOR >= 5
+
+/* Read the NETSCAPE2.0 loop count from a slurped GIF (0 = forever / absent). */
+static int _gif_loop_count ( GifFileType *gft )
+{
+  int i, j;
+  for ( i = 0; i < gft->ImageCount; i++ ) {
+    SavedImage *si = &gft->SavedImages[i];
+    for ( j = 0; j < si->ExtensionBlockCount; j++ ) {
+      ExtensionBlock *eb = &si->ExtensionBlocks[j];
+      if ( eb->Function == APPLICATION_EXT_FUNC_CODE && eb->ByteCount >= 11 &&
+           memcmp ( eb->Bytes, "NETSCAPE2.0", 11 ) == 0 ) {
+        /* The loop count is in the following sub-block: 0x01, lo, hi. */
+        if ( j + 1 < si->ExtensionBlockCount ) {
+          ExtensionBlock *sub = &si->ExtensionBlocks[j + 1];
+          if ( sub->ByteCount >= 3 && sub->Bytes[0] == 1 )
+            return ( sub->Bytes[1] | ( sub->Bytes[2] << 8 ) );
+        }
+      }
+    }
+  }
+  return ( 0 );
+}
+
+IError _IReadAnimGIF ( FILE *fp, IAnimation *anim_return )
+{
+  GifFileType *gft = NULL;
+  int fd, gif_err = 0, i, x, y;
+  int sw, sh;
+  unsigned char *canvas = NULL, *saved = NULL;
+  IAnimation anim = NULL;
+  IError ret = IGIFError;
+
+  fd = fileno ( fp );
+#if ILIB_GIF_OPEN_HAS_ERR
+  gft = DGifOpenFileHandle ( fd, &gif_err );
+#else
+  gft = DGifOpenFileHandle ( fd );
+#endif
+  if ( !gft )
+    return ( IGIFError );
+  if ( DGifSlurp ( gft ) == GIF_ERROR )
+    goto done;
+
+  sw = gft->SWidth;
+  sh = gft->SHeight;
+  if ( sw <= 0 || sh <= 0 || gft->ImageCount <= 0 )
+    goto done;
+
+  anim = ICreateAnimation ();
+  if ( !anim )
+    goto done;
+
+  /* Full-screen RGB canvas, composited frame by frame honoring disposal. */
+  canvas = (unsigned char *) malloc ( (size_t) sw * sh * 3 );
+  saved = (unsigned char *) malloc ( (size_t) sw * sh * 3 );
+  if ( !canvas || !saved )
+    goto done;
+  memset ( canvas, 0xff, (size_t) sw * sh * 3 ); /* start on white */
+
+  for ( i = 0; i < gft->ImageCount; i++ ) {
+    SavedImage *si = &gft->SavedImages[i];
+    GifImageDesc *d = &si->ImageDesc;
+    ColorMapObject *cmap = d->ColorMap ? d->ColorMap : gft->SColorMap;
+    GraphicsControlBlock gcb;
+    int has_gcb = ( DGifSavedExtensionToGCB ( gft, i, &gcb ) == GIF_OK );
+    int transp = has_gcb ? gcb.TransparentColor : NO_TRANSPARENT_COLOR;
+    int disposal = has_gcb ? gcb.DisposalMode : DISPOSAL_UNSPECIFIED;
+    int delay_ms = has_gcb ? gcb.DelayTime * 10 : 0;
+    IImageP *frame;
+
+    if ( !cmap )
+      goto done;
+    if ( disposal == DISPOSE_PREVIOUS )
+      memcpy ( saved, canvas, (size_t) sw * sh * 3 );
+
+    /* Paint this frame's sub-rectangle onto the canvas. */
+    for ( y = 0; y < d->Height; y++ ) {
+      int cy = d->Top + y;
+      if ( cy < 0 || cy >= sh )
+        continue;
+      for ( x = 0; x < d->Width; x++ ) {
+        int cx = d->Left + x;
+        int idx = si->RasterBits[y * d->Width + x];
+        unsigned char *p;
+        if ( cx < 0 || cx >= sw )
+          continue;
+        if ( transp != NO_TRANSPARENT_COLOR && idx == transp )
+          continue; /* transparent: leave the canvas pixel */
+        if ( idx >= cmap->ColorCount )
+          idx = 0;
+        p = canvas + ( (size_t) cy * sw + cx ) * 3;
+        p[0] = cmap->Colors[idx].Red;
+        p[1] = cmap->Colors[idx].Green;
+        p[2] = cmap->Colors[idx].Blue;
+      }
+    }
+
+    /* Snapshot the canvas as this frame. */
+    frame = (IImageP *) ICreateImage ( sw, sh, IOPTION_NONE );
+    if ( !frame )
+      goto done;
+    memcpy ( frame->data, canvas, (size_t) sw * sh * 3 );
+    if ( IAddAnimationFrame ( anim, (IImage) frame, delay_ms ) != INoError ) {
+      _IFreeImage ( frame );
+      goto done;
+    }
+    _IFreeImage ( frame );
+
+    /* Apply disposal for the next frame. */
+    if ( disposal == DISPOSE_BACKGROUND ) {
+      for ( y = 0; y < d->Height; y++ ) {
+        int cy = d->Top + y;
+        if ( cy < 0 || cy >= sh )
+          continue;
+        for ( x = 0; x < d->Width; x++ ) {
+          int cx = d->Left + x;
+          unsigned char *p;
+          if ( cx < 0 || cx >= sw )
+            continue;
+          p = canvas + ( (size_t) cy * sw + cx ) * 3;
+          p[0] = p[1] = p[2] = 0xff;
+        }
+      }
+    }
+    else if ( disposal == DISPOSE_PREVIOUS ) {
+      memcpy ( canvas, saved, (size_t) sw * sh * 3 );
+    }
+  }
+
+  ISetAnimationLoopCount ( anim, _gif_loop_count ( gft ) );
+  *anim_return = anim;
+  anim = NULL;
+  ret = INoError;
+
+done:
+  free ( canvas );
+  free ( saved );
+  if ( anim )
+    _IFreeAnimation ( anim );
+  if ( gft )
+#if ILIB_GIF_CLOSE_HAS_ERR
+    DGifCloseFile ( gft, &gif_err );
+#else
+    DGifCloseFile ( gft );
+#endif
+  return ( ret );
+}
+
+IError _IWriteAnimGIF ( FILE *fp, IAnimation anim, IOptions options )
+{
+  GifFileType *gft = NULL;
+  int fd, gif_err = 0, i, interlaced = 0;
+  int nframes = IAnimationFrameCount ( anim );
+  int sw = 0, sh = 0, loops;
+  IError ret = IGIFError;
+
+  if ( nframes <= 0 )
+    return ( IInvalidAnimation );
+  if ( options & IOPTION_INTERLACED )
+    interlaced = 1;
+  {
+    IImageP *f0 = (IImageP *) IAnimationFrame ( anim, 0 );
+    sw = f0->width;
+    sh = f0->height;
+  }
+  loops = IAnimationLoopCount ( anim );
+
+  fd = fileno ( fp );
+#if ILIB_GIF_OPEN_HAS_ERR
+  gft = EGifOpenFileHandle ( fd, &gif_err );
+#else
+  gft = EGifOpenFileHandle ( fd );
+#endif
+  if ( !gft )
+    return ( IGIFError );
+
+  for ( i = 0; i < nframes; i++ ) {
+    IImageP *frame = (IImageP *) IAnimationFrame ( anim, i );
+    unsigned char *data = NULL;
+    ColorMapObject *cmap = NULL;
+    int bpp, transp;
+    GraphicsControlBlock gcb;
+    GifByteType ext[4];
+    int rows;
+
+    if ( _gif_index_image ( frame, &data, &cmap, &bpp, &transp ) != INoError )
+      goto done;
+
+    if ( i == 0 ) {
+      /* Logical screen descriptor + the NETSCAPE2.0 looping extension. */
+      if ( EGifPutScreenDesc ( gft, sw, sh, bpp, 0, cmap ) == GIF_ERROR ) {
+        free ( data );
+        GifFreeMapObject ( cmap );
+        goto done;
+      }
+      EGifPutExtensionLeader ( gft, APPLICATION_EXT_FUNC_CODE );
+      EGifPutExtensionBlock ( gft, 11, "NETSCAPE2.0" );
+      {
+        unsigned char sub[3];
+        sub[0] = 1;
+        sub[1] = (unsigned char) ( loops & 0xff );
+        sub[2] = (unsigned char) ( ( loops >> 8 ) & 0xff );
+        EGifPutExtensionBlock ( gft, 3, sub );
+      }
+      EGifPutExtensionTrailer ( gft );
+    }
+
+    /* Per-frame graphics control: delay (centiseconds), disposal, transparency. */
+    memset ( &gcb, 0, sizeof ( gcb ) );
+    gcb.DisposalMode = DISPOSE_BACKGROUND;
+    gcb.UserInputFlag = false;
+    gcb.DelayTime = IAnimationFrameDelay ( anim, i ) / 10;
+    gcb.TransparentColor = transp;
+    EGifGCBToExtension ( &gcb, ext );
+    EGifPutExtension ( gft, GRAPHICS_EXT_FUNC_CODE, 4, ext );
+
+    /* Each frame is a full-size image with its own local colormap. */
+    if ( EGifPutImageDesc ( gft, 0, 0, frame->width, frame->height, interlaced,
+           cmap ) == GIF_ERROR ) {
+      free ( data );
+      GifFreeMapObject ( cmap );
+      goto done;
+    }
+    if ( interlaced ) {
+      int loop, loop2;
+      for ( loop = 0; loop < 4; loop++ ) {
+        for ( loop2 = InterlacedOffset[loop]; loop2 < frame->height;
+              loop2 += InterlacedJumps[loop] ) {
+          if ( EGifPutLine ( gft, data + ( loop2 * frame->width ),
+                 frame->width ) == GIF_ERROR ) {
+            free ( data );
+            GifFreeMapObject ( cmap );
+            goto done;
+          }
+        }
+      }
+    }
+    else {
+      rows = frame->width * frame->height;
+      if ( EGifPutLine ( gft, data, rows ) == GIF_ERROR ) {
+        free ( data );
+        GifFreeMapObject ( cmap );
+        goto done;
+      }
+    }
+    free ( data );
+    GifFreeMapObject ( cmap );
+  }
+  ret = INoError;
+
+done:
+  if ( gft )
+#if ILIB_GIF_CLOSE_HAS_ERR
+    EGifCloseFile ( gft, &gif_err );
+#else
+    EGifCloseFile ( gft );
+#endif
+  return ( ret );
+}
+
+#else /* giflib < 5: animation API unavailable */
+
+IError _IReadAnimGIF ( FILE *fp, IAnimation *anim_return )
+{
+  (void) fp;
+  (void) anim_return;
+  return ( INoGIFSupport );
+}
+
+IError _IWriteAnimGIF ( FILE *fp, IAnimation anim, IOptions options )
+{
+  (void) fp;
+  (void) anim;
+  (void) options;
+  return ( INoGIFSupport );
+}
+
+#endif /* GIFLIB_MAJOR >= 5 */
 
 #endif /* HAVE_GIFLIB */

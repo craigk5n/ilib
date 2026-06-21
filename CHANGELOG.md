@@ -10,6 +10,15 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Animated (multi-frame) GIF support via a new `IAnimation` type: build a
+  sequence of frames with per-frame delays and a loop count
+  (`ICreateAnimation`, `IAddAnimationFrame`, `ISetAnimationLoopCount`, the
+  frame accessors), and read/write animated GIFs with `IReadAnimationFile` /
+  `IWriteAnimationFile`. The reader composites each frame to a full-size RGB
+  image honoring the GIF disposal methods and reads the NETSCAPE2.0 loop count;
+  the writer emits per-frame delays, local palettes and the loop extension.
+  Exposed in the Python bindings as the `Animation` class (`add_frame`,
+  `frame`, `delay`, `loop_count`, `save`, `open`).
 - Charting: two new chart types — **horizontal bar** (`ICHART_HBAR`, grouped or
   stacked) and **donut** (`ICHART_DONUT`) — plus display toggles
   `IChartSetMarkers()` (point markers on line/area), `IChartSetGrid()` and
