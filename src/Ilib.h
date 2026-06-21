@@ -597,6 +597,72 @@ IError IRotateAngle (
 );
 
 
+/**
+ * Composition operations.
+ *
+ * ITrim and IBorder modify their image in place. IAppend and IMontage combine
+ * several images and return a newly created image (or NULL on error), which the
+ * caller must free with IFreeImage().
+ */
+
+/**
+ * Autocrop a uniform border. The top-left pixel is taken as the border color;
+ * rows and columns whose pixels all match it (within tolerance, per channel)
+ * are removed. An image that is entirely the border color, or has no uniform
+ * border, is left unchanged.
+ */
+IError ITrim (
+#ifndef _NO_PROTO
+  IImage image,          /* image (modified in place) */
+  unsigned int tolerance /* per-channel match tolerance (0 = exact) */
+#endif
+);
+
+/**
+ * Add a solid border (frame) of the given width, in pixels, on all four sides.
+ * The image grows by 2*width in each dimension. A width of 0 is a no-op.
+ */
+IError IBorder (
+#ifndef _NO_PROTO
+  IImage image,       /* image (modified in place) */
+  unsigned int width, /* border width in pixels */
+  IColor color        /* border color */
+#endif
+);
+
+/**
+ * Append several images into one new image: side by side when horizontal is
+ * non-zero (height = the tallest, width = the sum), or stacked when it is zero
+ * (width = the widest, height = the sum). Gaps are filled with background.
+ * Returns a new image (free with IFreeImage()) or NULL on error.
+ */
+IImage IAppend (
+#ifndef _NO_PROTO
+  IImage *images,   /* array of images */
+  int count,        /* number of images (> 0) */
+  int horizontal,   /* non-zero: left-to-right; zero: top-to-bottom */
+  IColor background /* fill color for gaps */
+#endif
+);
+
+/**
+ * Lay several images out in a grid (contact sheet) with the given number of
+ * columns and a spacing (in pixels) between and around the cells. Cells are
+ * sized to the largest input and each image is centered in its cell; remaining
+ * space is filled with background. Returns a new image (free with
+ * IFreeImage()) or NULL on error.
+ */
+IImage IMontage (
+#ifndef _NO_PROTO
+  IImage *images,   /* array of images */
+  int count,        /* number of images (> 0) */
+  int columns,      /* number of grid columns (> 0) */
+  int spacing,      /* pixels between/around cells (>= 0) */
+  IColor background /* fill color */
+#endif
+);
+
+
 #define IFreeImage( i ) \
   _IFreeImage ( i );    \
   ( i ) = NULL;

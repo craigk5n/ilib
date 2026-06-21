@@ -37,6 +37,9 @@ The drawing API is modeled on a subset of the X11 graphics functions:
   `IEdgeDetect`, `IEmboss`).
 - **Resampling:** bilinear resize to any dimensions (`IResize`) and
   arbitrary-angle rotation with a background fill (`IRotateAngle`).
+- **Composition:** autocrop a uniform border (`ITrim`), add a solid frame
+  (`IBorder`), and combine images — side-by-side/stacked (`IAppend`) or in a
+  grid / contact sheet (`IMontage`).
 
 Note: This code was originally developed in the late 1990s in "classic"
 (K&R) C. It has since been modernized to ISO C (ANSI-style prototypes) and
@@ -169,7 +172,8 @@ ilib-convert --help          # full list of operations
 Supported `ilib-convert` operations: `--greyscale`, `--negate`,
 `--brightness`, `--contrast`, `--gamma`, `--threshold`, `--flip`, `--flop`,
 `--rotate` (with `--background`), `--blur`, `--gaussian-blur`, `--sharpen`,
-`--edge`, `--emboss`, `--resize`, and `--reduce-colors`.
+`--edge`, `--emboss`, `--resize`, `--reduce-colors`, `--normalize`, `--sepia`,
+`--opacity`, `--trim`, and `--border`.
 
 The installed `ilib-mogrify` tool applies the same operations to **many files
 in place** (batch editing), or — with `--format EXT` — writes converted copies:

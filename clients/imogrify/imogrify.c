@@ -42,7 +42,9 @@ typedef enum {
   OP_REDUCE_COLORS,
   OP_NORMALIZE,
   OP_SEPIA,
-  OP_OPACITY
+  OP_OPACITY,
+  OP_TRIM,
+  OP_BORDER
 } OpType;
 
 typedef struct {
@@ -86,6 +88,8 @@ static void usage ( const char *prog )
     "  --normalize                auto-stretch contrast\n"
     "  --sepia                    apply a sepia tone\n"
     "  --opacity F                scale RGBA alpha by F (e.g. 0.5)\n"
+    "  --trim                     autocrop a uniform border\n"
+    "  --border N                 add an N-pixel border (uses --background)\n"
     "  -h, --help                 show this help\n",
     prog );
 }
@@ -183,6 +187,14 @@ static IError apply_op ( IImage image, const Op *op, const char *background )
     return ( ISepia ( image ) );
   case OP_OPACITY:
     return ( IOpacity ( image, op->d1 ) );
+  case OP_TRIM:
+    return ( ITrim ( image, (unsigned int) op->i1 ) );
+  case OP_BORDER: {
+    IColor bg;
+    if ( IAllocNamedColor ( (char *) background, &bg ) != INoError )
+      bg = IAllocColor ( 255, 255, 255 );
+    return ( IBorder ( image, (unsigned int) op->i1, bg ) );
+  }
   }
   return ( INoError );
 }
@@ -379,6 +391,13 @@ int main ( int argc, char *argv[] )
       op.type = OP_OPACITY;
       op.d1 = atof ( next_arg ( &loop, argc, argv, "--opacity" ) );
     }
+    else if ( is_flag ( tok, "trim" ) ) {
+      op.type = OP_TRIM;
+    }
+    else if ( is_flag ( tok, "border" ) ) {
+      op.type = OP_BORDER;
+      op.i1 = atoi ( next_arg ( &loop, argc, argv, "--border" ) );
+    }
     else if ( tok[0] == '-' && tok[1] != '\0' ) {
       fprintf ( stderr, "Unknown option: %s\n", tok );
       usage ( argv[0] );
@@ -413,7 +432,8 @@ int main ( int argc, char *argv[] )
            is_flag ( tok, "rotate" ) || is_flag ( tok, "blur" ) ||
            is_flag ( tok, "gaussian-blur" ) || is_flag ( tok, "resize" ) ||
            is_flag ( tok, "reduce-colors" ) ||
-           is_flag ( tok, "reduce-colours" ) || is_flag ( tok, "opacity" ) )
+           is_flag ( tok, "reduce-colours" ) || is_flag ( tok, "opacity" ) ||
+           is_flag ( tok, "border" ) )
         loop++; /* this flag took an argument */
       continue;
     }

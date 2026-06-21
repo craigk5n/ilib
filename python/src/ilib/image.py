@@ -65,6 +65,36 @@ class Image:
 
     # -- construction ------------------------------------------------------
     @classmethod
+    def append(cls, images, horizontal=True, background=0):
+        """Append ``images`` side by side (``horizontal``) or stacked.
+
+        Returns a new :class:`Image`. ``background`` is a color handle (from
+        :mod:`ilib.color`) for the gaps; defaults to black.
+        """
+        if not images:
+            raise ValueError("append needs at least one image")
+        arr = ffi.new("IImage[]", [im._as_parameter_ for im in images])
+        handle = lib.IAppend(arr, len(images), 1 if horizontal else 0, int(background))
+        if handle == ffi.NULL:
+            raise IlibError(IError.InvalidArgument, "IAppend failed")
+        return cls(0, 0, _handle=handle)
+
+    @classmethod
+    def montage(cls, images, columns, spacing=0, background=0):
+        """Lay ``images`` out in a grid of ``columns`` columns (contact sheet).
+
+        Cells are sized to the largest image; each is centered in its cell with
+        ``spacing`` pixels around/between cells. Returns a new :class:`Image`.
+        """
+        if not images:
+            raise ValueError("montage needs at least one image")
+        arr = ffi.new("IImage[]", [im._as_parameter_ for im in images])
+        handle = lib.IMontage(arr, len(images), int(columns), int(spacing), int(background))
+        if handle == ffi.NULL:
+            raise IlibError(IError.InvalidArgument, "IMontage failed")
+        return cls(0, 0, _handle=handle)
+
+    @classmethod
     def open(cls, path, fmt=None, options=Option.NONE):
         """Read an image from ``path``.
 
@@ -262,6 +292,16 @@ class Image:
     def crop(self, x, y, width, height):
         """Crop to the rectangle ``(x, y, width, height)``, in place."""
         check(lib.ICrop(self._as_parameter_, int(x), int(y), int(width), int(height)))
+        return self
+
+    def trim(self, tolerance=0):
+        """Autocrop a uniform border (matched to the top-left pixel), in place."""
+        check(lib.ITrim(self._as_parameter_, int(tolerance)))
+        return self
+
+    def border(self, width, color):
+        """Add a solid border of ``width`` pixels in ``color``, in place."""
+        check(lib.IBorder(self._as_parameter_, int(width), int(color)))
         return self
 
     # -- convolution (area filters) ---------------------------------------

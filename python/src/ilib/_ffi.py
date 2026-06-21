@@ -79,6 +79,12 @@ IError IEmboss(IImage image);
 IError IResize(IImage image, unsigned int width, unsigned int height);
 IError IRotateAngle(IImage image, double degrees, IColor background);
 
+IError ITrim(IImage image, unsigned int tolerance);
+IError IBorder(IImage image, unsigned int width, IColor color);
+IImage IAppend(IImage *images, int count, int horizontal, IColor background);
+IImage IMontage(IImage *images, int count, int columns, int spacing,
+                IColor background);
+
 IError _IFreeImage(IImage image);
 unsigned int IImageHeight(IImage image);
 unsigned int IImageWidth(IImage image);
