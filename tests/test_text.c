@@ -282,11 +282,42 @@ TEST ttf_text_style_adds_ink ( void )
   PASS ();
 }
 
+/* Regression: ITextWidth must report a real width for scalable (TTF) fonts.
+   It previously always used the BDF glyph cache and returned ~0 for TTF. */
+TEST ttf_text_width_scales ( void )
+{
+  IGC gc;
+  IFont font;
+  const char *path;
+  unsigned int w1 = 0, w2 = 0, h = 0;
+
+  if ( ILoadFontFromFileTTF ( "p", "/no/such.ttf", 16, &font ) ==
+       IFunctionNotImplemented )
+    SKIPm ( "built without FreeType" );
+  path = ttf_find_path ();
+  if ( !path )
+    SKIPm ( "no system TrueType font available" );
+
+  ASSERT_EQ ( INoError, ILoadFontFromFileTTF ( "wt", (char *) path, 20, &font ) );
+  gc = ICreateGC ();
+  ASSERT_EQ ( INoError, ITextWidth ( gc, font, (char *) "i", 1, &w1 ) );
+  ASSERT_EQ ( INoError, ITextWidth ( gc, font, (char *) "wide text", 9, &w2 ) );
+  ASSERT_EQ ( INoError, ITextHeight ( gc, font, (char *) "x", 1, &h ) );
+  ASSERT ( w1 > 0 );  /* the bug returned 0 here */
+  ASSERT ( w2 > w1 ); /* longer text is wider */
+  ASSERT ( h > 0 );
+
+  IFreeGC ( gc );
+  IFreeFont ( font );
+  PASS ();
+}
+
 SUITE ( text )
 {
   RUN_TEST ( load_font_succeeds );
   RUN_TEST ( load_missing_font_fails );
   RUN_TEST ( text_dimensions_positive );
+  RUN_TEST ( ttf_text_width_scales );
   RUN_TEST ( draw_string_succeeds );
   RUN_TEST ( ttf_text_is_antialiased );
   RUN_TEST ( ttf_text_rotation );

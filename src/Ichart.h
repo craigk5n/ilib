@@ -91,6 +91,12 @@ IError IChartSetStacked ( IChart chart, int stacked );
 IError IChartSetLogScale ( IChart chart, int on );
 
 /**
+ * Draw each data value as a small text label (above points/bars, inside
+ * stacked bar segments, and on pie slices). Requires a font; off by default.
+ */
+IError IChartSetValueLabels ( IChart chart, int on );
+
+/**
  * Add a data series. values[] holds count values; label and color are used in
  * the legend (and as the line/bar color). The data is copied. For a pie chart
  * the first series' values are the slice sizes.

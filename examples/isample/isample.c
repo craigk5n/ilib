@@ -60,7 +60,7 @@ int main ( int argc, char *argv[] )
   int x, y;
   char *outfile = "out.ppm";
   char *sample_text = NULL;
-  char *copyright = "@Copyright 2004 Craig Knudsen";
+  char *copyright = "@Copyright 2001-2026 Craig Knudsen";
   IFileFormat output_format = IFORMAT_PPM;
   char *infile = NULL;
   FILE *fp;

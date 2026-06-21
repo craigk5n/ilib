@@ -69,6 +69,24 @@ IError ITextDimensions ( IGC gc, IFont font, char *text, unsigned int len, unsig
   if ( gcp->magic != IMAGIC_GC )
     return ( IInvalidGC );
 
+#ifdef HAVE_FREETYPE
+  /* Scalable fonts measure via FreeType glyph advances, not the BDF cache. */
+  if ( fontp->type == IFONT_TTF ) {
+    unsigned int w = 0, fh = 0, k;
+    int lines = 1;
+    IFontSize ( font, &fh );
+    for ( k = 0; k < len; k++ )
+      if ( text[k] == '\012' )
+        lines++;
+    _IFontTTFTextWidth ( fontp->name, text, len, &w );
+    if ( width_return )
+      *width_return = w;
+    if ( height_return )
+      *height_return = fh * (unsigned int) lines;
+    return ( INoError );
+  }
+#endif
+
   charx = 0;
 
   IFontSize ( font, &font_height );

@@ -229,6 +229,15 @@ IError IChartSetLogScale ( IChart chart, int on )
   return ( INoError );
 }
 
+IError IChartSetValueLabels ( IChart chart, int on )
+{
+  IChartP *c = _chart_valid ( chart );
+  if ( !c )
+    return ( IInvalidChart );
+  c->value_labels = on ? 1 : 0;
+  return ( INoError );
+}
+
 IError IChartAddSeries ( IChart chart, const char *label, const double *values,
   int count, IColor color )
 {
@@ -306,6 +315,18 @@ static int _chart_text_w ( IChartP *c, IGC gc, const char *s )
 static void _chart_text ( IImage img, IGC gc, int x, int y, const char *s )
 {
   IDrawString ( img, gc, x, y, (char *) s, (unsigned int) strlen ( s ) );
+}
+
+/* Draw a value, centered horizontally on cx with its baseline at by. The
+   caller has already set the (text) foreground color. */
+static void _chart_draw_value ( IImage img, IGC gc, IChartP *c, int cx, int by,
+  double v )
+{
+  char buf[32];
+  int tw;
+  snprintf ( buf, sizeof ( buf ), "%g", v );
+  tw = _chart_text_w ( c, gc, buf );
+  _chart_text ( img, gc, cx - tw / 2, by, buf );
 }
 
 /* -------------------------------------------------------------- geometry */
@@ -646,18 +667,23 @@ static void _chart_plot_line ( IImage img, IGC gc, IChartP *c,
   const IChartLayout *lay )
 {
   int s, i;
+  int labels = ( c->value_labels && c->font );
   for ( s = 0; s < c->nseries; s++ ) {
     IChartSeries *ser = &c->series[s];
     int n = ser->count, px = 0, py = 0;
     if ( n <= 0 )
       continue;
-    ISetForeground ( gc, ser->color );
     for ( i = 0; i < n; i++ ) {
       int x = _cat_to_x ( i, n, lay );
       int y = _val_to_y ( ser->values[i], lay );
+      ISetForeground ( gc, ser->color );
       if ( i > 0 )
         IDrawLine ( img, gc, px, py, x, y );
       IFillCircle ( img, gc, x, y, 2 );
+      if ( labels ) {
+        ISetForeground ( gc, IBLACK_PIXEL );
+        _chart_draw_value ( img, gc, c, x, y - 4, ser->values[i] );
+      }
       px = x;
       py = y;
     }
@@ -699,14 +725,18 @@ static void _chart_plot_area ( IImage img, IGC gc, IChartP *c,
     }
     ISetBlendMode ( gc, IBLEND_REPLACE );
 
-    /* Opaque line + markers on top. */
-    ISetForeground ( gc, ser->color );
+    /* Opaque line + markers (and optional value labels) on top. */
     for ( i = 0; i < n; i++ ) {
       int x = _cat_to_x ( i, n, lay );
       int y = _val_to_y ( ser->values[i], lay );
+      ISetForeground ( gc, ser->color );
       if ( i > 0 )
         IDrawLine ( img, gc, px, py, x, y );
       IFillCircle ( img, gc, x, y, 2 );
+      if ( c->value_labels && c->font ) {
+        ISetForeground ( gc, IBLACK_PIXEL );
+        _chart_draw_value ( img, gc, c, x, y - 4, ser->values[i] );
+      }
       px = x;
       py = y;
     }
@@ -717,14 +747,19 @@ static void _chart_plot_scatter ( IImage img, IGC gc, IChartP *c,
   const IChartLayout *lay )
 {
   int s, i;
+  int labels = ( c->value_labels && c->font );
   for ( s = 0; s < c->nseries; s++ ) {
     IChartSeries *ser = &c->series[s];
-    ISetForeground ( gc, ser->color );
     for ( i = 0; i < ser->count; i++ ) {
       double xv = ser->xvalues ? ser->xvalues[i] : (double) i;
       int x = _val_to_x ( xv, lay );
       int y = _val_to_y ( ser->values[i], lay );
+      ISetForeground ( gc, ser->color );
       IFillCircle ( img, gc, x, y, 3 );
+      if ( labels ) {
+        ISetForeground ( gc, IBLACK_PIXEL );
+        _chart_draw_value ( img, gc, c, x, y - 5, ser->values[i] );
+      }
     }
   }
 }
@@ -774,6 +809,11 @@ static void _chart_plot_bar_stacked ( IImage img, IGC gc, IChartP *c,
       ISetForeground ( gc, c->series[s].color );
       IFillRectangle ( img, gc, bx, top, (unsigned int) barw,
         (unsigned int) h );
+      if ( c->value_labels && c->font && h > _chart_font_h ( c ) + 2 ) {
+        ISetForeground ( gc, IBLACK_PIXEL );
+        _chart_draw_value ( img, gc, c, bx + barw / 2,
+          top + h / 2 + _chart_font_h ( c ) / 2, v );
+      }
     }
   }
 }
@@ -808,17 +848,21 @@ static void _chart_plot_bar ( IImage img, IGC gc, IChartP *c,
 
   for ( s = 0; s < c->nseries; s++ ) {
     IChartSeries *ser = &c->series[s];
-    ISetForeground ( gc, ser->color );
     for ( i = 0; i < ser->count; i++ ) {
       int slotx = lay->x0 + i * slot + ( slot - groupw ) / 2;
       int bx = slotx + s * barw;
       int by = _val_to_y ( ser->values[i], lay );
       int top = ( by < basey ) ? by : basey;
       int h = ( by < basey ) ? ( basey - by ) : ( by - basey );
+      int w = ( barw > 1 ? barw - 1 : 1 );
       if ( h < 1 )
         h = 1;
-      IFillRectangle ( img, gc, bx, top, (unsigned int) ( barw > 1 ? barw - 1 : 1 ),
-        (unsigned int) h );
+      ISetForeground ( gc, ser->color );
+      IFillRectangle ( img, gc, bx, top, (unsigned int) w, (unsigned int) h );
+      if ( c->value_labels && c->font ) {
+        ISetForeground ( gc, IBLACK_PIXEL );
+        _chart_draw_value ( img, gc, c, bx + w / 2, top - 2, ser->values[i] );
+      }
     }
   }
 }
@@ -855,6 +899,18 @@ static void _chart_plot_pie ( IImage img, IGC gc, IChartP *c,
     a1 = a0 + ser->values[i] / total * 360.0;
     ISetForeground ( gc, _chart_palette ( i ) );
     IFillArc ( img, gc, cx, cy, r, r, a0, a1 );
+    if ( c->value_labels && c->font ) {
+      /* Place the label at the slice's angular midpoint, partway out from the
+         centre. Angles are negated for the y-down coordinate system, matching
+         IArcProperties / IFillArc. */
+      double mid = ( a0 + a1 ) / 2.0;
+      double ang = ( 2.0 * PI / 360.0 ) * ( 360.0 - mid );
+      int lx = cx + (int) ( r * 0.6 * cos ( ang ) );
+      int ly = cy + (int) ( r * 0.6 * sin ( ang ) );
+      ISetForeground ( gc, IBLACK_PIXEL );
+      _chart_draw_value ( img, gc, c, lx, ly + _chart_font_h ( c ) / 2,
+        ser->values[i] );
+    }
     a0 = a1;
   }
 }

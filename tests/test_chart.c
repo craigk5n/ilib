@@ -174,10 +174,29 @@ TEST log_scale_renders ( void )
   PASS ();
 }
 
+TEST value_labels_render ( void )
+{
+  IChart c = ICreateChart ( ICHART_BAR, 220, 160 );
+  double v[3] = { 2.0, 4.0, 3.0 };
+  IImage img;
+
+  /* Without a font, value labels are simply skipped (no crash). */
+  ASSERT_EQ ( INoError, IChartSetValueLabels ( c, 1 ) );
+  IChartAddSeries ( c, "a", v, 3, IAllocColor ( 50, 100, 200 ) );
+  img = IChartRender ( c );
+  ASSERT ( img != NULL );
+  ASSERT ( has_drawn_pixel ( img ) );
+
+  IFreeImage ( img );
+  IFreeChart ( c );
+  PASS ();
+}
+
 TEST chart_setters_reject_bad_handle ( void )
 {
   ASSERT_EQ ( IInvalidChart, IChartSetStacked ( NULL, 1 ) );
   ASSERT_EQ ( IInvalidChart, IChartSetLogScale ( NULL, 1 ) );
+  ASSERT_EQ ( IInvalidChart, IChartSetValueLabels ( NULL, 1 ) );
   PASS ();
 }
 
@@ -245,6 +264,7 @@ SUITE ( chart )
   RUN_TEST ( add_xy_series_rejects_bad_args );
   RUN_TEST ( stacked_bar_renders );
   RUN_TEST ( log_scale_renders );
+  RUN_TEST ( value_labels_render );
   RUN_TEST ( chart_setters_reject_bad_handle );
   RUN_TEST ( chart_explicit_range );
   RUN_TEST ( chart_setters_and_titles );

@@ -100,6 +100,11 @@ class Chart:
         check(lib.IChartSetLogScale(self._as_parameter_, 1 if on else 0))
         return self
 
+    def set_value_labels(self, on=True):
+        """Draw each data value as a text label (needs a font)."""
+        check(lib.IChartSetValueLabels(self._as_parameter_, 1 if on else 0))
+        return self
+
     def add_series(self, values, label=None, color=0):
         """Add a data series (a sequence of values) with a legend label/color."""
         values = [float(v) for v in values]
