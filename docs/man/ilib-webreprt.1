@@ -58,10 +58,15 @@ Omit the title and summary footer.
 .TP
 .BI \-rstring " text"
 Set the label used for the retrievals being counted.
+.SS Output format
+.TP
+.B \-gif ", " \-png ", " \-ppm ", " \-jpeg ", " \-bmp
+Select the output image format (default GIF), using whichever codecs the
+library was built with.
 .SH EXAMPLES
 .RS
 .nf
-ilib-webreprt -dom -bar -thismonth /var/log/apache2/access.log > usage.gif
+ilib-webreprt -dom -bar -thismonth -png access.log > usage.png
 .fi
 .RE
 .SH SEE ALSO
