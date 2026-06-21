@@ -75,6 +75,12 @@ IError IFileType ( char *file, IFileFormat *format_return )
       ret = INoWEBPSupport;
 #endif
     }
+    else if ( strcmp ( ptr, "avif" ) == 0 ) {
+      *format_return = IFORMAT_AVIF;
+#ifndef HAVE_AVIFLIB
+      ret = INoAVIFSupport;
+#endif
+    }
     else
       ret = IInvalidFormat;
   }

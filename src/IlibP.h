@@ -237,6 +237,24 @@ IError _IWriteWEBP (
 );
 #endif /* HAVE_WEBPLIB */
 
+#ifdef HAVE_AVIFLIB
+IError _IReadAVIF (
+#ifndef _NO_PROTO
+  FILE *fp,
+  IOptions options,
+  IImageP **image_return
+#endif
+);
+
+IError _IWriteAVIF (
+#ifndef _NO_PROTO
+  FILE *fp,
+  IImageP *image,
+  IOptions options
+#endif
+);
+#endif /* HAVE_AVIFLIB */
+
 /* Median-cut color reduction. Writes <= max_colors distinct colors from src
    (npixels of RGB) into dst, which may alias src. */
 void _IReduceColorsRGB (
@@ -307,6 +325,11 @@ static IFormatDef IFileFormats[] = {
   { /* IFORMAT_WEBP */ "WEBP", _IReadWEBP, _IWriteWEBP, 24, 0, 1 },
 #else
   { /* IFORMAT_WEBP */ "WEBP", NULL, NULL, 24, 0, 1 },
+#endif
+#ifdef HAVE_AVIFLIB
+  { /* IFORMAT_AVIF */ "AVIF", _IReadAVIF, _IWriteAVIF, 24, 0, 1 },
+#else
+  { /* IFORMAT_AVIF */ "AVIF", NULL, NULL, 24, 0, 1 },
 #endif
 };
 #endif /* IIncludeFileFormats */

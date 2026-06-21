@@ -80,8 +80,8 @@
  *
  * Ilib is a C library for reading, creating, manipulating and saving raster
  * images. It can draw text using X11 BDF fonts and read/write PPM, PGM, XPM,
- * BMP, GIF, PNG, JPEG and WebP. The drawing API is modeled on a subset of the
- * X11 graphics functions.
+ * BMP, GIF, PNG, JPEG, WebP and AVIF. The drawing API is modeled on a subset of
+ * the X11 graphics functions.
  *
  * @section handles Opaque handles
  * The public types ::IImage, ::IFont, ::IGC and ::IColor are opaque. Construct
@@ -129,9 +129,10 @@ typedef enum {
   IFORMAT_PNG = 6,
   IFORMAT_JPEG = 7,
   IFORMAT_BMP = 8,
-  IFORMAT_WEBP = 9
+  IFORMAT_WEBP = 9,
+  IFORMAT_AVIF = 10
 } IFileFormat;
-#define INUM_FORMATS 10
+#define INUM_FORMATS 11
 
 /**
  * Line drawing styles.
@@ -240,7 +241,9 @@ typedef enum {
   INoPNGSupport,
   IInvalidPolygon,
   IWEBPError,
-  INoWEBPSupport
+  INoWEBPSupport,
+  IAVIFError,
+  INoAVIFSupport
 } IError;
 
 

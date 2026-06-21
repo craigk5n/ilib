@@ -1,7 +1,7 @@
 # Ilib core library
 
 set(ILIB_SOURCES
-  IArcProp.c IBMP.c IColor.c IConvolve.c ICopyImg.c
+  IArcProp.c IAVIF.c IBMP.c IColor.c IConvolve.c ICopyImg.c
   IDrawArc.c IDrawCir.c IDrawCurve.c IDrawEll.c IDrawLin.c IDrawPol.c IDrawPt.c
   IDrawRec.c IDrawStr.c IErrorStr.c IFileType.c
   IFillArc.c IFillCir.c IFillEll.c IFillPol.c IFillRec.c IFilter.c IFlood.c
@@ -92,6 +92,24 @@ if(ILIB_WITH_WEBP)
   endif()
 endif()
 
+# libavif is located via pkg-config (libavif.pc); no CMake Find module.
+set(_avif_enabled OFF)
+if(ILIB_WITH_AVIF)
+  find_package(PkgConfig QUIET)
+  if(PkgConfig_FOUND)
+    pkg_check_modules(AVIF IMPORTED_TARGET libavif)
+    if(AVIF_FOUND)
+      target_link_libraries(ilib PRIVATE PkgConfig::AVIF)
+      target_compile_definitions(ilib PRIVATE HAVE_AVIFLIB)
+      set(_avif_enabled ON)
+    else()
+      message(STATUS "libavif not found -- AVIF support disabled")
+    endif()
+  else()
+    message(STATUS "pkg-config not found -- AVIF support disabled")
+  endif()
+endif()
+
 set(_freetype_enabled OFF)
 if(ILIB_WITH_FREETYPE)
   find_package(Freetype)
@@ -115,6 +133,7 @@ set(ILIB_PNG_ENABLED  ${_png_enabled}  PARENT_SCOPE)
 set(ILIB_JPEG_ENABLED ${_jpeg_enabled} PARENT_SCOPE)
 set(ILIB_GIF_ENABLED  ${_gif_enabled}  PARENT_SCOPE)
 set(ILIB_WEBP_ENABLED ${_webp_enabled} PARENT_SCOPE)
+set(ILIB_AVIF_ENABLED ${_avif_enabled} PARENT_SCOPE)
 set(ILIB_FREETYPE_ENABLED ${_freetype_enabled} PARENT_SCOPE)
 
 # --- Install ----------------------------------------------------------------

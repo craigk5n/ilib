@@ -18,6 +18,7 @@ class Format(IntEnum):
     JPEG = 7
     BMP = 8
     WEBP = 9
+    AVIF = 10
 
 
 # Map common filename extensions to a Format, used by Image.open()/save() when
@@ -34,6 +35,7 @@ EXTENSION_FORMATS = {
     "jpeg": Format.JPEG,
     "bmp": Format.BMP,
     "webp": Format.WEBP,
+    "avif": Format.AVIF,
 }
 
 

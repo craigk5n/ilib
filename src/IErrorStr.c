@@ -81,6 +81,10 @@ char *IErrorString ( IError err )
     return ( "WebP support not available" );
   case IWEBPError:
     return ( "Unknown WebP error" );
+  case INoAVIFSupport:
+    return ( "AVIF support not available" );
+  case IAVIFError:
+    return ( "Unknown AVIF error" );
   case INoError:
   default:
     return ( "error" );
