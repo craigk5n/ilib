@@ -29,6 +29,8 @@ The drawing API is modeled on a subset of the X11 graphics functions:
 - **Filters:** whole-image point operations (ImageMagick-style): greyscale,
   negate, brightness/contrast, gamma, and threshold (`IGreyscale`, `INegate`,
   `IBrightnessContrast`, `IGamma`, `IThreshold`).
+- **Transforms:** geometric operations: flip, flop, rotate (multiples of 90°),
+  and crop (`IFlip`, `IFlop`, `IRotate`, `ICrop`).
 
 Note: This code was originally developed in the late 1990s in "classic"
 (K&R) C. It has since been modernized to ISO C (ANSI-style prototypes) and

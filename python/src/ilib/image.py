@@ -224,6 +224,31 @@ class Image:
         check(lib.IThreshold(self._as_parameter_, int(threshold)))
         return self
 
+    # -- transforms (geometric whole-image operations) --------------------
+    def flip(self):
+        """Flip vertically (top to bottom), in place."""
+        check(lib.IFlip(self._as_parameter_))
+        return self
+
+    def flop(self):
+        """Flop horizontally (left to right), in place."""
+        check(lib.IFlop(self._as_parameter_))
+        return self
+
+    def rotate(self, degrees):
+        """Rotate clockwise by a multiple of 90 degrees, in place.
+
+        90/270 swap width and height; other multiples of 90 are accepted
+        (negatives and 360 are normalized). A non-multiple raises IlibError.
+        """
+        check(lib.IRotate(self._as_parameter_, int(degrees)))
+        return self
+
+    def crop(self, x, y, width, height):
+        """Crop to the rectangle ``(x, y, width, height)``, in place."""
+        check(lib.ICrop(self._as_parameter_, int(x), int(y), int(width), int(height)))
+        return self
+
     # -- transparency / comment -------------------------------------------
     def set_transparent(self, color):
         """Set the transparent color (relevant when writing GIF/XPM)."""

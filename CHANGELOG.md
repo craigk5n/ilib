@@ -10,6 +10,11 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Image transforms (geometric whole-image operations), the second batch of
+  ImageMagick-style transforms (`ITransform.c`): `IFlip()` (vertical),
+  `IFlop()` (horizontal), `IRotate()` (clockwise, by a multiple of 90 degrees;
+  90/270 swap width and height), and `ICrop()`. They operate in place and are
+  exposed in the Python bindings (`Image.flip/flop/rotate/crop`).
 - Image filters (whole-image point operations), the first batch of
   ImageMagick-style transforms (`IFilter.c`): `IGreyscale()` (Rec.601 luma
   desaturation; `IGrayscale` alias), `INegate()`, `IBrightnessContrast()`
