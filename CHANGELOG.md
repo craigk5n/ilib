@@ -10,6 +10,12 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- WebP read/write support (`IWEBP.c`, format `IFORMAT_WEBP`, extension
+  `.webp`) via libwebp, auto-detected with pkg-config like the other optional
+  codecs (`HAVE_WEBPLIB`; toggle with `ILIB_WITH_WEBP`). Decoding yields RGB, or
+  RGBA when the file has alpha; encoding takes RGB/RGBA (greyscale is expanded)
+  at a fixed high quality. New error codes `IWEBPError` / `INoWEBPSupport`.
+  Exposed in the Python bindings (`Format.WEBP`) and both CLIs.
 - New `ilib-mogrify` client tool: batch image editing. It applies the same
   operation pipeline as `ilib-convert` (in command-line order) to any number of
   files, overwriting each in place and keeping its format; with `--format EXT`

@@ -32,6 +32,8 @@ class IError(IntEnum):
     PNGError = 19
     NoPNGSupport = 20
     InvalidPolygon = 21
+    WEBPError = 22
+    NoWEBPSupport = 23
 
 
 def error_string(code):

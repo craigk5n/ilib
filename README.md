@@ -8,7 +8,7 @@ Copyright (C) 2001-2016 Craig Knudsen, craig@k5n.us — https://www.k5n.us/Ilib.
 
 Ilib is a library (and some tools and examples) written in C
 that can read, create, manipulate and save images.  It can read and
-write PPM, PGM, XPM, BMP, GIF, PNG and JPG image formats.
+write PPM, PGM, XPM, BMP, GIF, PNG, JPG and WebP image formats.
 
 ## Graphics
 
@@ -107,9 +107,9 @@ Install whichever of these you want format support for. FreeType is optional
 too and adds scalable, anti-aliased TrueType/OpenType fonts (alongside the
 built-in X11 BDF fonts):
 
-- **Debian/Ubuntu:** `sudo apt install cmake libpng-dev libjpeg-dev libgif-dev libfreetype-dev`
-- **Fedora/RHEL:** `sudo dnf install cmake libpng-devel libjpeg-turbo-devel giflib-devel freetype-devel`
-- **macOS (Homebrew):** `brew install cmake giflib libjpeg libpng freetype`
+- **Debian/Ubuntu:** `sudo apt install cmake libpng-dev libjpeg-dev libgif-dev libwebp-dev libfreetype-dev`
+- **Fedora/RHEL:** `sudo dnf install cmake libpng-devel libjpeg-turbo-devel giflib-devel libwebp-devel freetype-devel`
+- **macOS (Homebrew):** `brew install cmake giflib libjpeg libpng webp freetype`
 
 Each is auto-detected; a missing one is skipped gracefully.
 

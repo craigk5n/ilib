@@ -69,6 +69,12 @@ IError IFileType ( char *file, IFileFormat *format_return )
       *format_return = IFORMAT_JPEG;
     else if ( strcmp ( ptr, "bmp" ) == 0 )
       *format_return = IFORMAT_BMP;
+    else if ( strcmp ( ptr, "webp" ) == 0 ) {
+      *format_return = IFORMAT_WEBP;
+#ifndef HAVE_WEBPLIB
+      ret = INoWEBPSupport;
+#endif
+    }
     else
       ret = IInvalidFormat;
   }

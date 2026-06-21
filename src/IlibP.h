@@ -219,6 +219,24 @@ IError _IWriteBMP (
 #endif
 );
 
+#ifdef HAVE_WEBPLIB
+IError _IReadWEBP (
+#ifndef _NO_PROTO
+  FILE *fp,
+  IOptions options,
+  IImageP **image_return
+#endif
+);
+
+IError _IWriteWEBP (
+#ifndef _NO_PROTO
+  FILE *fp,
+  IImageP *image,
+  IOptions options
+#endif
+);
+#endif /* HAVE_WEBPLIB */
+
 /* Median-cut color reduction. Writes <= max_colors distinct colors from src
    (npixels of RGB) into dst, which may alias src. */
 void _IReduceColorsRGB (
@@ -285,6 +303,11 @@ static IFormatDef IFileFormats[] = {
   { /* IFORMAT_JPEG */ "JPEG", NULL, NULL, 24, 0, 0 },
 #endif
   { /* IFORMAT_BMP */ "BMP", _IReadBMP, _IWriteBMP, 24, 0, 0 },
+#ifdef HAVE_WEBPLIB
+  { /* IFORMAT_WEBP */ "WEBP", _IReadWEBP, _IWriteWEBP, 24, 0, 1 },
+#else
+  { /* IFORMAT_WEBP */ "WEBP", NULL, NULL, 24, 0, 1 },
+#endif
 };
 #endif /* IIncludeFileFormats */
 
