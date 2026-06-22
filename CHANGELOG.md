@@ -261,6 +261,11 @@ without breaking the public API.
 - Fixed the dead `ilib.sourceforge.net` URLs.
 
 ### Security
+- Expanded fuzzing and added static analysis. The libFuzzer decoder harness now
+  also covers the WebP, AVIF and TIFF decoders; a new `fuzz_bdf` harness fuzzes
+  the X11 BDF font parser via `ILoadFontFromFile`, and CI runs it alongside
+  `fuzz_decode`. Added a **CodeQL** workflow (`c-cpp`, security-extended) for
+  interprocedural dataflow analysis that clang-tidy does not provide.
 - Build hardening: a new `ILIB_HARDENING` option (on by default) enables
   `-fstack-protector-strong`, `-Wformat -Wformat-security`, `_FORTIFY_SOURCE=2`
   (optimized builds), position-independent executables, and full RELRO

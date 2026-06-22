@@ -1,0 +1,50 @@
+name: codeql
+
+# Dataflow/taint static analysis (CodeQL) over the C sources -- complements the
+# clang-tidy job, which does not do interprocedural dataflow. Results appear in
+# the repository's Security > Code scanning alerts.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  schedule:
+    - cron: "27 4 * * 1" # weekly, Monday 04:27 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: analyze (c-cpp)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write # upload CodeQL results
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Install codec dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake libpng-dev libjpeg-dev libgif-dev \
+            libwebp-dev libavif-dev libtiff-dev libfreetype-dev
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4
+        with:
+          languages: c-cpp
+          queries: security-extended
+
+      # Manual build (more reliable than autobuild for CMake C projects). Build
+      # everything so the analysis covers the library, clients and examples.
+      - name: Build
+        run: |
+          cmake -B build -DILIB_BUILD_TESTS=ON -DILIB_BUILD_CLIENTS=ON \
+            -DILIB_BUILD_EXAMPLES=ON
+          cmake --build build --parallel
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4

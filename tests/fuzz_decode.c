@@ -23,16 +23,24 @@
 #include <Ilib.h>
 
 static const IFileFormat ALL_FORMATS[] = {
-  IFORMAT_PPM, IFORMAT_PGM, IFORMAT_PBM, IFORMAT_XPM,
-  IFORMAT_XBM, IFORMAT_PNG, IFORMAT_JPEG, IFORMAT_GIF, IFORMAT_BMP };
+  IFORMAT_PPM, IFORMAT_PGM, IFORMAT_PBM, IFORMAT_XPM, IFORMAT_XBM,
+  IFORMAT_PNG, IFORMAT_JPEG, IFORMAT_GIF, IFORMAT_BMP, IFORMAT_WEBP,
+  IFORMAT_AVIF, IFORMAT_TIFF };
+
+/* These decoders use fileno()/dup() or otherwise need a real backing fd rather
+   than an fmemopen() buffer. */
+static int needs_real_fd ( IFileFormat fmt )
+{
+  return ( fmt == IFORMAT_GIF || fmt == IFORMAT_WEBP || fmt == IFORMAT_AVIF ||
+    fmt == IFORMAT_TIFF );
+}
 
 static void try_one ( const uint8_t *data, size_t size, IFileFormat fmt )
 {
   IImage img = NULL;
   FILE *fp;
 
-  if ( fmt == IFORMAT_GIF ) {
-    /* the GIF decoder uses fileno(), so it needs a real file descriptor */
+  if ( needs_real_fd ( fmt ) ) {
     fp = tmpfile ();
     if ( !fp )
       return;
