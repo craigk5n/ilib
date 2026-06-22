@@ -117,6 +117,30 @@ class Drawing(unittest.TestCase):
         self.gc.free()
         self.img.free()
 
+    def test_linear_gradient(self):
+        black = ilib.alloc_color(0, 0, 0)
+        white = ilib.alloc_color(255, 255, 255)
+        self.img.fill_linear_gradient(0, 0, 40, 40, black, white, 0.0)
+        self.assertLess(self.img.get_pixel(0, 20)[0], 30)
+        self.assertGreater(self.img.get_pixel(39, 20)[0], 225)
+
+    def test_radial_gradient(self):
+        white = ilib.alloc_color(255, 255, 255)
+        black = ilib.alloc_color(0, 0, 0)
+        self.img.fill_radial_gradient(0, 0, 40, 40, 20, 20, 18, white, black)
+        self.assertGreater(self.img.get_pixel(20, 20)[0], 235)
+        self.assertLess(self.img.get_pixel(0, 0)[0], 25)
+
+    def test_round_rectangle(self):
+        white = ilib.alloc_color(255, 255, 255)
+        self.gc.set_foreground(white)
+        self.img.fill_rectangle(self.gc, 0, 0, 40, 40)
+        self.gc.set_foreground(ilib.alloc_color(0, 0, 0))
+        self.img.fill_round_rectangle(self.gc, 0, 0, 40, 40, 12)
+        self.assertEqual(self.img.get_pixel(20, 20), (0, 0, 0))     # center filled
+        self.assertEqual(self.img.get_pixel(0, 0), (255, 255, 255))  # corner rounded
+        self.img.draw_round_rectangle(self.gc, 2, 2, 36, 36, 8)      # no crash
+
     def test_fill_rectangle(self):
         self.img.fill_rectangle(self.gc, 0, 0, 40, 40)
         self.assertEqual(self.img.get_pixel(20, 20), (255, 0, 0))

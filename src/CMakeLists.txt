@@ -6,6 +6,7 @@ set(ILIB_SOURCES
   IDrawArc.c IDrawCir.c IDrawCurve.c IDrawEll.c IDrawLin.c IDrawPol.c IDrawPt.c
   IDrawRec.c IDrawStr.c IDrawText.c IErrorStr.c IExif.c IFileType.c
   IFillArc.c IFillCir.c IFillEll.c IFillPol.c IFillRec.c IFilter.c IFlood.c
+  IGradient.c IRoundRec.c
   IFont.c IFontBDF.c IFontTTF.c IGC.c IGIF.c IImage.c IJPEG.c
   IPGM.c IPixel.c IPNG.c IPPM.c IQuantize.c IResample.c ITextDim.c ITransform.c
   IWEBP.c IXPM.c ITIFF.c)

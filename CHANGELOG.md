@@ -10,6 +10,12 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Gradient fills and rounded rectangles: `IFillLinearGradient` (any angle) and
+  `IFillRadialGradient` interpolate two colors over a region; `IDrawRoundRectangle`
+  / `IFillRoundRectangle` draw rectangles with rounded corners (built on the
+  existing line/arc primitives, so they inherit GC color/width/anti-aliasing).
+  Exposed in Python (`Image.fill_linear_gradient` / `fill_radial_gradient` /
+  `draw_round_rectangle` / `fill_round_rectangle`).
 - TIFF read/write via libtiff (auto-detected like the other optional codecs;
   `ILIB_WITH_TIFF`, `HAVE_TIFFLIB`). Reads any TIFF flavour to RGB and writes an
   8-bit LZW-compressed image; treated as an opaque (RGB) format. Recognized by
