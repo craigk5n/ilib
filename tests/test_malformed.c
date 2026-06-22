@@ -146,10 +146,50 @@ TEST codec_truncated_decode ( void )
   roundtrip_truncated ( im, IFORMAT_PNG );
   roundtrip_truncated ( im, IFORMAT_JPEG );
   roundtrip_truncated ( im, IFORMAT_GIF );
+  roundtrip_truncated ( im, IFORMAT_WEBP );
+  roundtrip_truncated ( im, IFORMAT_AVIF );
+  roundtrip_truncated ( im, IFORMAT_TIFF );
 
   IFreeColor ( c );
   IFreeGC ( gc );
   IFreeImage ( im );
+  PASS (); /* success == no crash / no leak under the sanitizers job */
+}
+
+/* Feed bytes to the BDF font parser (it reads a path, so via a temp file) and
+   free any font produced. Like feed(), the point is no crash / no leak. */
+static void feed_font ( const unsigned char *data, size_t len )
+{
+  char path[] = "/tmp/ilib_mal_bdf_XXXXXX";
+  int fd = mkstemp ( path );
+  FILE *fp;
+  IFont font = NULL;
+  if ( fd < 0 )
+    return;
+  fp = fdopen ( fd, "wb" );
+  if ( !fp ) {
+    close ( fd );
+    unlink ( path );
+    return;
+  }
+  if ( len )
+    fwrite ( data, 1, len, fp );
+  fclose ( fp );
+  if ( ILoadFontFromFile ( "mal", path, &font ) == INoError && font )
+    IFreeFont ( font );
+  unlink ( path );
+}
+
+#define FEED_FONT( s ) feed_font ( (const unsigned char *) ( s ), sizeof ( s ) - 1 )
+
+TEST font_malformed ( void )
+{
+  FEED_FONT ( "" );                          /* empty */
+  FEED_FONT ( "\x00\x01\x02 not a font\n" ); /* binary garbage */
+  /* truncated: glyph started, no bitmap rows, no ENDCHAR */
+  FEED_FONT ( "STARTFONT 2.1\nSTARTCHAR A\nBBX 8 8 0 0\nBITMAP\n" );
+  /* oversized BBX with a one-nibble bitmap row (would over-read unguarded) */
+  FEED_FONT ( "STARTCHAR A\nENCODING 65\nBBX 64 1 0 0\nBITMAP\nF\nENDCHAR\n" );
   PASS (); /* success == no crash / no leak under the sanitizers job */
 }
 
@@ -159,6 +199,7 @@ SUITE ( malformed )
   RUN_TEST ( xpm_malformed );
   RUN_TEST ( bmp_malformed );
   RUN_TEST ( codec_truncated_decode );
+  RUN_TEST ( font_malformed );
 }
 
 GREATEST_MAIN_DEFS ();
