@@ -42,6 +42,10 @@
 #define IMAGIC_FONT 104
 #define IMAGIC_ANIM 555
 
+/* Parse the EXIF orientation (1..8) from a JPEG APP1 payload ("Exif\0\0"...),
+   returning 1 (normal) if absent or malformed. Defined in IExif.c. */
+int _IExifOrientation ( const unsigned char *data, unsigned int len );
+
 #ifndef PI
 #define PI 3.14159265358979323846
 #endif /* PI */
@@ -75,6 +79,7 @@ typedef struct {
   unsigned short channels;   /* bytes per pixel: 1=grey, 3=RGB, 4=RGBA */
   unsigned short has_alpha;  /* convenience flag: channels == 4 */
   IColorP *transparent;      /* transparent color */
+  int orientation;           /* EXIF orientation as read (1..8; 1 = normal) */
 } IImageP;
 
 #define IFONT_BDF 0 /* X11 BDF bitmap font (IFontBDF) */

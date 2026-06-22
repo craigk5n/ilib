@@ -54,6 +54,8 @@ IError ICopyImageScaled(IImage source, IImage dest, IGC gc, int src_x,
                         unsigned int dest_width, unsigned int dest_height);
 IError IReduceColors(IImage image, unsigned int max_colors);
 IError IDither(IImage image, unsigned int max_colors);
+IError IAutoOrient(IImage image, int orientation);
+int IImageOrientation(IImage image);
 
 IError IGreyscale(IImage image);
 IError INegate(IImage image);

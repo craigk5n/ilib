@@ -86,6 +86,7 @@ static void usage ( const char *prog )
     "  --resize WxH               resize to WxH (bilinear)\n"
     "  --reduce-colors N          reduce to at most N colours\n"
     "  --dither                   Floyd-Steinberg dither on GIF color reduction\n"
+    "  --auto-orient              apply each JPEG's EXIF orientation on load\n"
     "  --normalize                auto-stretch contrast\n"
     "  --sepia                    apply a sepia tone\n"
     "  --opacity F                scale RGBA alpha by F (e.g. 0.5)\n"
@@ -203,7 +204,7 @@ static IError apply_op ( IImage image, const Op *op, const char *background )
 
 /* Process a single file. Returns 0 on success, non-zero on error. */
 static int mogrify_file ( const char *path, const Op *ops, int nops,
-  const char *format_ext, const char *background, int dither )
+  const char *format_ext, const char *background, int dither, int auto_orient )
 {
   IImage image;
   IFileFormat input_format, output_format;
@@ -224,7 +225,8 @@ static int mogrify_file ( const char *path, const Op *ops, int nops,
     fprintf ( stderr, "%s: cannot open for reading.\n", path );
     return ( 1 );
   }
-  ret = IReadImageFile ( fp, input_format, IOPTION_NONE, &image );
+  ret = IReadImageFile ( fp, input_format,
+    auto_orient ? IOPTION_AUTOORIENT : IOPTION_NONE, &image );
   fclose ( fp );
   if ( ret != INoError ) {
     fprintf ( stderr, "%s: read error: %s\n", path, IErrorString ( ret ) );
@@ -300,6 +302,7 @@ int main ( int argc, char *argv[] )
   int loop;
   int exit_code = 0;
   int dither = 0;
+  int auto_orient = 0;
 
   /* First pass: collect options and count files. Files are processed in a
      second pass so that all the (order-sensitive) operations are known. */
@@ -406,6 +409,10 @@ int main ( int argc, char *argv[] )
       dither = 1; /* a write option, not a pipeline op */
       continue;
     }
+    else if ( is_flag ( tok, "auto-orient" ) ) {
+      auto_orient = 1; /* a read option, not a pipeline op */
+      continue;
+    }
     else if ( tok[0] == '-' && tok[1] != '\0' ) {
       fprintf ( stderr, "Unknown option: %s\n", tok );
       usage ( argv[0] );
@@ -445,7 +452,8 @@ int main ( int argc, char *argv[] )
         loop++; /* this flag took an argument */
       continue;
     }
-    if ( mogrify_file ( tok, ops, nops, format_ext, background, dither ) != 0 )
+    if ( mogrify_file ( tok, ops, nops, format_ext, background, dither,
+           auto_orient ) != 0 )
       exit_code = 1;
   }
 

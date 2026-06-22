@@ -73,6 +73,7 @@ IImage ICreateImage ( unsigned width, unsigned height, unsigned options )
   memset ( image->data, 255, nbytes );
 
   image->magic = IMAGIC_IMAGE;
+  image->orientation = 1; /* normal until a reader sets it from EXIF */
 
   return ( (IImage) image );
 }
@@ -136,6 +137,15 @@ unsigned int IImageWidth ( IImage image )
     return ( 0 );
 
   return ( i->width );
+}
+
+int IImageOrientation ( IImage image )
+{
+  IImageP *i = (IImageP *) image;
+
+  if ( !i || i->magic != IMAGIC_IMAGE )
+    return ( 1 );
+  return ( i->orientation );
 }
 
 

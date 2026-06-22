@@ -189,9 +189,63 @@ TEST transforms_reject_bad_handle ( void )
   PASS ();
 }
 
+/* A 4x2 white image with one red pixel at (0,0). */
+static IImage corner_marker ( void )
+{
+  IImage im = ICreateImage ( 4, 2, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+  ISetForeground ( gc, IAllocColor ( 255, 255, 255 ) );
+  IFillRectangle ( im, gc, 0, 0, 4, 2 );
+  ISetPixel ( im, 0, 0, 255, 0, 0 );
+  IFreeGC ( gc );
+  return ( im );
+}
+
+static int is_red ( IImage im, int x, int y )
+{
+  unsigned int r, g, b;
+  IGetPixel ( im, x, y, &r, &g, &b );
+  return ( r == 255 && g == 0 && b == 0 );
+}
+
+TEST auto_orient_applies_exif_transforms ( void )
+{
+  IImage im;
+
+  /* 1: no-op. */
+  im = corner_marker ();
+  ASSERT_EQ ( INoError, IAutoOrient ( im, 1 ) );
+  ASSERT ( is_red ( im, 0, 0 ) );
+  IFreeImage ( im );
+
+  /* 2: mirror horizontal -> (0,0) lands at (3,0). */
+  im = corner_marker ();
+  ASSERT_EQ ( INoError, IAutoOrient ( im, 2 ) );
+  ASSERT ( is_red ( im, 3, 0 ) );
+  IFreeImage ( im );
+
+  /* 3: rotate 180 -> (0,0) lands at (3,1). */
+  im = corner_marker ();
+  ASSERT_EQ ( INoError, IAutoOrient ( im, 3 ) );
+  ASSERT ( is_red ( im, 3, 1 ) );
+  IFreeImage ( im );
+
+  /* 6: rotate 90 CW -> dims swap to 2x4, (0,0) lands at (1,0). */
+  im = corner_marker ();
+  ASSERT_EQ ( INoError, IAutoOrient ( im, 6 ) );
+  ASSERT_EQ ( 2, (int) IImageWidth ( im ) );
+  ASSERT_EQ ( 4, (int) IImageHeight ( im ) );
+  ASSERT ( is_red ( im, 1, 0 ) );
+  IFreeImage ( im );
+
+  ASSERT_EQ ( IInvalidImage, IAutoOrient ( NULL, 6 ) );
+  PASS ();
+}
+
 SUITE ( transform )
 {
   RUN_TEST ( flip_reverses_rows );
+  RUN_TEST ( auto_orient_applies_exif_transforms );
   RUN_TEST ( flop_reverses_columns );
   RUN_TEST ( rotate_90_clockwise );
   RUN_TEST ( rotate_270_counterclockwise );

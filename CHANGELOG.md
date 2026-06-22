@@ -10,6 +10,12 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- EXIF orientation support for JPEG: the orientation tag is read on load
+  (`IImageOrientation()`), and `IAutoOrient()` rotates/flips an image upright
+  for a given orientation. Reading with the new `IOPTION_AUTOORIENT` flag
+  applies it automatically, so photos load the right way up. Exposed in Python
+  (`Image.open(auto_orient=True)`, `Image.auto_orient()`, `Image.orientation`)
+  and as `--auto-orient` on `ilib-convert` / `ilib-mogrify`.
 - Multi-line text layout: `IDrawText()` word-wraps a string to a pixel width
   (breaking at spaces; over-long words overflow) and honors existing newlines,
   drawing each line with left/center/right alignment (`IHAlign`);

@@ -97,18 +97,22 @@ class Image:
         return cls(0, 0, _handle=handle)
 
     @classmethod
-    def open(cls, path, fmt=None, options=Option.NONE):
+    def open(cls, path, fmt=None, options=Option.NONE, auto_orient=False):
         """Read an image from ``path``.
 
         The format is inferred from the file extension unless ``fmt`` is given.
+        With ``auto_orient=True`` a JPEG's EXIF orientation is applied on load.
         """
         format_ = _format_for(path, fmt)
+        opts = int(options)
+        if auto_orient:
+            opts |= int(Option.AUTOORIENT)
         fp = libc.fopen(str(path).encode("utf-8"), b"rb")
         if not fp:
             raise IlibError(IError.NoSuchFile, f"cannot open {path!r} for reading")
         try:
             out = ffi.new("IImage *")
-            check(lib.IReadImageFile(fp, int(format_), int(options), out))
+            check(lib.IReadImageFile(fp, int(format_), opts, out))
         finally:
             libc.fclose(fp)
         return cls(0, 0, _handle=out[0])
@@ -154,6 +158,18 @@ class Image:
     def size(self):
         """``(width, height)`` in pixels."""
         return self.width, self.height
+
+    @property
+    def orientation(self):
+        """EXIF orientation as read (1..8; 1 = normal). 1 after auto-orient."""
+        return int(lib.IImageOrientation(self._as_parameter_))
+
+    def auto_orient(self, orientation=None):
+        """Rotate/flip upright per an EXIF ``orientation`` (default: the image's
+        own :attr:`orientation`), in place."""
+        o = self.orientation if orientation is None else int(orientation)
+        check(lib.IAutoOrient(self._as_parameter_, o))
+        return self
 
     # -- pixels ------------------------------------------------------------
     def set_pixel(self, x, y, red, green, blue):

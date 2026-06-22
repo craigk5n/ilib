@@ -296,6 +296,14 @@ class Filters(unittest.TestCase):
 
 
 class Transforms(unittest.TestCase):
+    def test_auto_orient(self):
+        with ilib.Image(4, 2) as img:
+            img.set_pixel(0, 0, 255, 0, 0)
+            self.assertEqual(img.orientation, 1)
+            img.auto_orient(6)  # rotate 90 CW
+            self.assertEqual(img.size, (2, 4))
+            self.assertEqual(img.get_pixel(1, 0), (255, 0, 0))
+
     def test_flip(self):
         with ilib.Image(3, 2) as img:
             img.set_pixel(0, 0, 10, 0, 0)
