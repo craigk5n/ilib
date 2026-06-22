@@ -1,0 +1,48 @@
+name: security-scan
+
+# Supply-chain scanning with Trivy: known-vulnerability, secret and
+# misconfiguration checks over the working tree. Results are uploaded to
+# Security > Code scanning. The scan is informational (exit-code 0) so it
+# surfaces findings without gating merges.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  schedule:
+    - cron: "41 5 * * 1" # weekly, Monday 05:41 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  trivy:
+    name: trivy (fs)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # upload SARIF
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          exit-code: "0" # informational; never fail the build
+
+      # Skip the upload for pull requests from forks, which do not get a token
+      # with security-events: write.
+      - name: Upload results to code scanning
+        if: >-
+          always() && ( github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.full_name == github.repository )
+        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4
+        with:
+          sarif_file: trivy-results.sarif
