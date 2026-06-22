@@ -139,6 +139,14 @@ static int num_fonts = 0;
 static char *bdf_last_name = NULL;
 static Font *bdf_last_font = NULL;
 
+/* The text after a fixed-length keyword in a BDF line. Returns "" when the
+   line is shorter than the offset, so the `text + N` field reads below never
+   run past the (untrusted, exactly-sized) line buffer. */
+static const char *bdf_after ( const char *text, size_t off )
+{
+  return ( strlen ( text ) >= off ? text + off : "" );
+}
+
 IError IFontBDFReadFile ( char *name, char *path )
 {
   struct stat buf;
@@ -167,11 +175,20 @@ IError IFontBDFReadFile ( char *name, char *path )
         return ( IFontError );
       }
       lines = tmp;
-      if ( text[strlen ( text ) - 1] == '\012' )
-        text[strlen ( text ) - 1] = '\0';
-      if ( text[strlen ( text ) - 1] == '\015' )
-        text[strlen ( text ) - 1] = '\0';
+      /* Strip trailing CR/LF without underflowing on an empty/NUL-led line. */
+      {
+        size_t l = strlen ( text );
+        while ( l > 0 && ( text[l - 1] == '\012' || text[l - 1] == '\015' ) )
+          text[--l] = '\0';
+      }
       lines[num_lines] = (char *) malloc ( strlen ( text ) + 1 );
+      if ( !lines[num_lines] ) {
+        for ( loop = 0; loop < num_lines; loop++ )
+          free ( lines[loop] );
+        free ( lines );
+        fclose ( fp );
+        return ( IFontError );
+      }
       strcpy ( lines[num_lines++], text );
     }
     fclose ( fp );
@@ -220,16 +237,27 @@ IError IFontBDFReadData ( char *name, char **lines )
   }
 
   font = (Font *) malloc ( sizeof ( Font ) );
+  if ( !font )
+    return ( IFontError );
   memset ( font, '\0', sizeof ( Font ) );
   font->name = (char *) malloc ( strlen ( name ) + 1 );
+  if ( !font->name ) {
+    free ( font );
+    return ( IFontError );
+  }
   strcpy ( font->name, name );
   memset ( font->chars, '\0', sizeof ( font->chars ) );
   font->other_chars = malloc ( 4 );
+  if ( !font->other_chars ) {
+    free ( font->name );
+    free ( font );
+    return ( IFontError );
+  }
 
   while ( lines[line_no] ) {
     text = lines[line_no];
     if ( strncmp ( text, "STARTCHAR", 9 ) == 0 ) {
-      strcpy ( ch, text + 10 );
+      snprintf ( ch, sizeof ( ch ), "%s", bdf_after ( text, 10 ) );
       for ( loop = 0; translation[loop].name; loop++ ) {
         if ( strcmp ( translation[loop].name, ch ) == 0 ) {
           ch[0] = translation[loop].value;
@@ -242,39 +270,61 @@ IError IFontBDFReadData ( char *name, char **lines )
       if ( character )
         free_character ( character );
       character = (Char *) malloc ( sizeof ( Char ) );
+      if ( !character ) {
+        free_font ( font );
+        return ( IFontError );
+      }
       memset ( character, '\0', sizeof ( Char ) );
       character->name = (char *) malloc ( strlen ( ch ) + 1 );
+      if ( !character->name ) {
+        free ( character );
+        free_font ( font );
+        return ( IFontError );
+      }
       strcpy ( character->name, ch );
     }
     else if ( strncmp ( text, "ENCODING", 8 ) == 0 ) {
-      temp = atoi ( text + 9 );
+      temp = atoi ( bdf_after ( text, 9 ) );
       if ( temp > 0 && temp < 256 && character != NULL ) {
-        sprintf ( ch, "%c", temp );
-        strcpy ( character->name, ch );
+        /* Re-allocate name to exactly 2 bytes rather than reusing the
+           STARTCHAR-sized buffer (which can be too small). */
+        char *nn = (char *) malloc ( 2 );
+        if ( nn ) {
+          nn[0] = (char) temp;
+          nn[1] = '\0';
+          free ( character->name );
+          character->name = nn;
+        }
       }
     }
     else if ( strncmp ( text, "PIXEL_SIZE", 10 ) == 0 ) {
-      font->pixel_size = atoi ( text + 11 );
+      font->pixel_size = atoi ( bdf_after ( text, 11 ) );
     }
     else if ( strncmp ( text, "FONT_ASCENT", 11 ) == 0 ) {
-      font->font_ascent = atoi ( text + 12 );
+      font->font_ascent = atoi ( bdf_after ( text, 12 ) );
     }
     else if ( strncmp ( text, "FONT_DESCENT", 12 ) == 0 ) {
-      font->font_descent = atoi ( text + 13 );
+      font->font_descent = atoi ( bdf_after ( text, 13 ) );
     }
     else if ( strncmp ( text, "SPACING", 7 ) == 0 ) {
-      if ( strncmp ( text + 8, "\"P\"", 3 ) == 0 )
+      if ( strncmp ( bdf_after ( text, 8 ), "\"P\"", 3 ) == 0 )
         font->proportional = TRUE;
       else
         font->proportional = FALSE;
     }
     else if ( strncmp ( text, "FACE_NAME", 9 ) == 0 ) {
-      font->face_name = (char *) malloc ( strlen ( text + 10 ) + 1 );
-      strcpy ( font->face_name, text + 10 );
+      const char *v = bdf_after ( text, 10 );
+      free ( font->face_name );
+      font->face_name = (char *) malloc ( strlen ( v ) + 1 );
+      if ( font->face_name )
+        strcpy ( font->face_name, v );
     }
     else if ( strncmp ( text, "SETWIDTH_NAME", 13 ) == 0 ) {
-      font->width_name = (char *) malloc ( strlen ( text + 14 ) + 1 );
-      strcpy ( font->width_name, text + 14 );
+      const char *v = bdf_after ( text, 14 );
+      free ( font->width_name );
+      font->width_name = (char *) malloc ( strlen ( v ) + 1 );
+      if ( font->width_name )
+        strcpy ( font->width_name, v );
     }
     else if ( strncmp ( text, "BBX", 3 ) == 0 && character != NULL ) {
       sscanf ( text, "BBX %d %d %d %d", &character->width, &character->height,
@@ -337,28 +387,28 @@ IError IFontBDFReadData ( char *name, char **lines )
             printf ( "\n-------------------\n" );
       */
     }
-    else if ( in_bitmap && character != NULL && character->data != NULL ) {
+    else if ( in_bitmap && character != NULL && character->data != NULL &&
+              ypos < (int) character->height ) {
+      int len = (int) strlen ( text );
       xpos = 0;
       for ( loop = 0; (unsigned int) loop < character->width; loop++ ) {
         which_char = loop / 4;
-        c = text[which_char];
-        if ( isdigit ( c ) )
+        /* The hex row can be shorter than width/4 -- don't read past it. */
+        c = ( which_char < len ) ? text[which_char] : '0';
+        if ( isdigit ( (unsigned char) c ) )
           hexval = (int) ( c - '0' );
-        else
+        else if ( c >= 'A' && c <= 'F' )
           hexval = (int) ( c - 'A' ) + 10;
+        else if ( c >= 'a' && c <= 'f' )
+          hexval = (int) ( c - 'a' ) + 10;
+        else
+          hexval = 0;
         which_bit = 3 - ( loop % 4 );
-        if ( hexval & ( 1 << which_bit ) ) {
-          character->data[ypos * character->width + xpos] = 1;
-          /*printf ( "X" );*/
-        }
-        else {
-          character->data[ypos * character->width + xpos] = 0;
-          /*printf ( " " );*/
-        }
+        character->data[ypos * character->width + xpos] =
+          ( hexval & ( 1 << which_bit ) ) ? 1 : 0;
         xpos++;
       }
       ypos++;
-      /*printf ( "\n" );*/
     }
     line_no++;
   }

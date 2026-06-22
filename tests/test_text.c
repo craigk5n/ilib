@@ -3,7 +3,9 @@
    ILIB_TEST_FONT_DIR is defined by CMake to the source fonts/ directory. */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <Ilib.h>
 #include "greatest.h"
 
@@ -20,6 +22,49 @@ TEST load_font_succeeds ( void )
     ILoadFontFromFile ( "helvR08", FONT_PATH, &font ) );
   ASSERT ( font != NULL );
   IFreeFont ( font );
+  PASS ();
+}
+
+/* Load a BDF written from `body`; return the IError (and free any font). The
+   point is that crafted/malformed fonts must not crash or read/write out of
+   bounds (verified under ASan/UBSan in CI). */
+static IError load_bdf_body ( const char *body )
+{
+  char path[] = "/tmp/ilib_bdf_XXXXXX";
+  int fd = mkstemp ( path );
+  FILE *fp;
+  IFont font = NULL;
+  IError ret;
+  if ( fd < 0 )
+    return ( IFontError );
+  fp = fdopen ( fd, "w" );
+  fwrite ( body, 1, strlen ( body ), fp );
+  fclose ( fp );
+  ret = ILoadFontFromFile ( "crafted", path, &font );
+  if ( font )
+    IFreeFont ( font );
+  unlink ( path );
+  return ( ret );
+}
+
+/* Malformed BDF input must be handled safely: an oversized BBX with a short
+   bitmap row (over-read), more bitmap rows than the declared height
+   (over-write), a nameless STARTCHAR, and empty/short field lines. */
+TEST bdf_malicious_input_is_safe ( void )
+{
+  /* BBX claims 32 wide / 1 tall but the BITMAP row is one nibble. */
+  (void) load_bdf_body (
+    "STARTFONT 2.1\nSTARTCHAR A\nENCODING 65\nBBX 32 1 0 0\nBITMAP\nF\n"
+    "ENDCHAR\nENDFONT\n" );
+  /* BBX 8x2 but five bitmap rows -> ypos must be clamped to the height. */
+  (void) load_bdf_body (
+    "STARTCHAR B\nENCODING 66\nBBX 8 2 0 0\nBITMAP\nFF\nFF\nFF\nFF\nFF\n"
+    "ENDCHAR\n" );
+  /* Nameless STARTCHAR and short/empty field lines. */
+  (void) load_bdf_body (
+    "STARTCHAR\nENCODING\nPIXEL_SIZE\nFONT_ASCENT\nFACE_NAME\nSPACING\n"
+    "BBX\nBITMAP\nENDCHAR\n" );
+  /* If we got here without crashing / an ASan abort, the guards held. */
   PASS ();
 }
 
@@ -439,6 +484,7 @@ SUITE ( text )
 {
   RUN_TEST ( load_font_succeeds );
   RUN_TEST ( load_missing_font_fails );
+  RUN_TEST ( bdf_malicious_input_is_safe );
   RUN_TEST ( text_dimensions_positive );
   RUN_TEST ( text_alignment_coordinates );
   RUN_TEST ( ttf_text_width_scales );

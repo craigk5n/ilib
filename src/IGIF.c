@@ -391,8 +391,10 @@ IError _IReadGIF ( FILE *fp, IOptions options, IImageP **image_return )
             r = image->data + ( loop * image->width * 3 ) + ( col * 3 );
             g = r + 1;
             b = r + 2;
-            if ( temp > (unsigned int) gft->SColorMap->ColorCount ) {
-              temp = gft->SColorMap->ColorCount - 1;
+            if ( temp >= (unsigned int) gft->SColorMap->ColorCount ) {
+              temp = ( gft->SColorMap->ColorCount > 0 )
+                       ? (unsigned int) gft->SColorMap->ColorCount - 1
+                       : 0;
               fprintf ( stderr, "ILib Warning: Invalid color found in GIF.\n" );
             }
             *r = gft->SColorMap->Colors[temp].Red;
@@ -407,10 +409,16 @@ IError _IReadGIF ( FILE *fp, IOptions options, IImageP **image_return )
       DGifGetExtension ( gft, &extcode, &extension );
       while ( extension != NULL ) {
         if ( extcode == COMMENT_EXT_FUNC_CODE ) {
+          /* extension[0] is the sub-block length; the bytes are NOT
+             NUL-terminated, so copy exactly that many. */
+          unsigned int clen = extension[0];
           if ( comments != NULL )
             free ( comments );
-          comments = (char *) malloc ( strlen ( (char *) ( extension + 1 ) ) + 1 );
-          strcpy ( comments, (char *) ( extension + 1 ) );
+          comments = (char *) malloc ( clen + 1 );
+          if ( comments ) {
+            memcpy ( comments, extension + 1, clen );
+            comments[clen] = '\0';
+          }
         }
         else if ( extcode == GRAPHICS_EXT_FUNC_CODE ) {
           /* this is used to set transparent color index */
@@ -436,7 +444,8 @@ IError _IReadGIF ( FILE *fp, IOptions options, IImageP **image_return )
   }
 
   /* lookup transparent color from colormap IF it exists -- GLM 2000*/
-  if ( trans_set && gft->SColorMap ) {
+  if ( trans_set && gft->SColorMap &&
+       transparent_ind < (unsigned int) gft->SColorMap->ColorCount ) {
     transcolor = IAllocColor (
       gft->SColorMap->Colors[transparent_ind].Red,
       gft->SColorMap->Colors[transparent_ind].Green,

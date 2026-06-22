@@ -260,6 +260,19 @@ without breaking the public API.
 - Single-sourced the version (`src/Ilib.h`) and de-duplicated the public header.
 - Fixed the dead `ilib.sourceforge.net` URLs.
 
+### Security
+- Hardened the untrusted-file parsers (memory-safety fixes found in a security
+  audit). **GIF reader** (`IGIF.c`): fixed an off-by-one palette-index check
+  (`>` → `>=`) that over-read the colormap by one entry, an unchecked
+  transparent-color index that could index past a small palette, and a
+  `strlen`/`strcpy` over-read on the non-NUL-terminated comment sub-block.
+  **BDF font parser** (`IFontBDF.c`): fixed a `strlen()-1` underflow on an
+  empty/NUL-led line, a glyph-bitmap heap over-write when a glyph supplies more
+  rows than its declared height (and an over-read on short rows), unchecked
+  `malloc`s that could NULL-deref on OOM, an undersized `ENCODING` name buffer,
+  and several `text + N` field reads that could run past a short line. Added a
+  crafted-BDF regression test (run under ASan/UBSan).
+
 ### Fixed
 - `ilib-fraggraph` miscounted events: the frag-log parser left the trailing
   newline on the second ("killed") field, so deaths and suicides never matched
