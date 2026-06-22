@@ -38,6 +38,8 @@ class IError(IntEnum):
     NoAVIFSupport = 25
     InvalidChart = 26
     InvalidAnimation = 27
+    TIFFError = 28
+    NoTIFFSupport = 29
 
 
 def error_string(code):

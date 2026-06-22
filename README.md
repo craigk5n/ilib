@@ -8,7 +8,7 @@ Copyright (C) 2001-2026 Craig Knudsen, craig@k5n.us — https://www.k5n.us/Ilib.
 
 Ilib is a library (and some tools and examples) written in C
 that can read, create, manipulate and save images.  It can read and
-write PPM, PGM, XPM, BMP, GIF, PNG, JPG, WebP and AVIF image formats,
+write PPM, PGM, XPM, BMP, GIF, PNG, JPG, WebP, AVIF and TIFF image formats,
 including **animated (multi-frame) GIFs**.
 
 ## Graphics
@@ -148,9 +148,9 @@ Install whichever of these you want format support for. FreeType is optional
 too and adds scalable, anti-aliased TrueType/OpenType fonts (alongside the
 built-in X11 BDF fonts):
 
-- **Debian/Ubuntu:** `sudo apt install cmake libpng-dev libjpeg-dev libgif-dev libwebp-dev libavif-dev libfreetype-dev`
-- **Fedora/RHEL:** `sudo dnf install cmake libpng-devel libjpeg-turbo-devel giflib-devel libwebp-devel libavif-devel freetype-devel`
-- **macOS (Homebrew):** `brew install cmake giflib libjpeg libpng webp libavif freetype`
+- **Debian/Ubuntu:** `sudo apt install cmake libpng-dev libjpeg-dev libgif-dev libwebp-dev libavif-dev libtiff-dev libfreetype-dev`
+- **Fedora/RHEL:** `sudo dnf install cmake libpng-devel libjpeg-turbo-devel giflib-devel libwebp-devel libavif-devel libtiff-devel freetype-devel`
+- **macOS (Homebrew):** `brew install cmake giflib libjpeg libpng webp libavif libtiff freetype`
 
 Each is auto-detected; a missing one is skipped gracefully.
 
@@ -172,7 +172,7 @@ library is simply skipped with a notice rather than failing the build.
 |--------|---------|-------------|
 | `CMAKE_INSTALL_PREFIX` | `/usr/local` | Install location |
 | `BUILD_SHARED_LIBS` | `ON` | Build a shared library (`OFF` for static) |
-| `ILIB_WITH_PNG` / `ILIB_WITH_JPEG` / `ILIB_WITH_GIF` | `ON` | Toggle a codec even if its library is present |
+| `ILIB_WITH_PNG` / `ILIB_WITH_JPEG` / `ILIB_WITH_GIF` / `ILIB_WITH_WEBP` / `ILIB_WITH_AVIF` / `ILIB_WITH_TIFF` | `ON` | Toggle a codec even if its library is present |
 | `ILIB_BUILD_CLIENTS` / `ILIB_BUILD_EXAMPLES` | `ON` | Build the bundled tools / demos |
 | `ILIB_BUILD_TESTS` | `OFF` | Build the CTest test suite |
 

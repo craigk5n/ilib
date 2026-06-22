@@ -10,6 +10,10 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- TIFF read/write via libtiff (auto-detected like the other optional codecs;
+  `ILIB_WITH_TIFF`, `HAVE_TIFFLIB`). Reads any TIFF flavour to RGB and writes an
+  8-bit LZW-compressed image; treated as an opaque (RGB) format. Recognized by
+  the `.tif`/`.tiff` extension and exposed in Python (`Format.TIFF`).
 - EXIF orientation support for JPEG: the orientation tag is read on load
   (`IImageOrientation()`), and `IAutoOrient()` rotates/flips an image upright
   for a given orientation. Reading with the new `IOPTION_AUTOORIENT` flag

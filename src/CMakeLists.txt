@@ -8,7 +8,7 @@ set(ILIB_SOURCES
   IFillArc.c IFillCir.c IFillEll.c IFillPol.c IFillRec.c IFilter.c IFlood.c
   IFont.c IFontBDF.c IFontTTF.c IGC.c IGIF.c IImage.c IJPEG.c
   IPGM.c IPixel.c IPNG.c IPPM.c IQuantize.c IResample.c ITextDim.c ITransform.c
-  IWEBP.c IXPM.c)
+  IWEBP.c IXPM.c ITIFF.c)
 # NOTE: IXBM.c is intentionally excluded. It has never compiled (an
 # unterminated string literal since the initial checkin), its only unique
 # symbol _IWriteXBM is dead (XBM is NULL/NULL in the format dispatch table),
@@ -111,6 +111,18 @@ if(ILIB_WITH_AVIF)
   endif()
 endif()
 
+set(_tiff_enabled OFF)
+if(ILIB_WITH_TIFF)
+  find_package(TIFF)
+  if(TIFF_FOUND)
+    target_link_libraries(ilib PRIVATE TIFF::TIFF)
+    target_compile_definitions(ilib PRIVATE HAVE_TIFFLIB)
+    set(_tiff_enabled ON)
+  else()
+    message(STATUS "libtiff not found -- TIFF support disabled")
+  endif()
+endif()
+
 set(_freetype_enabled OFF)
 if(ILIB_WITH_FREETYPE)
   find_package(Freetype)
@@ -135,6 +147,7 @@ set(ILIB_JPEG_ENABLED ${_jpeg_enabled} PARENT_SCOPE)
 set(ILIB_GIF_ENABLED  ${_gif_enabled}  PARENT_SCOPE)
 set(ILIB_WEBP_ENABLED ${_webp_enabled} PARENT_SCOPE)
 set(ILIB_AVIF_ENABLED ${_avif_enabled} PARENT_SCOPE)
+set(ILIB_TIFF_ENABLED ${_tiff_enabled} PARENT_SCOPE)
 set(ILIB_FREETYPE_ENABLED ${_freetype_enabled} PARENT_SCOPE)
 
 # --- Install ----------------------------------------------------------------

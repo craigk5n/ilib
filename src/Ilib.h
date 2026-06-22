@@ -131,9 +131,10 @@ typedef enum {
   IFORMAT_JPEG = 7,
   IFORMAT_BMP = 8,
   IFORMAT_WEBP = 9,
-  IFORMAT_AVIF = 10
+  IFORMAT_AVIF = 10,
+  IFORMAT_TIFF = 11
 } IFileFormat;
-#define INUM_FORMATS 11
+#define INUM_FORMATS 12
 
 /**
  * Line drawing styles.
@@ -280,7 +281,9 @@ typedef enum {
   IAVIFError,
   INoAVIFSupport,
   IInvalidChart,
-  IInvalidAnimation
+  IInvalidAnimation,
+  ITIFFError,
+  INoTIFFSupport
 } IError;
 
 

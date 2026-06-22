@@ -279,6 +279,24 @@ IError _IWriteAVIF (
 );
 #endif /* HAVE_AVIFLIB */
 
+#ifdef HAVE_TIFFLIB
+IError _IReadTIFF (
+#ifndef _NO_PROTO
+  FILE *fp,
+  IOptions options,
+  IImageP **image_return
+#endif
+);
+
+IError _IWriteTIFF (
+#ifndef _NO_PROTO
+  FILE *fp,
+  IImageP *image,
+  IOptions options
+#endif
+);
+#endif /* HAVE_TIFFLIB */
+
 /* Median-cut color reduction. Writes <= max_colors distinct colors from src
    (npixels of RGB) into dst, which may alias src. */
 void _IReduceColorsRGB (
@@ -365,6 +383,11 @@ static IFormatDef IFileFormats[] = {
   { /* IFORMAT_AVIF */ "AVIF", _IReadAVIF, _IWriteAVIF, 24, 0, 1 },
 #else
   { /* IFORMAT_AVIF */ "AVIF", NULL, NULL, 24, 0, 1 },
+#endif
+#ifdef HAVE_TIFFLIB
+  { /* IFORMAT_TIFF */ "TIFF", _IReadTIFF, _IWriteTIFF, 24, 0, 0 },
+#else
+  { /* IFORMAT_TIFF */ "TIFF", NULL, NULL, 24, 0, 0 },
 #endif
 };
 #endif /* IIncludeFileFormats */

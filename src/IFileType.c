@@ -81,6 +81,12 @@ IError IFileType ( char *file, IFileFormat *format_return )
       ret = INoAVIFSupport;
 #endif
     }
+    else if ( strcmp ( ptr, "tif" ) == 0 || strcmp ( ptr, "tiff" ) == 0 ) {
+      *format_return = IFORMAT_TIFF;
+#ifndef HAVE_TIFFLIB
+      ret = INoTIFFSupport;
+#endif
+    }
     else
       ret = IInvalidFormat;
   }
