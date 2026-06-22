@@ -135,8 +135,16 @@ IError IBorder ( IImage image, unsigned int width, IColor color )
   h = imagep->height;
   bpp = imagep->channels;
   bw = (int) width;
-  nw = w + 2 * bw;
-  nh = h + 2 * bw;
+  /* Compute the bordered size in size_t and bound it: an extreme border width
+     would otherwise overflow the int dimensions and under-allocate below. */
+  {
+    size_t snw = (size_t) w + 2 * (size_t) width;
+    size_t snh = (size_t) h + 2 * (size_t) width;
+    if ( snw * snh > ILIB_MAX_PIXELS )
+      return ( IInvalidArgument );
+    nw = (int) snw;
+    nh = (int) snh;
+  }
 
   nd = (unsigned char *) malloc ( (size_t) nw * nh * bpp );
   if ( !nd )
@@ -178,7 +186,8 @@ IImage IAppend ( IImage *images, int count, int horizontal, IColor background )
 {
   IColorP *bg;
   IImageP *dst;
-  int i, total = 0, other = 0, any_alpha = 0, off = 0;
+  int i, other = 0, any_alpha = 0, off = 0;
+  long total = 0; /* accumulated wide to avoid int overflow on many images */
 
   if ( !_IValidateImages ( images, count, &any_alpha ) )
     return ( NULL );
@@ -200,8 +209,14 @@ IImage IAppend ( IImage *images, int count, int horizontal, IColor background )
     }
   }
 
-  dst = (IImageP *) ICreateImage ( horizontal ? total : other,
-    horizontal ? other : total, any_alpha ? IOPTION_ALPHA : IOPTION_NONE );
+  /* Bound the combined size before allocating (ICreateImage also caps, but the
+     int math feeding it must not overflow first). */
+  if ( total <= 0 || other <= 0 || (size_t) total * other > ILIB_MAX_PIXELS )
+    return ( NULL );
+
+  dst = (IImageP *) ICreateImage ( (unsigned) ( horizontal ? total : other ),
+    (unsigned) ( horizontal ? other : total ),
+    any_alpha ? IOPTION_ALPHA : IOPTION_NONE );
   if ( !dst )
     return ( NULL );
   _IFillBuffer ( dst->data, dst->width, dst->height, dst->channels,
@@ -245,8 +260,16 @@ IImage IMontage ( IImage *images, int count, int columns, int spacing,
       cellh = p->height;
   }
   rows = ( count + columns - 1 ) / columns;
-  nw = columns * cellw + ( columns + 1 ) * spacing;
-  nh = rows * cellh + ( rows + 1 ) * spacing;
+  /* Compute the montage size in size_t and bound it: large columns/spacing
+     would otherwise overflow the int dimensions before ICreateImage's cap. */
+  {
+    size_t snw = (size_t) columns * cellw + (size_t) ( columns + 1 ) * spacing;
+    size_t snh = (size_t) rows * cellh + (size_t) ( rows + 1 ) * spacing;
+    if ( snw == 0 || snh == 0 || snw * snh > ILIB_MAX_PIXELS )
+      return ( NULL );
+    nw = (int) snw;
+    nh = (int) snh;
+  }
 
   dst = (IImageP *) ICreateImage ( nw, nh,
     any_alpha ? IOPTION_ALPHA : IOPTION_NONE );

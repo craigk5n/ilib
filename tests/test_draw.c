@@ -494,9 +494,30 @@ TEST copy_image_clips_out_of_bounds_source ( void )
   PASS ();
 }
 
+/* A (non-AA) filled polygon whose vertices lie far outside the image must clip
+   to the image, not run the scanline loop over an unbounded y-range or read OOB.
+   The covered region inside the image should still be filled. */
+TEST fill_polygon_out_of_bounds_is_safe ( void )
+{
+  IImage im = ICreateImage ( W, H, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+  IColor black = IAllocColor ( 0, 0, 0 );
+  IPoint tri[3] = { { -1000, -1000 }, { 100000, 5 }, { -1000, 100000 } };
+
+  ISetForeground ( gc, black );
+  ASSERT_EQ ( INoError, IFillPolygon ( im, gc, tri, 3 ) );
+  ASSERT_EQ ( 0, px_r ( im, 0, 5 ) ); /* a covered interior pixel got filled */
+
+  IFreeColor ( black );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
 SUITE ( draw )
 {
   RUN_TEST ( draw_point_sets_one_pixel );
+  RUN_TEST ( fill_polygon_out_of_bounds_is_safe );
   RUN_TEST ( flood_fill_stops_at_boundary );
   RUN_TEST ( flood_fill_full_region_is_bounded );
   RUN_TEST ( copy_image_clips_out_of_bounds_source );

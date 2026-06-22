@@ -156,9 +156,8 @@ IError IFillPolygon ( IImage image, IGC gc, IPoint *points, int npoints )
   IImageP *imagep = (IImageP *) image;
   int loop;
   int maxY, minY;
-  IPoint *pts;
   int left = 0, right = 0, xval;
-  int npts, yloop;
+  int yloop;
   linetype *lines;
   int nlines;
   int found;
@@ -189,6 +188,10 @@ IError IFillPolygon ( IImage image, IGC gc, IPoint *points, int npoints )
   /* create an array of lines */
   nlines = npoints;
   lines = (linetype *) malloc ( sizeof ( linetype ) * nlines );
+  if ( !lines ) {
+    gcp->line_width = save_line_width;
+    return ( IInvalidImage );
+  }
   for ( loop = 1; loop < npoints; loop++ ) {
     lines[loop].x1 = points[loop - 1].x;
     lines[loop].y1 = points[loop - 1].y;
@@ -217,9 +220,12 @@ IError IFillPolygon ( IImage image, IGC gc, IPoint *points, int npoints )
     minY = points[loop].y < minY ? points[loop].y : minY;
     maxY = points[loop].y > maxY ? points[loop].y : maxY;
   }
-  npts = maxY - minY + 1;
-  pts = (IPoint *) malloc ( sizeof ( IPoint ) * npts );
-  memset ( pts, '\0', sizeof ( IPoint ) * npts );
+  /* Clamp the scanned range to the image: caller y-coordinates are otherwise
+     unbounded, which would spin a huge no-op loop. */
+  if ( minY < 0 )
+    minY = 0;
+  if ( maxY > imagep->height - 1 )
+    maxY = imagep->height - 1;
 
   /* now loop through from lowest y to top y */
   for ( yloop = minY; yloop <= maxY; yloop++ ) {
@@ -272,7 +278,6 @@ IError IFillPolygon ( IImage image, IGC gc, IPoint *points, int npoints )
   }
 
   free ( lines );
-  free ( pts );
 
   gcp->line_width = save_line_width;
 
