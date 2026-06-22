@@ -42,6 +42,12 @@
 #define IMAGIC_FONT 104
 #define IMAGIC_ANIM 555
 
+/* Upper bound on total pixels for a single image (~134 megapixels). Generous
+   for real use but bounds allocations so a malformed file or an extreme
+   resize/rotate request cannot trigger a huge allocation or a size_t overflow
+   that under-allocates. Shared by ICreateImage and the resampling paths. */
+#define ILIB_MAX_PIXELS ( 1u << 27 )
+
 /* Parse the EXIF orientation (1..8) from a JPEG APP1 payload ("Exif\0\0"...),
    returning 1 (normal) if absent or malformed. Defined in IExif.c. */
 int _IExifOrientation ( const unsigned char *data, unsigned int len );
