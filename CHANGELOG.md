@@ -261,6 +261,9 @@ without breaking the public API.
 - Fixed the dead `ilib.sourceforge.net` URLs.
 
 ### Security
+- Extended the malformed-input regression suite (`test_malformed`, run under the
+  leak-detecting sanitizer job) to the WebP, AVIF and TIFF decoders (truncated
+  round-trips) and added a malformed-BDF font case.
 - Hardened the remaining audit-flagged allocation/overflow paths.
   `IFillPolygon` now null-checks its line array, clamps the scanline range to the
   image (caller polygon coordinates were unbounded), and drops a dead per-scanline
