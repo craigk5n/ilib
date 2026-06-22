@@ -102,11 +102,11 @@
 #include <stdio.h> /* for FILE * in the read/write prototypes */
 
 #define ILIB_MAJOR_VERSION 1
-#define ILIB_MINOR_VERSION 1
-#define ILIB_MICRO_VERSION 10
+#define ILIB_MINOR_VERSION 2
+#define ILIB_MICRO_VERSION 0
 
-#define ILIB_VERSION "1.1.10"
-#define ILIB_VERSION_DATE "25 Oct 2004"
+#define ILIB_VERSION "1.2.0"
+#define ILIB_VERSION_DATE "22 Jun 2026"
 #define ILIB_URL "https://www.k5n.us/Ilib.php"
 
 
