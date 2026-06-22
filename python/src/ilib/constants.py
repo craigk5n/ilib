@@ -51,6 +51,8 @@ class Option(IntFlag):
     ASCII = 0x0001
     INTERLACED = 0x0002
     DITHER = 0x0008
+    # IReadImageFile()
+    AUTOORIENT = 0x0010
 
 
 class LineStyle(IntEnum):

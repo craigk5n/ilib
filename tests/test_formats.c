@@ -293,6 +293,56 @@ TEST dither_rejects_bad_handle ( void )
   PASS ();
 }
 
+/* Hand-built little-endian EXIF APP1 payload with Orientation = value. */
+static int build_exif ( unsigned char *b, int value )
+{
+  memcpy ( b, "Exif\0\0", 6 );
+  b[6] = 'I';
+  b[7] = 'I'; /* little-endian */
+  b[8] = 0x2a;
+  b[9] = 0x00; /* TIFF magic */
+  b[10] = 8;
+  b[11] = 0;
+  b[12] = 0;
+  b[13] = 0; /* IFD0 at TIFF+8 -> offset 14 */
+  b[14] = 1;
+  b[15] = 0; /* one entry */
+  b[16] = 0x12;
+  b[17] = 0x01; /* tag 0x0112 (orientation) */
+  b[18] = 0x03;
+  b[19] = 0x00; /* type SHORT */
+  b[20] = 1;
+  b[21] = 0;
+  b[22] = 0;
+  b[23] = 0; /* count 1 */
+  b[24] = (unsigned char) value;
+  b[25] = 0; /* value */
+  b[26] = 0;
+  b[27] = 0;
+  return ( 28 );
+}
+
+/* The EXIF parser recovers the orientation tag and rejects malformed data. */
+TEST exif_orientation_parses ( void )
+{
+  unsigned char b[40];
+  int n = build_exif ( b, 6 );
+  ASSERT_EQ ( 6, _IExifOrientation ( b, (unsigned int) n ) );
+
+  n = build_exif ( b, 8 );
+  ASSERT_EQ ( 8, _IExifOrientation ( b, (unsigned int) n ) );
+
+  /* Out-of-range stored value falls back to normal. */
+  n = build_exif ( b, 99 );
+  ASSERT_EQ ( 1, _IExifOrientation ( b, (unsigned int) n ) );
+
+  /* Truncated / non-EXIF data is rejected (returns normal), never crashes. */
+  ASSERT_EQ ( 1, _IExifOrientation ( b, 10 ) );
+  ASSERT_EQ ( 1, _IExifOrientation ( (const unsigned char *) "not exif", 8 ) );
+  ASSERT_EQ ( 1, _IExifOrientation ( NULL, 0 ) );
+  PASS ();
+}
+
 /* The GIF writer auto-quantizes a >256-color image down to a 256-color
    palette: writing one must succeed cleanly (when giflib is compiled in) or
    fail cleanly otherwise -- never crash or report a palette overflow. Palette
@@ -467,6 +517,7 @@ SUITE ( formats )
   RUN_TEST ( reduce_colors_rejects_bad_handle );
   RUN_TEST ( dither_diffuses_gradient );
   RUN_TEST ( dither_rejects_bad_handle );
+  RUN_TEST ( exif_orientation_parses );
   RUN_TEST ( gif_write_quantizes );
   RUN_TEST ( optional_codec_write_is_clean );
   RUN_TEST ( webp_roundtrip );

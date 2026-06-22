@@ -239,6 +239,9 @@ typedef struct {
 #define IOPTION_INTERLACED 0x0002 /* interlaced output (GIF) */
 #define IOPTION_DITHER 0x0008     /* Floyd-Steinberg dither on color reduction */
 
+/* use the following with IReadImageFile() */
+#define IOPTION_AUTOORIENT 0x0010 /* apply EXIF orientation on load (JPEG) */
+
 /**
  * Default color values for black and white
  */
@@ -518,6 +521,19 @@ IError IRotate (
 );
 
 /**
+ * Rotate/flip an image to upright per an EXIF orientation value (1..8), in
+ * place. 1 (or any out-of-range value) is a no-op. JPEGs read with
+ * IOPTION_AUTOORIENT are corrected automatically; this lets you do it manually
+ * from the value returned by IImageOrientation().
+ */
+IError IAutoOrient (
+#ifndef _NO_PROTO
+  IImage image,   /* image (modified in place) */
+  int orientation /* EXIF orientation, 1..8 */
+#endif
+);
+
+/**
  * Crop an image to the rectangle (x, y, width, height). The rectangle must lie
  * within the image and have non-zero size, else IInvalidArgument is returned.
  * On success the image is resized in place to width x height.
@@ -750,6 +766,17 @@ unsigned int IImageHeight (
  * Returns the width of the image.
  */
 unsigned int IImageWidth (
+#ifndef _NO_PROTO
+  IImage image /* pointer to image */
+#endif
+);
+
+/**
+ * Return the image's EXIF orientation as read from the file (1..8; 1 = normal,
+ * the default). After an auto-oriented load (IOPTION_AUTOORIENT) this is 1
+ * because the pixels have already been corrected.
+ */
+int IImageOrientation (
 #ifndef _NO_PROTO
   IImage image /* pointer to image */
 #endif

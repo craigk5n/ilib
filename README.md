@@ -35,7 +35,10 @@ The drawing API is modeled on a subset of the X11 graphics functions:
   sepia, and opacity (`IGreyscale`, `INegate`, `IBrightnessContrast`, `IGamma`,
   `IThreshold`, `INormalize`, `ISepia`, `IOpacity`).
 - **Transforms:** geometric operations: flip, flop, rotate (multiples of 90°),
-  and crop (`IFlip`, `IFlop`, `IRotate`, `ICrop`).
+  and crop (`IFlip`, `IFlop`, `IRotate`, `ICrop`). JPEGs carry an EXIF
+  orientation, readable via `IImageOrientation` and applied by `IAutoOrient`
+  (or automatically when read with `IOPTION_AUTOORIENT` / `--auto-orient` /
+  `Image.open(auto_orient=True)`) so photos load upright.
 - **Convolution:** a generic kernel filter (`IConvolve`) plus blur, Gaussian
   blur, sharpen, edge detect, and emboss (`IBlur`, `IGaussianBlur`, `ISharpen`,
   `IEdgeDetect`, `IEmboss`).

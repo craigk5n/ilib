@@ -181,6 +181,40 @@ IError IRotate ( IImage image, int degrees )
   }
 }
 
+IError IAutoOrient ( IImage image, int orientation )
+{
+  IImageP *imagep = (IImageP *) image;
+  IError err = _IValidImage ( imagep );
+
+  if ( err != INoError )
+    return ( err );
+
+  /* Map an EXIF orientation (1..8) to the operations that make the image
+     upright. 5 and 7 are the (rare) transpose/transverse cases: a 90/270
+     rotation followed by a horizontal flip. */
+  switch ( orientation ) {
+  case 2:
+    return ( IFlop ( image ) );
+  case 3:
+    return ( IRotate ( image, 180 ) );
+  case 4:
+    return ( IFlip ( image ) );
+  case 5:
+    err = IRotate ( image, 90 );
+    return ( err != INoError ? err : IFlop ( image ) );
+  case 6:
+    return ( IRotate ( image, 90 ) );
+  case 7:
+    err = IRotate ( image, 270 );
+    return ( err != INoError ? err : IFlop ( image ) );
+  case 8:
+    return ( IRotate ( image, 270 ) );
+  case 1:
+  default:
+    return ( INoError ); /* normal, or unknown -> leave as is */
+  }
+}
+
 IError ICrop ( IImage image, int x, int y, unsigned int width,
   unsigned int height )
 {

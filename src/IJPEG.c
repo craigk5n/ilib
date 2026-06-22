@@ -121,7 +121,8 @@ IError _IReadJPEG ( FILE *fp, IOptions options, IImageP **image_return )
   struct my_error_mgr jerr;
   JSAMPROW row_pointer[1];
   int loop;
-  (void) options;
+  volatile int orientation = 1; /* survives the setjmp/longjmp path */
+  jpeg_saved_marker_ptr marker;
 
   /* We set up the normal JPEG error routines */
   cinfo.err = jpeg_std_error ( &jerr.pub );
@@ -143,8 +144,19 @@ IError _IReadJPEG ( FILE *fp, IOptions options, IImageP **image_return )
   /* Step 2: specify data source (eg, a file) */
   jpeg_stdio_src ( &cinfo, fp );
 
+  /* Ask libjpeg to retain the APP1 marker so we can read EXIF orientation. */
+  jpeg_save_markers ( &cinfo, JPEG_APP0 + 1, 0xFFFF );
+
   /* Step 3: read file parameters with jpeg_read_header() */
   (void) jpeg_read_header ( &cinfo, TRUE );
+
+  for ( marker = cinfo.marker_list; marker; marker = marker->next ) {
+    if ( marker->marker == JPEG_APP0 + 1 && marker->data_length >= 6 &&
+         memcmp ( marker->data, "Exif\0\0", 6 ) == 0 ) {
+      orientation = _IExifOrientation ( marker->data, marker->data_length );
+      break;
+    }
+  }
 
   /* Step 5: Start decompressor */
   (void) jpeg_start_decompress ( &cinfo );
@@ -171,6 +183,13 @@ IError _IReadJPEG ( FILE *fp, IOptions options, IImageP **image_return )
 
   /* Step 8: Release JPEG decompression object */
   jpeg_destroy_decompress ( &cinfo );
+
+  image->orientation = orientation;
+  /* Auto-orient on request: rotate/flip upright, then report as normal. */
+  if ( ( options & IOPTION_AUTOORIENT ) && orientation > 1 ) {
+    IAutoOrient ( (IImage) image, orientation );
+    image->orientation = 1;
+  }
 
   *image_return = image;
 

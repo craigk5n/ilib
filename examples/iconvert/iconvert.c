@@ -84,6 +84,7 @@ static void usage ( const char *prog )
     "  --resize WxH               resize to WxH (bilinear)\n"
     "  --reduce-colors N          reduce to at most N colours\n"
     "  --dither                   Floyd-Steinberg dither on GIF color reduction\n"
+    "  --auto-orient              apply the JPEG's EXIF orientation on load\n"
     "  --normalize                auto-stretch contrast\n"
     "  --sepia                    apply a sepia tone\n"
     "  --opacity F                scale RGBA alpha by F (e.g. 0.5)\n"
@@ -222,6 +223,7 @@ int main ( int argc, char *argv[] )
   IError ret;
   int loop;
   int dither = 0;
+  int auto_orient = 0;
 
   for ( loop = 1; loop < argc; loop++ ) {
     char *tok = argv[loop];
@@ -322,6 +324,10 @@ int main ( int argc, char *argv[] )
       dither = 1; /* a write option, not a pipeline op */
       continue;
     }
+    else if ( is_flag ( tok, "auto-orient" ) ) {
+      auto_orient = 1; /* a read option, not a pipeline op */
+      continue;
+    }
     else if ( tok[0] == '-' && tok[1] != '\0' ) {
       fprintf ( stderr, "Unknown option: %s\n", tok );
       usage ( argv[0] );
@@ -379,7 +385,8 @@ int main ( int argc, char *argv[] )
   else
     fp = stdin;
 
-  if ( ( ret = IReadImageFile ( fp, input_format, IOPTION_NONE, &image ) ) ) {
+  if ( ( ret = IReadImageFile ( fp, input_format,
+           auto_orient ? IOPTION_AUTOORIENT : IOPTION_NONE, &image ) ) ) {
     fprintf ( stderr, "Error reading image: %s\n", IErrorString ( ret ) );
     exit ( 1 );
   }
