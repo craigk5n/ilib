@@ -168,7 +168,13 @@ IError IDrawStringRotated ( IImage image, IGC gc, int x, int y, char *text, unsi
   case ITEXT_SHADOWED:
     if ( gcp->background != NULL ) {
       IFontSize ( (IFont) gcp->font, &font_height );
+      /* font_height comes from the (untrusted) font's PIXEL_SIZE; clamp so it
+         can't divide by zero or overrun the fixed shadows[20] array. */
       nshadows = font_height / 5;
+      if ( nshadows < 1 )
+        nshadows = 1;
+      if ( nshadows > 20 )
+        nshadows = 20;
       make_shadows ( gcp->background, shadows, nshadows );
       gcp->foreground = fgsave;
       for ( loop = nshadows; loop > 0; loop-- ) {
@@ -266,7 +272,7 @@ static IError draw_string_rotated_90 ( IImage image, IGC gc, int x, int y, char 
     else {
       loop2 = 0;
       ptr++;
-      while ( *ptr != ';' && (unsigned int) loop < len && loop2 < 256 ) {
+      while ( (unsigned int) loop < len && loop2 < 255 && *ptr != ';' ) {
         ch[loop2] = *ptr;
         ptr++;
         loop++;
@@ -395,7 +401,7 @@ IError IDrawStringRotatedAngle ( IImage image, IGC gc, int x, int y, char *text,
     else {
       loop2 = 0;
       ptr++;
-      while ( *ptr != ';' && (unsigned int) loop < len && loop2 < 256 ) {
+      while ( (unsigned int) loop < len && loop2 < 255 && *ptr != ';' ) {
         ch[loop2] = *ptr;
         ptr++;
         loop++;

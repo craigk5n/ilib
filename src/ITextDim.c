@@ -152,7 +152,7 @@ IError ITextDimensions ( IGC gc, IFont font, char *text, unsigned int len, unsig
     else {
       loop2 = 0;
       ptr++;
-      while ( *ptr != ';' && (unsigned int) loop < len && loop2 < 256 ) {
+      while ( (unsigned int) loop < len && loop2 < 255 && *ptr != ';' ) {
         ch[loop2] = *ptr;
         ptr++;
         loop++;

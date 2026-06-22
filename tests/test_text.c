@@ -68,6 +68,67 @@ TEST bdf_malicious_input_is_safe ( void )
   PASS ();
 }
 
+/* A long `\033...` escape with no terminating ';' must not overrun the fixed
+   256-byte name buffer in the text routines (off-by-one fix). */
+TEST text_escape_sequence_is_bounded ( void )
+{
+  IImage im = ICreateImage ( 40, 20, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+  IFont font = NULL;
+  char buf[400];
+  unsigned int w = 0, h = 0;
+
+  ILoadFontFromFile ( "helvR08", FONT_PATH, &font );
+  ISetFont ( gc, font );
+  ISetForeground ( gc, IAllocColor ( 0, 0, 0 ) );
+  buf[0] = '\033';
+  memset ( buf + 1, 'a', sizeof ( buf ) - 1 ); /* no ';' and no NUL within len */
+  ITextDimensions ( gc, font, buf, sizeof ( buf ), &w, &h );
+  IDrawString ( im, gc, 1, 15, buf, sizeof ( buf ) );
+
+  IFreeFont ( font );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS (); /* the value is "no ASan stack-buffer-overflow" */
+}
+
+/* A font with a huge PIXEL_SIZE drove nshadows past the fixed shadows[20]
+   (and divided by zero when tiny); both are now clamped. */
+TEST text_shadow_large_pixelsize_is_bounded ( void )
+{
+  char path[] = "/tmp/ilib_bdf_XXXXXX";
+  int fd = mkstemp ( path );
+  FILE *fp;
+  IFont font = NULL;
+  IImage im;
+  IGC gc;
+  const char *body =
+    "STARTFONT 2.1\nPIXEL_SIZE 200\nFONT_ASCENT 180\nFONT_DESCENT 20\n"
+    "STARTCHAR A\nENCODING 65\nBBX 4 4 0 0\nBITMAP\nF0\nF0\nF0\nF0\n"
+    "ENDCHAR\nENDFONT\n";
+
+  if ( fd < 0 )
+    SKIP ();
+  fp = fdopen ( fd, "w" );
+  fwrite ( body, 1, strlen ( body ), fp );
+  fclose ( fp );
+
+  ASSERT_EQ ( INoError, ILoadFontFromFile ( "big", path, &font ) );
+  im = ICreateImage ( 60, 60, IOPTION_NONE );
+  gc = ICreateGC ();
+  ISetFont ( gc, font );
+  ISetForeground ( gc, IAllocColor ( 0, 0, 0 ) );
+  ISetBackground ( gc, IAllocColor ( 200, 200, 200 ) );
+  ISetTextStyle ( gc, ITEXT_SHADOWED ); /* nshadows = 200/5 = 40 -> clamp to 20 */
+  IDrawString ( im, gc, 5, 50, "A", 1 );
+
+  IFreeFont ( font );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  unlink ( path );
+  PASS ();
+}
+
 TEST load_missing_font_fails ( void )
 {
   IFont font = NULL;
@@ -485,6 +546,8 @@ SUITE ( text )
   RUN_TEST ( load_font_succeeds );
   RUN_TEST ( load_missing_font_fails );
   RUN_TEST ( bdf_malicious_input_is_safe );
+  RUN_TEST ( text_escape_sequence_is_bounded );
+  RUN_TEST ( text_shadow_large_pixelsize_is_bounded );
   RUN_TEST ( text_dimensions_positive );
   RUN_TEST ( text_alignment_coordinates );
   RUN_TEST ( ttf_text_width_scales );

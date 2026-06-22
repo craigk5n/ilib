@@ -268,8 +268,8 @@ static void generate_gif ( void )
   ISetForeground ( gc, black );
   IDrawRectangle ( im_out, gc, 0, 0, width - 1, height - 1 );
 
-  /* draw title */
-  sprintf ( temp, "Frag Efficiency Graph 1.0: %s", player );
+  /* draw title (player is a command-line arg; bound it to temp[]) */
+  snprintf ( temp, sizeof ( temp ), "Frag Efficiency Graph 1.0: %s", player );
   /* Prefer anti-aliased TrueType, falling back to the compiled-in BDF fonts. */
   load_font ( "label", 11, courR10_font, &courR10 );
   load_font ( "title", 18, helvB18_font, &helvB18 );
