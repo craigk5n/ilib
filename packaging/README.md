@@ -26,7 +26,7 @@ A formula can build straight from a release tarball:
 class Ilib < Formula
   desc "C library to read, create, manipulate and save raster images"
   homepage "https://www.k5n.us/Ilib.php"
-  url "https://github.com/craigk5n/ilib/releases/download/v1.1.10/ilib-1.1.10.tar.gz"
+  url "https://github.com/craigk5n/ilib/releases/download/v1.2.0/ilib-1.2.0.tar.gz"
   # sha256 from the release SHA256SUMS
   license "GPL-2.0-only"
 
