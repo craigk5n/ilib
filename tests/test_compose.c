@@ -189,9 +189,31 @@ TEST compose_rejects_bad_handle ( void )
   PASS ();
 }
 
+/* Extreme arguments must be rejected, not overflow the int dimension math into
+   an under-allocation. */
+TEST compose_rejects_huge_dimensions ( void )
+{
+  IImage im = ICreateImage ( 4, 4, IOPTION_NONE );
+  IImage list[1], out;
+  IColor green = IAllocColor ( 0, 255, 0 );
+
+  /* A border so wide that (w + 2*bw)^2 blows past the pixel cap. */
+  ASSERT_EQ ( IInvalidArgument, IBorder ( im, 0x40000000u, green ) );
+  ASSERT_EQ ( 4, (int) IImageWidth ( im ) ); /* unchanged */
+
+  /* A montage with absurd spacing must return NULL, not crash. */
+  list[0] = im;
+  out = IMontage ( list, 1, 1, 0x40000000, green );
+  ASSERT ( out == NULL );
+
+  IFreeImage ( im );
+  PASS ();
+}
+
 SUITE ( compose )
 {
   RUN_TEST ( trim_crops_to_content );
+  RUN_TEST ( compose_rejects_huge_dimensions );
   RUN_TEST ( trim_all_background_is_noop );
   RUN_TEST ( border_grows_and_frames );
   RUN_TEST ( border_rejects_bad_color );

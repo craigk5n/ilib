@@ -34,9 +34,16 @@ static void init_colors ( void )
   IColorP *color;
 
   colors = (IColorP **) malloc ( 2 * sizeof ( IColorP * ) );
+  if ( !colors )
+    return;
 
   /* add black as color 0 */
   color = (IColorP *) malloc ( sizeof ( IColorP ) );
+  if ( !color ) {
+    free ( colors );
+    colors = NULL;
+    return;
+  }
   color->red = color->green = color->blue = 0;
   color->alpha = 255;
   color->value = num_colors++;
@@ -44,6 +51,13 @@ static void init_colors ( void )
 
   /* add white as color 1 */
   color = (IColorP *) malloc ( sizeof ( IColorP ) );
+  if ( !color ) {
+    free ( colors[0] );
+    free ( colors );
+    colors = NULL;
+    num_colors = 0;
+    return;
+  }
   color->red = color->green = color->blue = 255;
   color->alpha = 255;
   color->value = num_colors++;
@@ -56,7 +70,7 @@ IColorP *_IGetColor ( int color )
   if ( colors == NULL )
     init_colors ();
 
-  if ( color < 0 || color >= num_colors )
+  if ( colors == NULL || color < 0 || color >= num_colors )
     return ( NULL );
 
   return ( colors[color] );
@@ -70,13 +84,15 @@ IColor IAllocColorAlpha ( unsigned int red, unsigned int green,
 
   if ( colors == NULL )
     init_colors ();
+  if ( colors == NULL )
+    return ( 0 ); /* black; out of memory */
 
   if ( red > 255 || green > 255 || blue > 255 || alpha > 255 ) {
     fprintf ( stderr, "Bad color: %d/%d/%d/%d\n", red, green, blue, alpha );
     return ( 0 ); /* black */
   }
   else {
-    IColorP **new_colors;
+    int slot, i;
     color = (IColorP *) malloc ( sizeof ( IColorP ) );
     if ( !color )
       return ( 0 ); /* black */
@@ -85,16 +101,28 @@ IColor IAllocColorAlpha ( unsigned int red, unsigned int green,
     color->green = green;
     color->blue = blue;
     color->alpha = alpha;
-    color->value = num_colors++;
-    new_colors = (IColorP **) realloc ( (void *) colors,
-      ( num_colors * sizeof ( IColorP * ) ) );
-    if ( !new_colors ) {
-      free ( color );
-      num_colors--;
-      return ( 0 ); /* black */
+
+    /* Reuse a freed slot if one exists so repeated alloc/free cycles do not
+       grow the table without bound. Otherwise append (growing the array). */
+    slot = -1;
+    for ( i = 0; i < num_colors; i++ ) {
+      if ( colors[i] == NULL ) {
+        slot = i;
+        break;
+      }
     }
-    colors = new_colors;
-    colors[color->value] = color;
+    if ( slot < 0 ) {
+      IColorP **new_colors = (IColorP **) realloc ( (void *) colors,
+        ( (size_t) num_colors + 1 ) * sizeof ( IColorP * ) );
+      if ( !new_colors ) {
+        free ( color );
+        return ( 0 ); /* black */
+      }
+      colors = new_colors;
+      slot = num_colors++;
+    }
+    color->value = slot;
+    colors[slot] = color;
     return ( color->value );
   }
 }

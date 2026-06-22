@@ -261,6 +261,17 @@ without breaking the public API.
 - Fixed the dead `ilib.sourceforge.net` URLs.
 
 ### Security
+- Hardened the remaining audit-flagged allocation/overflow paths.
+  `IFillPolygon` now null-checks its line array, clamps the scanline range to the
+  image (caller polygon coordinates were unbounded), and drops a dead per-scanline
+  allocation whose size came from those unclamped coordinates. `IBorder`,
+  `IAppend` and `IMontage` compute their output dimensions in `size_t` and bound
+  them by `ILIB_MAX_PIXELS`, so extreme border widths / image counts / montage
+  spacing can no longer overflow the `int` math into an under-allocation.
+  `IColor` checks its allocations (no NULL-deref on OOM) and now reuses freed
+  color-table slots instead of growing the table without bound on repeated
+  alloc/free cycles. Added regression tests (compose size limits, polygon
+  out-of-bounds fill, color-slot reuse), all ASan/UBSan-clean.
 - Expanded fuzzing and added static analysis. The libFuzzer decoder harness now
   also covers the WebP, AVIF and TIFF decoders; a new `fuzz_bdf` harness fuzzes
   the X11 BDF font parser via `ILoadFontFromFile`, and CI runs it alongside
