@@ -119,6 +119,10 @@ int main ( int argc, char *argv[] )
       print_usage ();
     }
     else if ( strcmp ( argv[loop], "-html" ) == 0 ) {
+      if ( loop + 1 >= argc ) {
+        fprintf ( stderr, "Error: -html requires a filename\n" );
+        exit ( 1 );
+      }
       map_fp = fopen ( argv[++loop], "w" );
       if ( map_fp == NULL ) {
         fprintf ( stderr, "Error: could not write map file \"%s\"\n",

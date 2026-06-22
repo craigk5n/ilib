@@ -261,6 +261,15 @@ without breaking the public API.
 - Fixed the dead `ilib.sourceforge.net` URLs.
 
 ### Security
+- Hardened text rendering and the client tools (audit follow-up). The `\033`
+  escape-sequence parser in `IDrawString`/`IDrawStringRotated*`/
+  `ITextDimensions` wrote one byte past a fixed 256-byte buffer (and could read
+  past the caller's text length); both are now bounded. The `ITEXT_SHADOWED`
+  path derived its shadow count from the font's `PIXEL_SIZE`, overflowing the
+  fixed `shadows[20]` array (and dividing by zero for tiny fonts) — now clamped.
+  Client tools: `ilib-font2h` (stack overflows in the `"`-escaping buffer and
+  the basename copy), `ilib-fraggraph` (`sprintf` of the player name from argv),
+  and `ilib-index` (`fopen(argv[++loop])` without an arg-count check) are fixed.
 - Hardened the core image operations (audit follow-up). `ICopyImage` /
   `ICopyImageScaled` now clip the **source** rectangle to the source image
   (caller coordinates were trusted and read out of bounds), reject zero
