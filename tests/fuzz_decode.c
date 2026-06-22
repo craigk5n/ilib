@@ -32,7 +32,7 @@ static const IFileFormat ALL_FORMATS[] = {
 static int needs_real_fd ( IFileFormat fmt )
 {
   return ( fmt == IFORMAT_GIF || fmt == IFORMAT_WEBP || fmt == IFORMAT_AVIF ||
-    fmt == IFORMAT_TIFF );
+           fmt == IFORMAT_TIFF );
 }
 
 static void try_one ( const uint8_t *data, size_t size, IFileFormat fmt )
