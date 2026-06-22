@@ -33,6 +33,9 @@ jobs:
             echo "::error::Tag ${GITHUB_REF_NAME} does not match ILIB_VERSION=${hdr}"
             exit 1
           fi
+          # Export the bare version (no leading "v") so artifact names match the
+          # CPack tarballs (ilib-<version>.tar.gz).
+          echo "VERSION=$tag" >> "$GITHUB_ENV"
 
       - name: Configure
         run: |
@@ -55,7 +58,7 @@ jobs:
         with:
           path: .
           format: spdx-json
-          output-file: build/ilib-${{ github.ref_name }}.spdx.json
+          output-file: build/ilib-${{ env.VERSION }}.spdx.json
           upload-artifact: false
           upload-release-assets: false
 
@@ -67,8 +70,8 @@ jobs:
         run: |
           cosign sign-blob --yes SHA256SUMS \
             --bundle SHA256SUMS.cosign.bundle
-          cosign sign-blob --yes "ilib-${GITHUB_REF_NAME}.spdx.json" \
-            --bundle "ilib-${GITHUB_REF_NAME}.spdx.json.cosign.bundle"
+          cosign sign-blob --yes "ilib-${VERSION}.spdx.json" \
+            --bundle "ilib-${VERSION}.spdx.json.cosign.bundle"
 
       - name: Publish GitHub release
         working-directory: build
@@ -77,7 +80,7 @@ jobs:
         run: |
           gh release create "${GITHUB_REF_NAME}" \
             ilib-*.tar.gz SHA256SUMS SHA256SUMS.cosign.bundle \
-            "ilib-${GITHUB_REF_NAME}.spdx.json" \
-            "ilib-${GITHUB_REF_NAME}.spdx.json.cosign.bundle" \
+            "ilib-${VERSION}.spdx.json" \
+            "ilib-${VERSION}.spdx.json.cosign.bundle" \
             --title "ilib ${GITHUB_REF_NAME}" \
             --generate-notes
