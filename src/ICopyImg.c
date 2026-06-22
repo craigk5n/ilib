@@ -70,6 +70,10 @@ IError ICopyImage ( IImage source, IImage dest, IGC gc, int src_x, int src_y, un
 
   for ( row = src_y, y = dest_y; row < src_y + (int) height; row++, y++ ) {
     for ( col = src_x, x = dest_x; col < src_x + (int) width; col++, x++ ) {
+      /* Clip to the source: src_x/src_y/width/height are caller-supplied and
+         otherwise read out of bounds of i1->data. */
+      if ( row < 0 || row >= i1->height || col < 0 || col >= i1->width )
+        continue;
       if ( i1->greyscale ) {
         ptr = i1->data + ( row * i1->width ) + col;
         colorp->red = colorp->green = colorp->blue = *( ptr );
@@ -78,7 +82,9 @@ IError ICopyImage ( IImage source, IImage dest, IGC gc, int src_x, int src_y, un
       else {
         ptr = i1->data + ( row * i1->width * 3 ) + ( col * 3 );
         /* check for transparent color */
-        if ( i1->transparent == NULL || i1->transparent->red != *( ptr ) || i1->transparent->green != *( ptr + 1 ) || i1->transparent->blue != ( *ptr + 2 ) ) {
+        if ( i1->transparent == NULL || i1->transparent->red != *( ptr ) ||
+             i1->transparent->green != *( ptr + 1 ) ||
+             i1->transparent->blue != *( ptr + 2 ) ) {
           colorp->red = *( ptr );
           colorp->green = *( ptr + 1 );
           colorp->blue = *( ptr + 2 );
@@ -136,6 +142,11 @@ IError ICopyImageScaled ( IImage source, IImage dest, IGC gc,
   else
     return ( IInvalidGC );
 
+  /* Zero source/dest extents would divide by zero in the scale factors. */
+  if ( src_width == 0 || src_height == 0 || dest_width == 0 ||
+       dest_height == 0 )
+    return ( IInvalidArgument );
+
   save = gcp->foreground;
 
   color = IAllocColor ( 0, 0, 0 );
@@ -158,6 +169,9 @@ IError ICopyImageScaled ( IImage source, IImage dest, IGC gc,
       x2 = (int) tempx;
       tempy = (double) src_y + (double) ( y - dest_y ) / scaley;
       y2 = (int) tempy;
+      /* The mapped source location can fall outside i1; skip if so. */
+      if ( x2 < 0 || x2 >= i1->width || y2 < 0 || y2 >= i1->height )
+        continue;
       if ( i1->greyscale ) {
         ptr = i1->data + ( y2 * i1->width ) + x2;
         colorp->red = colorp->green = colorp->blue = *( ptr );

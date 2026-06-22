@@ -261,6 +261,16 @@ without breaking the public API.
 - Fixed the dead `ilib.sourceforge.net` URLs.
 
 ### Security
+- Hardened the core image operations (audit follow-up). `ICopyImage` /
+  `ICopyImageScaled` now clip the **source** rectangle to the source image
+  (caller coordinates were trusted and read out of bounds), reject zero
+  source/dest extents (division by zero), and fix a `*ptr + 2` typo in the
+  transparent-color compare. `IFloodFill` was rewritten from unbounded
+  recursion (a stack-overflow DoS on a large uniform region) to an iterative
+  heap-stack scanline fill, also fixing a `fillR >= height` bound that should
+  have been `width`. `IResizeFiltered` and `IRotateAngle` now cap the target
+  pixel count (`ILIB_MAX_PIXELS`), preventing a huge allocation / 32-bit
+  size overflow that could under-allocate and overflow the buffer.
 - Hardened the untrusted-file parsers (memory-safety fixes found in a security
   audit). **GIF reader** (`IGIF.c`): fixed an off-by-one palette-index check
   (`>` → `>=`) that over-read the colormap by one entry, an unchecked

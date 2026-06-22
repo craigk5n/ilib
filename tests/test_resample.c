@@ -185,6 +185,21 @@ TEST resize_filtered_rejects_zero ( void )
   PASS ();
 }
 
+/* An absurd target size must be rejected, not over-allocated (or, on 32-bit
+   size_t, wrapped into an under-allocation + heap overflow). */
+TEST resize_rejects_huge_dimensions ( void )
+{
+  IImage im = ICreateImage ( 4, 4, IOPTION_NONE );
+
+  ASSERT_EQ ( IInvalidArgument,
+    IResizeFiltered ( im, 40000, 40000, IRESIZE_BILINEAR ) );
+  ASSERT_EQ ( 4, (int) IImageWidth ( im ) ); /* unchanged */
+  ASSERT_EQ ( 4, (int) IImageHeight ( im ) );
+
+  IFreeImage ( im );
+  PASS ();
+}
+
 TEST rotate_angle_zero_is_identity ( void )
 {
   IImage im = ICreateImage ( 4, 3, IOPTION_NONE );
@@ -272,6 +287,7 @@ SUITE ( resample )
   RUN_TEST ( auto_shrinks_with_area );
   RUN_TEST ( bicubic_preserves_solid_and_dims );
   RUN_TEST ( resize_filtered_rejects_zero );
+  RUN_TEST ( resize_rejects_huge_dimensions );
   RUN_TEST ( rotate_angle_zero_is_identity );
   RUN_TEST ( rotate_angle_90_clockwise );
   RUN_TEST ( rotate_angle_45_grows_and_fills_background );

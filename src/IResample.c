@@ -202,6 +202,10 @@ IError IResizeFiltered ( IImage image, unsigned int width, unsigned int height,
     return ( err );
   if ( width == 0 || height == 0 )
     return ( IInvalidArgument );
+  /* Bound the target size so a huge request can't over-allocate (or, on a
+     32-bit size_t, overflow the buffer math below and under-allocate). */
+  if ( (size_t) width * height > ILIB_MAX_PIXELS )
+    return ( IInvalidArgument );
 
   w = imagep->width;
   h = imagep->height;
@@ -290,6 +294,8 @@ IError IRotateAngle ( IImage image, double degrees, IColor background )
     nw = 1;
   if ( nh < 1 )
     nh = 1;
+  if ( (size_t) nw * nh > ILIB_MAX_PIXELS )
+    return ( IInvalidArgument );
 
   nd = (unsigned char *) malloc ( (size_t) nw * nh * bpp );
   if ( !nd )

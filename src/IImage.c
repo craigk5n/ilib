@@ -25,11 +25,6 @@
 #include "IlibP.h"
 
 
-/* Upper bound on total pixels for a single image. Generous for real use
-   (~134 megapixels) but bounds the allocation so a malformed file claiming
-   enormous dimensions cannot trigger a huge allocation / OOM. */
-#define ILIB_MAX_PIXELS ( 1u << 27 )
-
 IImage ICreateImage ( unsigned width, unsigned height, unsigned options )
 {
   IImageP *image;

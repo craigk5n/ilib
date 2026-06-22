@@ -428,9 +428,78 @@ TEST round_rectangle_rounds_corners ( void )
   PASS ();
 }
 
+TEST flood_fill_stops_at_boundary ( void )
+{
+  IImage im = ICreateImage ( 20, 20, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+
+  ISetForeground ( gc, IAllocColor ( 255, 255, 255 ) );
+  IFillRectangle ( im, gc, 0, 0, 20, 20 );
+  ISetForeground ( gc, IAllocColor ( 0, 0, 0 ) );
+  IFillRectangle ( im, gc, 0, 10, 20, 1 ); /* a wall splitting top / bottom */
+  ISetForeground ( gc, IAllocColor ( 255, 0, 0 ) );
+  ASSERT_EQ ( INoError, IFloodFill ( im, gc, 5, 5 ) ); /* fill the top half */
+
+  ASSERT_EQ ( 255, px_r ( im, 5, 5 ) ); /* filled red */
+  ASSERT_EQ ( 0, px_g ( im, 5, 5 ) );
+  ASSERT_EQ ( 0, px_r ( im, 5, 10 ) );   /* wall stays black */
+  ASSERT_EQ ( 255, px_r ( im, 5, 15 ) ); /* below the wall stays white */
+  ASSERT_EQ ( 255, px_g ( im, 5, 15 ) );
+
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST flood_fill_full_region_is_bounded ( void )
+{
+  IImage im = ICreateImage ( 96, 96, IOPTION_NONE ); /* uniform: one big region */
+  IGC gc = ICreateGC ();
+
+  ISetForeground ( gc, IAllocColor ( 255, 255, 255 ) );
+  IFillRectangle ( im, gc, 0, 0, 96, 96 );
+  ISetForeground ( gc, IAllocColor ( 0, 0, 255 ) );
+  /* Recursion would overflow the stack here; the iterative fill must not. */
+  ASSERT_EQ ( INoError, IFloodFill ( im, gc, 48, 48 ) );
+  ASSERT_EQ ( 255, px_b ( im, 0, 0 ) );
+  ASSERT_EQ ( 255, px_b ( im, 95, 95 ) );
+  /* Filling with the color already present is a no-op (must not loop forever). */
+  ASSERT_EQ ( INoError, IFloodFill ( im, gc, 0, 0 ) );
+
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST copy_image_clips_out_of_bounds_source ( void )
+{
+  IImage src = ICreateImage ( 8, 8, IOPTION_NONE );
+  IImage dst = ICreateImage ( 8, 8, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+
+  ISetForeground ( gc, IAllocColor ( 10, 20, 30 ) );
+  IFillRectangle ( src, gc, 0, 0, 8, 8 );
+  ISetForeground ( gc, IAllocColor ( 0, 0, 0 ) );
+  IFillRectangle ( dst, gc, 0, 0, 8, 8 );
+
+  /* A region extending far past the source must clip, not over-read. */
+  ASSERT_EQ ( INoError, ICopyImage ( src, dst, gc, -5, -5, 100, 100, 0, 0 ) );
+  /* src (0,0) maps to dst (5,5); src color landed there. */
+  ASSERT_EQ ( 10, px_r ( dst, 5, 5 ) );
+  ASSERT_EQ ( 30, px_b ( dst, 5, 5 ) );
+
+  IFreeGC ( gc );
+  IFreeImage ( src );
+  IFreeImage ( dst );
+  PASS ();
+}
+
 SUITE ( draw )
 {
   RUN_TEST ( draw_point_sets_one_pixel );
+  RUN_TEST ( flood_fill_stops_at_boundary );
+  RUN_TEST ( flood_fill_full_region_is_bounded );
+  RUN_TEST ( copy_image_clips_out_of_bounds_source );
   RUN_TEST ( linear_gradient_interpolates );
   RUN_TEST ( radial_gradient_center_and_edge );
   RUN_TEST ( round_rectangle_rounds_corners );
