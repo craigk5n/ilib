@@ -43,4 +43,8 @@ if(ILIB_FUZZ)
   target_link_libraries(fuzz_decode PRIVATE Ilib::ilib)
   target_compile_definitions(fuzz_decode PRIVATE _GNU_SOURCE) # fmemopen
   target_link_options(fuzz_decode PRIVATE -fsanitize=fuzzer)
+
+  add_executable(fuzz_bdf fuzz_bdf.c)
+  target_link_libraries(fuzz_bdf PRIVATE Ilib::ilib)
+  target_link_options(fuzz_bdf PRIVATE -fsanitize=fuzzer)
 endif()
