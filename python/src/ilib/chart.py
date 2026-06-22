@@ -120,6 +120,17 @@ class Chart:
         check(lib.IChartSetLegend(self._as_parameter_, 1 if on else 0))
         return self
 
+    def set_background_gradient(self, top, bottom):
+        """Fill the background with a vertical ``top``->``bottom`` gradient."""
+        check(lib.IChartSetBackgroundGradient(self._as_parameter_, int(top),
+                                              int(bottom)))
+        return self
+
+    def set_bar_radius(self, radius):
+        """Round bar/hbar corners to ``radius`` pixels (0 = square)."""
+        check(lib.IChartSetBarRadius(self._as_parameter_, int(radius)))
+        return self
+
     def add_series(self, values, label=None, color=0):
         """Add a data series (a sequence of values) with a legend label/color."""
         values = [float(v) for v in values]

@@ -595,6 +595,20 @@ class Charting(unittest.TestCase):
             finally:
                 img.free()
 
+    def test_gradient_background_and_rounded_bars(self):
+        with ilib.Chart(ilib.ChartType.BAR, 200, 140) as c:
+            c.set_background_gradient(ilib.alloc_color(240, 245, 255),
+                                      ilib.alloc_color(200, 215, 240))
+            c.set_bar_radius(5)
+            c.add_series([2, 4, 3], label="a",
+                         color=ilib.alloc_color(50, 100, 200))
+            img = c.render()
+            try:
+                # gradient => top and bottom background rows differ
+                self.assertNotEqual(img.get_pixel(1, 1), img.get_pixel(1, 138))
+            finally:
+                img.free()
+
     def test_stacked_bar(self):
         with ilib.Chart(ilib.ChartType.BAR, 220, 160) as c:
             c.set_stacked(True)

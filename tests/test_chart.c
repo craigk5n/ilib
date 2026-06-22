@@ -265,6 +265,32 @@ TEST chart_display_options ( void )
   PASS ();
 }
 
+TEST chart_gradient_and_rounded_bars ( void )
+{
+  IChart c = ICreateChart ( ICHART_BAR, 200, 140 );
+  double a[3] = { 2.0, 4.0, 3.0 };
+  IImage img;
+  unsigned int r1, g1, b1, r2, g2, b2;
+
+  ASSERT ( c != NULL );
+  ASSERT_EQ ( INoError, IChartSetBackgroundGradient ( c,
+                          IAllocColor ( 240, 245, 255 ),
+                          IAllocColor ( 200, 215, 240 ) ) );
+  ASSERT_EQ ( INoError, IChartSetBarRadius ( c, 5 ) );
+  IChartAddSeries ( c, "a", a, 3, IAllocColor ( 50, 100, 200 ) );
+  img = IChartRender ( c );
+  ASSERT ( img != NULL );
+  ASSERT ( has_drawn_pixel ( img ) );
+  /* The gradient makes the top and bottom background rows differ. */
+  IGetPixel ( img, 1, 1, &r1, &g1, &b1 );
+  IGetPixel ( img, 1, 138, &r2, &g2, &b2 );
+  ASSERT ( r1 != r2 || g1 != g2 || b1 != b2 );
+
+  IFreeImage ( img );
+  IFreeChart ( c );
+  PASS ();
+}
+
 TEST chart_setters_reject_bad_handle ( void )
 {
   ASSERT_EQ ( IInvalidChart, IChartSetStacked ( NULL, 1 ) );
@@ -273,6 +299,8 @@ TEST chart_setters_reject_bad_handle ( void )
   ASSERT_EQ ( IInvalidChart, IChartSetMarkers ( NULL, 1 ) );
   ASSERT_EQ ( IInvalidChart, IChartSetGrid ( NULL, 1 ) );
   ASSERT_EQ ( IInvalidChart, IChartSetLegend ( NULL, 1 ) );
+  ASSERT_EQ ( IInvalidChart, IChartSetBackgroundGradient ( NULL, 0, 0 ) );
+  ASSERT_EQ ( IInvalidChart, IChartSetBarRadius ( NULL, 4 ) );
   PASS ();
 }
 
@@ -344,6 +372,7 @@ SUITE ( chart )
   RUN_TEST ( hbar_chart_renders );
   RUN_TEST ( donut_chart_renders );
   RUN_TEST ( chart_display_options );
+  RUN_TEST ( chart_gradient_and_rounded_bars );
   RUN_TEST ( chart_setters_reject_bad_handle );
   RUN_TEST ( chart_explicit_range );
   RUN_TEST ( chart_setters_and_titles );

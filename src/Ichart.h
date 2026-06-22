@@ -112,6 +112,19 @@ IError IChartSetGrid ( IChart chart, int on );
 IError IChartSetLegend ( IChart chart, int on );
 
 /**
+ * Fill the chart background with a vertical gradient from top to bottom
+ * instead of a flat color. Overrides IChartSetBackground().
+ */
+IError IChartSetBackgroundGradient ( IChart chart, IColor top, IColor bottom );
+
+/**
+ * Round the corners of bar / horizontal-bar bars to the given pixel radius
+ * (clamped to half the bar size). 0 (the default) draws square bars. Applies to
+ * grouped bars; stacked bars stay square.
+ */
+IError IChartSetBarRadius ( IChart chart, int radius );
+
+/**
  * Add a data series. values[] holds count values; label and color are used in
  * the legend (and as the line/bar color). The data is copied. For a pie chart
  * the first series' values are the slice sizes.

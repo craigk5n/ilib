@@ -85,6 +85,28 @@ static IColor _chart_grid_color ( void )
   return ( grid );
 }
 
+static IColor _chart_panel_color ( void )
+{
+  static IColor c;
+  static int init = 0;
+  if ( !init ) {
+    c = IAllocColor ( 250, 250, 250 );
+    init = 1;
+  }
+  return ( c );
+}
+
+static IColor _chart_panel_border ( void )
+{
+  static IColor c;
+  static int init = 0;
+  if ( !init ) {
+    c = IAllocColor ( 205, 205, 205 );
+    init = 1;
+  }
+  return ( c );
+}
+
 /* ------------------------------------------------------------- lifecycle */
 
 IChart ICreateChart ( IChartType type, unsigned int width,
@@ -265,6 +287,26 @@ IError IChartSetLegend ( IChart chart, int on )
   if ( !c )
     return ( IInvalidChart );
   c->show_legend = on ? 1 : 0;
+  return ( INoError );
+}
+
+IError IChartSetBackgroundGradient ( IChart chart, IColor top, IColor bottom )
+{
+  IChartP *c = _chart_valid ( chart );
+  if ( !c )
+    return ( IInvalidChart );
+  c->background = top;
+  c->bg_color2 = bottom;
+  c->bg_gradient = 1;
+  return ( INoError );
+}
+
+IError IChartSetBarRadius ( IChart chart, int radius )
+{
+  IChartP *c = _chart_valid ( chart );
+  if ( !c )
+    return ( IInvalidChart );
+  c->bar_radius = ( radius < 0 ) ? 0 : radius;
   return ( INoError );
 }
 
@@ -579,6 +621,15 @@ static void _chart_legend ( IImage img, IGC gc, IChartP *c,
   by = lay->y0 + 4;
   if ( bx < lay->x0 )
     bx = lay->x0;
+
+  /* A light rounded panel behind the entries; helps the legend read over a
+     gradient background and tidies it over a flat one. */
+  ISetForeground ( gc, _chart_panel_color () );
+  IFillRoundRectangle ( img, gc, bx - 3, by - 3, (unsigned int) boxw,
+    (unsigned int) ( count * rowh + 4 ), 5 );
+  ISetForeground ( gc, _chart_panel_border () );
+  IDrawRoundRectangle ( img, gc, bx - 3, by - 3, (unsigned int) boxw,
+    (unsigned int) ( count * rowh + 4 ), 5 );
 
   for ( i = 0; i < count; i++ ) {
     int ry = by + i * rowh;
@@ -928,7 +979,11 @@ static void _chart_plot_bar ( IImage img, IGC gc, IChartP *c,
       if ( h < 1 )
         h = 1;
       ISetForeground ( gc, ser->color );
-      IFillRectangle ( img, gc, bx, top, (unsigned int) w, (unsigned int) h );
+      if ( c->bar_radius > 0 )
+        IFillRoundRectangle ( img, gc, bx, top, (unsigned int) w,
+          (unsigned int) h, (unsigned int) c->bar_radius );
+      else
+        IFillRectangle ( img, gc, bx, top, (unsigned int) w, (unsigned int) h );
       if ( c->value_labels && c->font ) {
         ISetForeground ( gc, IBLACK_PIXEL );
         _chart_draw_value ( img, gc, c, bx + w / 2, top - 2, ser->values[i] );
@@ -1083,8 +1138,12 @@ static void _chart_plot_hbar ( IImage img, IGC gc, IChartP *c,
       if ( w < 1 )
         w = 1;
       ISetForeground ( gc, ser->color );
-      IFillRectangle ( img, gc, left, by, (unsigned int) w,
-        (unsigned int) hh );
+      if ( c->bar_radius > 0 )
+        IFillRoundRectangle ( img, gc, left, by, (unsigned int) w,
+          (unsigned int) hh, (unsigned int) c->bar_radius );
+      else
+        IFillRectangle ( img, gc, left, by, (unsigned int) w,
+          (unsigned int) hh );
       if ( c->value_labels && c->font ) {
         char buf[32];
         int tw, lx;
@@ -1184,9 +1243,15 @@ IImage IChartRender ( IChart chart )
   if ( c->font )
     ISetFont ( gc, c->font );
 
-  ISetForeground ( gc, c->background );
-  IFillRectangle ( img, gc, 0, 0, (unsigned int) c->width,
-    (unsigned int) c->height );
+  if ( c->bg_gradient ) {
+    IFillLinearGradient ( img, 0, 0, (unsigned int) c->width,
+      (unsigned int) c->height, c->background, c->bg_color2, 90.0 );
+  }
+  else {
+    ISetForeground ( gc, c->background );
+    IFillRectangle ( img, gc, 0, 0, (unsigned int) c->width,
+      (unsigned int) c->height );
+  }
 
   fh = _chart_font_h ( c );
 

@@ -99,6 +99,9 @@ def main():
     hbar.set_title("Horizontal bar")
     hbar.set_categories(months)
     hbar.set_value_labels(True)
+    hbar.set_bar_radius(5)  # rounded bars
+    hbar.set_background_gradient(ilib.alloc_color(245, 248, 255),
+                                 ilib.alloc_color(214, 226, 246))
     hbar.add_series([3, 5, 4, 7, 6, 9], "n", _color(0))
     hbar.add_series([2, 3, 5, 4, 8, 7], "s", _color(1))
     charts.append(hbar.render())
