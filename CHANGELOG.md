@@ -261,6 +261,11 @@ without breaking the public API.
 - Fixed the dead `ilib.sourceforge.net` URLs.
 
 ### Security
+- Supply chain: added a Trivy filesystem scan (vulnerabilities, secrets,
+  misconfiguration) that uploads to GitHub code scanning on push/PR/weekly
+  (informational, non-blocking). Releases now ship a cosign-signed `SHA256SUMS`
+  and an SPDX SBOM (also signed) via keyless Sigstore/OIDC signing; `SECURITY.md`
+  documents how to verify them with `cosign verify-blob`.
 - Extended the malformed-input regression suite (`test_malformed`, run under the
   leak-detecting sanitizer job) to the WebP, AVIF and TIFF decoders (truncated
   round-trips) and added a malformed-BDF font case.
