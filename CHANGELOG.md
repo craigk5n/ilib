@@ -6,6 +6,8 @@ to follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-06-22
+
 A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
@@ -367,5 +369,6 @@ without breaking the public API.
 
 Baseline release prior to the modernization work described above.
 
-[Unreleased]: https://github.com/craigk5n/ilib/compare/v1.1.10...HEAD
+[Unreleased]: https://github.com/craigk5n/ilib/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/craigk5n/ilib/compare/v1.1.10...v1.2.0
 [1.1.10]: https://github.com/craigk5n/ilib/releases/tag/v1.1.10
