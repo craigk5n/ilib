@@ -106,6 +106,9 @@ IColor IAllocColorAlpha ( unsigned int red, unsigned int green,
        grow the table without bound. Otherwise append (growing the array). */
     slot = -1;
     for ( i = 0; i < num_colors; i++ ) {
+      /* False positive: the analyzer models the malloc'd table slots as
+         uninitialized, but every index < num_colors has been written. */
+      /* NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult) */
       if ( colors[i] == NULL ) {
         slot = i;
         break;
