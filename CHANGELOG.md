@@ -10,6 +10,12 @@ A modernization effort brought the late-1990s codebase up to current practice
 without breaking the public API.
 
 ### Added
+- Charting polish using the new primitives: `IChartSetBackgroundGradient` (a
+  vertical gradient background), `IChartSetBarRadius` (rounded-corner bars for
+  bar/hbar charts), and a light rounded panel drawn behind every legend so it
+  reads cleanly (especially over a gradient). Exposed in Python
+  (`Chart.set_background_gradient` / `set_bar_radius`); the README showcase is
+  regenerated to feature them.
 - Gradient fills and rounded rectangles: `IFillLinearGradient` (any angle) and
   `IFillRadialGradient` interpolate two colors over a region; `IDrawRoundRectangle`
   / `IFillRoundRectangle` draw rectangles with rounded corners (built on the

@@ -68,9 +68,9 @@ The drawing API is modeled on a subset of the X11 graphics functions:
 - **Charting:** a small charting layer (`Ichart.h`) builds line, bar (grouped
   or stacked, vertical or horizontal), pie, donut, area and scatter charts —
   with title, axes, gridlines (linear or log scale), tick/category labels,
-  optional value labels/point markers and a legend (each toggleable) — and
-  renders them to an image. The `ilib-chart` tool drives it from the command
-  line:
+  optional value labels/point markers and a legend (each toggleable), plus
+  optional gradient backgrounds and rounded-corner bars — and renders them to
+  an image. The `ilib-chart` tool drives it from the command line:
 
   ```sh
   printf 'month,2023,2024\nJan,3,2\nFeb,5,3\nMar,4,5\n' \

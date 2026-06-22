@@ -44,6 +44,9 @@ typedef struct {
   int markers;      /* line/area: draw a marker at each point (default on) */
   int show_grid;    /* draw gridlines (default on) */
   int show_legend;  /* draw the legend (default on) */
+  int bg_gradient;  /* fill background with a top->bottom gradient */
+  IColor bg_color2; /* bottom color of the background gradient */
+  int bar_radius;   /* corner radius for bar/hbar bars (0 = square) */
 } IChartP;
 
 #endif /* _ichartp_h */

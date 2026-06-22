@@ -233,6 +233,8 @@ IError IChartSetValueLabels(IChart chart, int on);
 IError IChartSetMarkers(IChart chart, int on);
 IError IChartSetGrid(IChart chart, int on);
 IError IChartSetLegend(IChart chart, int on);
+IError IChartSetBackgroundGradient(IChart chart, IColor top, IColor bottom);
+IError IChartSetBarRadius(IChart chart, int radius);
 IError IChartAddSeries(IChart chart, const char *label, const double *values,
                        int count, IColor color);
 IError IChartAddXYSeries(IChart chart, const char *label,
