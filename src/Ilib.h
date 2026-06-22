@@ -1724,6 +1724,76 @@ IError IFillEllipse (
 );
 
 /**
+ * Draw the outline of a rectangle with rounded corners using the GC (color,
+ * line width, anti-aliasing). radius is clamped to half the shorter side; a
+ * radius of 0 draws a plain rectangle.
+ */
+IError IDrawRoundRectangle (
+#ifndef _NO_PROTO
+  IImage image,        /* image */
+  IGC gc,              /* graphics context */
+  int x,               /* left edge */
+  int y,               /* top edge */
+  unsigned int width,  /* width */
+  unsigned int height, /* height */
+  unsigned int radius  /* corner radius */
+#endif
+);
+
+/**
+ * Fill a rectangle with rounded corners using the GC. radius is clamped to
+ * half the shorter side; a radius of 0 fills a plain rectangle.
+ */
+IError IFillRoundRectangle (
+#ifndef _NO_PROTO
+  IImage image,        /* image */
+  IGC gc,              /* graphics context */
+  int x,               /* left edge */
+  int y,               /* top edge */
+  unsigned int width,  /* width */
+  unsigned int height, /* height */
+  unsigned int radius  /* corner radius */
+#endif
+);
+
+/**
+ * Fill a rectangular region with a linear gradient between c1 and c2. angle is
+ * in degrees: 0 runs left-to-right (c1 at the left), 90 top-to-bottom. The
+ * region is clipped to the image.
+ */
+IError IFillLinearGradient (
+#ifndef _NO_PROTO
+  IImage image,        /* image */
+  int x,               /* region left edge */
+  int y,               /* region top edge */
+  unsigned int width,  /* region width */
+  unsigned int height, /* region height */
+  IColor c1,           /* start color */
+  IColor c2,           /* end color */
+  double angle         /* gradient direction, degrees */
+#endif
+);
+
+/**
+ * Fill a rectangular region with a radial gradient: c1 at (cx, cy) blending to
+ * c2 at distance radius (and beyond). The region is clipped to the image.
+ */
+IError IFillRadialGradient (
+#ifndef _NO_PROTO
+  IImage image,        /* image */
+  int x,               /* region left edge */
+  int y,               /* region top edge */
+  unsigned int width,  /* region width */
+  unsigned int height, /* region height */
+  int cx,              /* gradient center x */
+  int cy,              /* gradient center y */
+  unsigned int radius, /* radius at which c2 is reached */
+  IColor c1,           /* center color */
+  IColor c2            /* edge color */
+#endif
+);
+
+/**
  * Fill a circle.
  */
 IError IFillCircle (

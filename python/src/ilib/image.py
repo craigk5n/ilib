@@ -521,6 +521,39 @@ class Image:
         check(lib.IFloodFill(self._as_parameter_, gc._as_parameter_, int(x), int(y)))
         return self
 
+    def draw_round_rectangle(self, gc, x, y, width, height, radius):
+        """Draw a rounded-rectangle outline using the GC."""
+        check(lib.IDrawRoundRectangle(self._as_parameter_, gc._as_parameter_,
+                                      int(x), int(y), int(width), int(height),
+                                      int(radius)))
+        return self
+
+    def fill_round_rectangle(self, gc, x, y, width, height, radius):
+        """Fill a rounded rectangle using the GC."""
+        check(lib.IFillRoundRectangle(self._as_parameter_, gc._as_parameter_,
+                                      int(x), int(y), int(width), int(height),
+                                      int(radius)))
+        return self
+
+    # -- drawing: gradients ------------------------------------------------
+    def fill_linear_gradient(self, x, y, width, height, c1, c2, angle=0.0):
+        """Fill a region with a linear gradient from color ``c1`` to ``c2``.
+
+        ``angle`` is in degrees (0 = left-to-right, 90 = top-to-bottom).
+        """
+        check(lib.IFillLinearGradient(self._as_parameter_, int(x), int(y),
+                                      int(width), int(height), int(c1), int(c2),
+                                      float(angle)))
+        return self
+
+    def fill_radial_gradient(self, x, y, width, height, cx, cy, radius, c1, c2):
+        """Fill a region with a radial gradient: ``c1`` at ``(cx, cy)`` to
+        ``c2`` at ``radius``."""
+        check(lib.IFillRadialGradient(self._as_parameter_, int(x), int(y),
+                                      int(width), int(height), int(cx), int(cy),
+                                      int(radius), int(c1), int(c2)))
+        return self
+
     # -- drawing: text -----------------------------------------------------
     def draw_string(self, gc, x, y, text):
         """Draw ``text`` with its lower-left corner at ``(x, y)``."""

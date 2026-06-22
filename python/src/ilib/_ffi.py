@@ -204,6 +204,18 @@ IError IFillArc(IImage image, IGC gc, int x, int y, int r1, int r2, double a1,
 IError IFillEllipse(IImage image, IGC gc, int x, int y, int r1, int r2);
 IError IFillCircle(IImage image, IGC gc, int x, int y, int r);
 IError IFloodFill(IImage image, IGC gc, int x, int y);
+IError IDrawRoundRectangle(IImage image, IGC gc, int x, int y,
+                           unsigned int width, unsigned int height,
+                           unsigned int radius);
+IError IFillRoundRectangle(IImage image, IGC gc, int x, int y,
+                           unsigned int width, unsigned int height,
+                           unsigned int radius);
+IError IFillLinearGradient(IImage image, int x, int y, unsigned int width,
+                           unsigned int height, IColor c1, IColor c2,
+                           double angle);
+IError IFillRadialGradient(IImage image, int x, int y, unsigned int width,
+                           unsigned int height, int cx, int cy,
+                           unsigned int radius, IColor c1, IColor c2);
 
 typedef void *IChart;
 IChart ICreateChart(int type, unsigned int width, unsigned int height);

@@ -373,9 +373,67 @@ TEST curve_rejects_bad_handle ( void )
   PASS ();
 }
 
+TEST linear_gradient_interpolates ( void )
+{
+  IImage im = ICreateImage ( 16, 4, IOPTION_NONE );
+  IColor black = IAllocColor ( 0, 0, 0 );
+  IColor white = IAllocColor ( 255, 255, 255 );
+
+  /* Horizontal: black at the left, white at the right, grey in the middle. */
+  ASSERT_EQ ( INoError,
+    IFillLinearGradient ( im, 0, 0, 16, 4, black, white, 0.0 ) );
+  ASSERT ( px_r ( im, 0, 2 ) < 30 );
+  ASSERT ( px_r ( im, 15, 2 ) > 225 );
+  ASSERT ( px_r ( im, 8, 2 ) > 100 && px_r ( im, 8, 2 ) < 160 );
+  /* Monotonic increase left to right. */
+  ASSERT ( px_r ( im, 12, 2 ) > px_r ( im, 4, 2 ) );
+
+  ASSERT_EQ ( IInvalidImage,
+    IFillLinearGradient ( NULL, 0, 0, 4, 4, black, white, 0.0 ) );
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST radial_gradient_center_and_edge ( void )
+{
+  IImage im = ICreateImage ( 21, 21, IOPTION_NONE );
+  IColor white = IAllocColor ( 255, 255, 255 );
+  IColor black = IAllocColor ( 0, 0, 0 );
+
+  ASSERT_EQ ( INoError,
+    IFillRadialGradient ( im, 0, 0, 21, 21, 10, 10, 10, white, black ) );
+  ASSERT ( px_r ( im, 10, 10 ) > 235 ); /* center == c1 */
+  ASSERT ( px_r ( im, 0, 0 ) < 20 );    /* corner is past the radius == c2 */
+  IFreeImage ( im );
+  PASS ();
+}
+
+TEST round_rectangle_rounds_corners ( void )
+{
+  IImage im = ICreateImage ( 30, 20, IOPTION_NONE );
+  IGC gc = ICreateGC ();
+
+  ISetForeground ( gc, IAllocColor ( 255, 255, 255 ) );
+  IFillRectangle ( im, gc, 0, 0, 30, 20 );
+  ISetForeground ( gc, IAllocColor ( 0, 0, 0 ) );
+  ASSERT_EQ ( INoError, IFillRoundRectangle ( im, gc, 0, 0, 30, 20, 8 ) );
+
+  ASSERT_EQ ( 0, px_r ( im, 15, 10 ) ); /* center is filled (black) */
+  ASSERT_EQ ( 255, px_r ( im, 0, 0 ) ); /* extreme corner rounded away (white) */
+  ASSERT_EQ ( 0, px_r ( im, 15, 0 ) );  /* top edge midpoint is filled */
+
+  ASSERT_EQ ( IInvalidArgument, IFillRoundRectangle ( im, gc, 0, 0, 0, 20, 4 ) );
+  IFreeGC ( gc );
+  IFreeImage ( im );
+  PASS ();
+}
+
 SUITE ( draw )
 {
   RUN_TEST ( draw_point_sets_one_pixel );
+  RUN_TEST ( linear_gradient_interpolates );
+  RUN_TEST ( radial_gradient_center_and_edge );
+  RUN_TEST ( round_rectangle_rounds_corners );
   RUN_TEST ( fill_rectangle_fills_all );
   RUN_TEST ( draw_line_marks_endpoints );
   RUN_TEST ( greyscale_image_is_single_channel );

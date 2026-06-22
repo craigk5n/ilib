@@ -15,8 +15,12 @@ including **animated (multi-frame) GIFs**.
 
 The drawing API is modeled on a subset of the X11 graphics functions:
 
-- **Shapes:** points, lines, rectangles, polygons, circles, ellipses, and arcs,
-  each with outline (`IDraw*`) and filled (`IFill*`) forms, plus flood fill.
+- **Shapes:** points, lines, rectangles, rounded rectangles, polygons, circles,
+  ellipses, and arcs, each with outline (`IDraw*`) and filled (`IFill*`) forms,
+  plus flood fill.
+- **Gradients:** fill a region with a linear (`IFillLinearGradient`, any angle)
+  or radial (`IFillRadialGradient`) color gradient — nice for backgrounds and
+  panels.
 - **Curves:** cubic Bézier paths (`IDrawBezier`) and Catmull-Rom splines through
   points (`IDrawSpline`) — handy for line/area charts.
 - **Anti-aliasing:** enable per graphics context with `ISetAntiAlias()`; lines,
