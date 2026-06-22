@@ -634,6 +634,29 @@ class FileIO(unittest.TestCase):
                     img.save(os.path.join(d, "x.bogus"))
                 self.assertEqual(ctx.exception.code, ilib.IError.InvalidFormat)
 
+    def test_tiff_roundtrip_or_skip(self):
+        unsupported = {
+            ilib.IError.NoTIFFSupport,
+            ilib.IError.TIFFError,
+            ilib.IError.InvalidFormat,
+            ilib.IError.FunctionNotImplemented,
+        }
+        with ilib.Image(6, 4) as img:
+            img.set_pixel(0, 0, 10, 20, 30)
+            img.set_pixel(5, 3, 200, 100, 50)
+            with tempfile.TemporaryDirectory() as d:
+                path = os.path.join(d, "x.tif")
+                try:
+                    img.save(path)
+                except ilib.IlibError as exc:
+                    if exc.code in unsupported:
+                        self.skipTest("library built without TIFF")
+                    raise
+                with ilib.Image.open(path) as back:
+                    self.assertEqual(back.size, (6, 4))
+                    self.assertEqual(back.get_pixel(0, 0), (10, 20, 30))  # lossless
+                    self.assertEqual(back.get_pixel(5, 3), (200, 100, 50))
+
     def test_webp_roundtrip_or_skip(self):
         unsupported = {
             ilib.IError.NoWEBPSupport,

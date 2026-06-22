@@ -386,6 +386,37 @@ TEST optional_codec_write_is_clean ( void )
 
 /* WebP round-trip (when libwebp is compiled in). WebP is lossy, so a solid
    colour is checked with tolerance; alpha is preserved (encoded losslessly). */
+/* TIFF is lossless here (8-bit LZW), so pixels survive exactly. The reader
+   dup()s the descriptor, so the single-tmpfile round-trip works. */
+TEST tiff_roundtrip ( void )
+{
+  IImage im = ICreateImage ( 6, 4, IOPTION_NONE );
+  IError wr, rd;
+  IImage back;
+
+  ISetPixel ( im, 0, 0, 10, 20, 30 );
+  ISetPixel ( im, 5, 3, 200, 100, 50 );
+  ISetPixel ( im, 2, 1, 0, 255, 0 );
+
+  back = roundtrip ( im, IFORMAT_TIFF, &wr, &rd );
+  if ( wr == INoError ) {
+    ASSERT_EQ ( INoError, rd );
+    ASSERT ( back != NULL );
+    ASSERT_EQ ( 6, px_width ( back ) );
+    ASSERT_EQ ( 4, px_height ( back ) );
+    ASSERT_EQ ( 10, px_r ( back, 0, 0 ) );
+    ASSERT_EQ ( 30, px_b ( back, 0, 0 ) );
+    ASSERT_EQ ( 200, px_r ( back, 5, 3 ) );
+    ASSERT_EQ ( 255, px_g ( back, 2, 1 ) );
+    IFreeImage ( back );
+  }
+  else {
+    ASSERT ( back == NULL ); /* not compiled in: clean error, no image */
+  }
+  IFreeImage ( im );
+  PASS ();
+}
+
 TEST webp_roundtrip ( void )
 {
   IImage im = ICreateImage ( 16, 16, IOPTION_NONE );
@@ -520,6 +551,7 @@ SUITE ( formats )
   RUN_TEST ( exif_orientation_parses );
   RUN_TEST ( gif_write_quantizes );
   RUN_TEST ( optional_codec_write_is_clean );
+  RUN_TEST ( tiff_roundtrip );
   RUN_TEST ( webp_roundtrip );
   RUN_TEST ( webp_alpha_roundtrip );
   RUN_TEST ( avif_roundtrip );

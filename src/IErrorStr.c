@@ -89,6 +89,10 @@ char *IErrorString ( IError err )
     return ( "Invalid chart" );
   case IInvalidAnimation:
     return ( "Invalid animation" );
+  case ITIFFError:
+    return ( "Unknown TIFF error" );
+  case INoTIFFSupport:
+    return ( "No TIFF support" );
   case INoError:
   default:
     return ( "error" );
