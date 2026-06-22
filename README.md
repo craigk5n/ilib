@@ -179,6 +179,7 @@ library is simply skipped with a notice rather than failing the build.
 | `ILIB_WITH_PNG` / `ILIB_WITH_JPEG` / `ILIB_WITH_GIF` / `ILIB_WITH_WEBP` / `ILIB_WITH_AVIF` / `ILIB_WITH_TIFF` | `ON` | Toggle a codec even if its library is present |
 | `ILIB_BUILD_CLIENTS` / `ILIB_BUILD_EXAMPLES` | `ON` | Build the bundled tools / demos |
 | `ILIB_BUILD_TESTS` | `OFF` | Build the CTest test suite |
+| `ILIB_HARDENING` | `ON` | Stack protector, FORTIFY, PIE and full RELRO (off under sanitizer/coverage/fuzz builds) |
 
 ### Using Ilib from another project
 

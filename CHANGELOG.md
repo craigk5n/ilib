@@ -261,6 +261,16 @@ without breaking the public API.
 - Fixed the dead `ilib.sourceforge.net` URLs.
 
 ### Security
+- Build hardening: a new `ILIB_HARDENING` option (on by default) enables
+  `-fstack-protector-strong`, `-Wformat -Wformat-security`, `_FORTIFY_SOURCE=2`
+  (optimized builds), position-independent executables, and full RELRO
+  (`-Wl,-z,relro,-z,now` on ELF) for the library, clients and examples. It is
+  skipped automatically under the sanitizer/coverage/fuzz instrumentation
+  builds. Verified present in the binaries (PIE, BIND_NOW, stack canary,
+  `__*_chk` calls).
+- Supply chain: all GitHub Actions are now pinned to full commit SHAs (with the
+  version as a trailing comment) instead of mutable tags/branches — notably the
+  PyPI trusted-publishing action, which runs in a job holding `id-token: write`.
 - Hardened text rendering and the client tools (audit follow-up). The `\033`
   escape-sequence parser in `IDrawString`/`IDrawStringRotated*`/
   `ITextDimensions` wrote one byte past a fixed 256-byte buffer (and could read

@@ -32,6 +32,7 @@ option(ILIB_WERROR         "Treat compiler warnings as errors (CI)" OFF)
 option(ILIB_SANITIZE       "Build with AddressSanitizer + UBSan"   OFF)
 option(ILIB_COVERAGE       "Build with coverage instrumentation"   OFF)
 option(ILIB_FUZZ           "Build libFuzzer decoder harness (Clang)" OFF)
+option(ILIB_HARDENING      "Enable compiler/linker hardening flags" ON)
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build type" FORCE)
@@ -60,6 +61,9 @@ if(ILIB_FUZZ)
                       -fno-omit-frame-pointer -g)
   add_link_options(-fsanitize=address,undefined)
 endif()
+
+# Exploit-mitigation flags (after the instrumentation blocks so it can see them).
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/IlibHardening.cmake")
 
 include(GNUInstallDirs)
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/IlibFonts.cmake")
